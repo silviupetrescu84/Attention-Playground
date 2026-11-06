@@ -1,0 +1,36 @@
+# Dependency folders
+node_modules/
+.venv/
+venv/
+
+# Caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+.vite/
+
+# Build, distribution, and coverage output
+build/
+dist/
+coverage/
+htmlcov/
+.coverage
+.coverage.*
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Editor and operating-system files
+.DS_Store
+*.local
+.vscode/*
+!.vscode/extensions.json
+
+# Logs
+*.log
+npm-debug.log*

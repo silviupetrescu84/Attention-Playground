@@ -1,0 +1,26 @@
+{
+  "name": "attention-playground",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An open-source collection of browser-based minigames for practicing attention and well-being.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.21",
+    "npm": ">=10.9"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "vite": "8.3.3"
+  },
+  "overrides": {
+    "postcss": "8.5.29",
+    "rolldown": "1.2.12"
+  }
+}
