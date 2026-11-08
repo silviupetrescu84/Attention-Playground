@@ -175,23 +175,23 @@ describe('choosing the text size', () => {
 })
 
 describe('drawing the scene', () => {
-  it('covers the whole canvas with the background, then draws the bubbles in order', () => {
+  it('clears the drawing layer, then draws the bubbles in order', () => {
     const context = createFakeContext()
 
     drawScene(context.asContext(), [bubble('Joy', 'good'), bubble('Fear', 'bad')], 19)
 
-    expect(context.callsTo('fillRect')[0].args).toEqual([0, 0, 400, 800])
+    expect(context.callsTo('clearRect')[0].args).toEqual([0, 0, 400, 800])
     expect(context.callsTo('fillText').map((call) => call.args[0])).toEqual(['Joy', 'Fear'])
     expect(context.callsTo('fillText').map((call) => call.font)).toEqual([font(19), font(19)])
     const names = context.calls.map((call) => call.name)
-    expect(names.indexOf('fillRect')).toBeLessThan(names.indexOf('fillText'))
+    expect(names.indexOf('clearRect')).toBeLessThan(names.indexOf('fillText'))
   })
 
-  it('draws just the background when there are no bubbles', () => {
+  it('clears the drawing layer when there are no bubbles', () => {
     const context = createFakeContext()
 
     drawScene(context.asContext(), [], 19)
 
-    expect(context.calls.map((call) => call.name)).toEqual(['createLinearGradient', 'fillRect'])
+    expect(context.calls.map((call) => call.name)).toEqual(['clearRect'])
   })
 })

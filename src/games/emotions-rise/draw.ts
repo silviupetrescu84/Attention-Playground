@@ -46,11 +46,8 @@ export function fitFontSize(context: CanvasRenderingContext2D, texts: readonly s
 }
 
 export function drawBackground(context: CanvasRenderingContext2D) {
-  const sky = context.createLinearGradient(0, 0, 0, GAME_HEIGHT)
-  sky.addColorStop(0, '#cfe0fb')
-  sky.addColorStop(1, '#eef4ff')
-  context.fillStyle = sky
-  context.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT)
+  // The shared canvas background is CSS, so keep the drawing layer transparent.
+  context.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT)
 }
 
 export function drawBubble(
