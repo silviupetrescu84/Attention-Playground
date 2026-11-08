@@ -1,21 +1,25 @@
-import { describe, expect, it } from 'vitest'
-import { createFakeContext, fontSizeOf } from '../../test/fake-canvas-context'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import ovalImageUrl from '../../assets/emotions-rise/oval.png'
+import { createFakeContext } from '../../test/fake-canvas-context'
+import { stubImages } from '../../test/fake-image'
+import { fitFontSize, type CanvasFont } from '../shared/text'
 import emotions from './data/emotions.json'
 import {
+  BUBBLE_BORDER_WIDTH,
   drawBubble,
   drawScene,
-  EMOTION_FONT_FAMILY,
-  fitFontSize,
-  font,
-  MAX_FONT_SIZE,
-  MAX_TEXT_WIDTH,
-  MIN_FONT_SIZE,
-  TEXT_COLOR,
+  EMOTION_TEXT_FIT,
+  type BubbleLook,
 } from './draw'
 import { BUBBLE_HEIGHT, BUBBLE_WIDTH, type Bubble } from './emotions-rise'
 
 const allEmotions = [...emotions.positive, ...emotions.negative]
 const bubbleImage = {} as CanvasImageSource
+/** Stand-ins for the font and colours read from the CSS. */
+const look: BubbleLook = {
+  font: 'test font',
+  colors: { text: 'ink', cardFill: 'card fill', cardBorder: 'card border' },
+}
 
 function bubble(text: string, type: 'good' | 'bad', x = 200, y = 400): Bubble {
   return { emotion: { text, type }, x, y, speed: 50, spawnedAtMs: 0 }
@@ -32,18 +36,11 @@ function lookOf(calls: ReturnType<typeof createFakeContext>['calls']) {
   }))
 }
 
-describe('the emotion font', () => {
-  it('is the bundled condensed font, semi-bold, with condensed fallbacks', () => {
-    expect(EMOTION_FONT_FAMILY).toBe('"Roboto Condensed", "Arial Narrow", sans-serif')
-    expect(font(19)).toBe('600 19px "Roboto Condensed", "Arial Narrow", sans-serif')
-  })
-})
-
 describe('drawing a bubble', () => {
   it('draws the oval image, then the text over it', () => {
     const context = createFakeContext()
 
-    drawBubble(context.asContext(), bubble('Joy', 'good'), 19, bubbleImage)
+    drawBubble(context.asContext(), bubble('Joy', 'good'), look, bubbleImage)
 
     expect(context.calls.map((call) => call.name)).toEqual(['drawImage', 'fillText'])
   })
@@ -51,7 +48,7 @@ describe('drawing a bubble', () => {
   it('centres the text and the 140 × 77 image on the bubble position', () => {
     const context = createFakeContext()
 
-    drawBubble(context.asContext(), bubble('Calm', 'good', 123, 456), 19, bubbleImage)
+    drawBubble(context.asContext(), bubble('Calm', 'good', 123, 456), look, bubbleImage)
 
     expect(context.callsTo('fillText')[0].args).toEqual(['Calm', 123, 456])
     expect(context.textAlign).toBe('center')
@@ -66,106 +63,84 @@ describe('drawing a bubble', () => {
     expect([BUBBLE_WIDTH, BUBBLE_HEIGHT]).toEqual([140, 77])
   })
 
-  it('draws the text at the given size', () => {
+  it('draws the text in the look’s font', () => {
     const context = createFakeContext()
 
-    drawBubble(context.asContext(), bubble('Hope', 'good'), 18.5, bubbleImage)
+    drawBubble(context.asContext(), bubble('Hope', 'good'), look, bubbleImage)
 
-    expect(context.callsTo('fillText')[0].font).toBe(font(18.5))
+    expect(context.callsTo('fillText')[0].font).toBe('test font')
   })
 
   it('uses the supplied image instead of generating an oval', () => {
     const context = createFakeContext()
 
-    drawBubble(context.asContext(), bubble('Hope', 'good'), 19, bubbleImage)
+    drawBubble(context.asContext(), bubble('Hope', 'good'), look, bubbleImage)
 
     expect(context.callsTo('drawImage')[0].args[0]).toBe(bubbleImage)
     expect(context.callsTo('ellipse')).toEqual([])
   })
 
+  it('draws a plain translucent oval of the same size if the image did not load', () => {
+    const context = createFakeContext()
+
+    drawBubble(context.asContext(), bubble('Calm', 'good', 123, 456), look)
+
+    expect(context.calls.map((call) => call.name)).toEqual([
+      'beginPath',
+      'ellipse',
+      'fill',
+      'stroke',
+      'fillText',
+    ])
+    expect(context.callsTo('ellipse')[0].args).toEqual([
+      123,
+      456,
+      BUBBLE_WIDTH / 2,
+      BUBBLE_HEIGHT / 2,
+      0,
+      0,
+      Math.PI * 2,
+    ])
+    expect(context.callsTo('fill')[0].fillStyle).toBe('card fill')
+    const [stroke] = context.callsTo('stroke')
+    expect([stroke.strokeStyle, stroke.lineWidth]).toEqual(['card border', BUBBLE_BORDER_WIDTH])
+    expect(context.callsTo('fillText')[0]).toMatchObject({
+      args: ['Calm', 123, 456],
+      fillStyle: 'ink',
+    })
+  })
+
   it('draws every emotion exactly alike (same size too), so only the word differs', () => {
     const looks = allEmotions.map((text, i) => {
       const context = createFakeContext()
-      drawBubble(context.asContext(), bubble(text, i % 2 ? 'good' : 'bad'), 19, bubbleImage)
+      drawBubble(context.asContext(), bubble(text, i % 2 ? 'good' : 'bad'), look, bubbleImage)
       return lookOf(context.calls)
     })
 
     for (const look of looks) {
       expect(look).toEqual(looks[0])
     }
-    expect(looks[0].find((call) => call.name === 'fillText')?.fillStyle).toBe(TEXT_COLOR)
+    expect(looks[0].find((call) => call.name === 'fillText')?.fillStyle).toBe('ink')
   })
 })
 
 describe('choosing the text size', () => {
-  // The fake font is 0.6 × size wide per letter.
-  const widthAt = (text: string, size: number) => text.length * size * 0.6
-
-  it('uses the largest size when every word fits', () => {
-    const context = createFakeContext()
-
-    expect(fitFontSize(context.asContext(), ['Joy', 'Calm'])).toBe(MAX_FONT_SIZE)
+  it('fits one line inside the bubble, leaving 10 px on each side, at 10 to 22 px', () => {
+    expect(EMOTION_TEXT_FIT).toEqual({ maxWidth: BUBBLE_WIDTH - 20, minSize: 10, maxSize: 22 })
   })
 
-  it('picks the largest half-pixel size at which the longest word fits the bubble', () => {
-    const context = createFakeContext()
-    const texts = ['Joy', 'Disappointment', 'Calm']
-
-    const size = fitFontSize(context.asContext(), texts)
-
-    // 14 letters: 14 × 0.6 × 14 = 117.6 ≤ 120, but at 14.5 it is 121.8.
-    expect(size).toBe(14)
-    expect(widthAt('Disappointment', size)).toBeLessThanOrEqual(MAX_TEXT_WIDTH)
-    expect(widthAt('Disappointment', size + 0.5)).toBeGreaterThan(MAX_TEXT_WIDTH)
-  })
-
-  it('steps down in half pixels, to keep the text as large as possible', () => {
+  it('fits every emotion of the real list at one size, above the smallest', () => {
     const context = createFakeContext()
 
-    // 12 letters: 12 × 0.6 × 16.5 = 118.8 ≤ 120, but at 17 it is 122.4.
-    expect(fitFontSize(context.asContext(), ['Hopelessness'])).toBe(16.5)
-  })
+    const font: CanvasFont = { family: 'sans-serif', weight: '600' }
 
-  it('fits every emotion of the real list at one size', () => {
-    const context = createFakeContext()
+    const size = fitFontSize(context.asContext(), font, allEmotions, EMOTION_TEXT_FIT)
 
-    const size = fitFontSize(context.asContext(), allEmotions)
-
+    // The fake font is 0.6 × size wide per letter.
     for (const text of allEmotions) {
-      expect(widthAt(text, size), text).toBeLessThanOrEqual(MAX_TEXT_WIDTH)
+      expect(text.length * size * 0.6, text).toBeLessThanOrEqual(EMOTION_TEXT_FIT.maxWidth)
     }
-    expect(size).toBeGreaterThan(MIN_FONT_SIZE)
-  })
-
-  it('never goes below the smallest size', () => {
-    const context = createFakeContext()
-
-    expect(fitFontSize(context.asContext(), ['Supercalifragilisticexpialidocious'])).toBe(
-      MIN_FONT_SIZE,
-    )
-  })
-
-  it('leaves room inside the oval on both sides of the text', () => {
-    expect(MAX_TEXT_WIDTH).toBe(BUBBLE_WIDTH - 20)
-  })
-
-  it('measures in the emotion font', () => {
-    const context = createFakeContext()
-    const fonts: string[] = []
-    const measure = context.asContext().measureText
-    Object.assign(context, {
-      measureText: (text: string) => {
-        fonts.push(context.font)
-        return measure(text)
-      },
-    })
-
-    fitFontSize(context.asContext(), ['Disappointment'])
-
-    expect(fonts.length).toBeGreaterThan(0)
-    for (const measuredIn of fonts) {
-      expect(measuredIn).toBe(font(fontSizeOf(measuredIn)))
-    }
+    expect(size).toBeGreaterThan(EMOTION_TEXT_FIT.minSize)
   })
 })
 
@@ -176,14 +151,15 @@ describe('drawing the scene', () => {
     drawScene(
       context.asContext(),
       [bubble('Joy', 'good'), bubble('Fear', 'bad')],
-      19,
+      look,
       bubbleImage,
     )
 
     expect(context.callsTo('clearRect')[0].args).toEqual([0, 0, 400, 800])
     expect(context.callsTo('drawImage')).toHaveLength(2)
     expect(context.callsTo('fillText').map((call) => call.args[0])).toEqual(['Joy', 'Fear'])
-    expect(context.callsTo('fillText').map((call) => call.font)).toEqual([font(19), font(19)])
+    const fonts = context.callsTo('fillText').map((call) => call.font)
+    expect(fonts).toEqual(['test font', 'test font'])
     const names = context.calls.map((call) => call.name)
     expect(names.indexOf('clearRect')).toBeLessThan(names.indexOf('fillText'))
   })
@@ -191,8 +167,56 @@ describe('drawing the scene', () => {
   it('clears the drawing layer when there are no bubbles', () => {
     const context = createFakeContext()
 
-    drawScene(context.asContext(), [], 19)
+    drawScene(context.asContext(), [], look)
 
     expect(context.calls.map((call) => call.name)).toEqual(['clearRect'])
+  })
+})
+
+describe('loading the bubble image', () => {
+  /** A fresh copy of the module, so no image loaded by another test is cached. */
+  async function freshLoadBubbleImage() {
+    vi.resetModules()
+    const { loadBubbleImage } = await import('./draw')
+    return loadBubbleImage
+  }
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('loads the oval artwork', async () => {
+    const images = stubImages()
+    const loadBubbleImage = await freshLoadBubbleImage()
+
+    const image = await loadBubbleImage()
+
+    expect(images).toEqual([image])
+    expect(image.src).toBe(ovalImageUrl)
+  })
+
+  it('downloads it only once, however often it is asked for', async () => {
+    const images = stubImages()
+    const loadBubbleImage = await freshLoadBubbleImage()
+
+    const [first, second] = await Promise.all([loadBubbleImage(), loadBubbleImage()])
+    const later = await loadBubbleImage()
+
+    expect(images).toHaveLength(1)
+    expect(second).toBe(first)
+    expect(later).toBe(first)
+  })
+
+  it('fails if the image cannot load, and tries again the next time', async () => {
+    const failing = stubImages('error')
+    const loadBubbleImage = await freshLoadBubbleImage()
+
+    await expect(loadBubbleImage()).rejects.toThrow(new Error('Could not load oval.png'))
+    expect(failing).toHaveLength(1)
+
+    const working = stubImages()
+    const image = await loadBubbleImage()
+
+    expect(working).toEqual([image])
   })
 })

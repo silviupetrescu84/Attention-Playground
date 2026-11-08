@@ -1,21 +1,24 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest'
-import { createGameHud, formatSeconds } from './game-hud'
+import gameCss from './game.css?raw'
+import { createGameHud, formatSeconds, GAME_BAR_HEIGHT } from './game-hud'
 import { createGameLifecycle, isNewRound, type GameState } from './game-lifecycle'
 import type { GameLoop } from './game-loop'
+import { createMistakes } from './mistakes'
 import { createScore } from './score'
 
 function setup() {
   const screen = new AbortController()
   const lifecycle = createGameLifecycle({ signal: screen.signal })
-  const loop = { elapsedMs: 0, durationMs: 60_000 } satisfies GameLoop
+  const loop = { elapsedMs: 0 } satisfies GameLoop
   // The real loop resets its time on start and restart; so does this one.
   lifecycle.subscribe((change) => {
     if (isNewRound(change)) loop.elapsedMs = 0
   })
   const score = createScore({ lifecycle })
+  const mistakes = createMistakes({ lifecycle })
   const stage = document.createElement('div')
-  const hud = createGameHud(stage, { lifecycle, loop, score })
+  const hud = createGameHud(stage, { lifecycle, loop, score, mistakes })
 
   const get = <T extends HTMLElement = HTMLElement>(selector: string) =>
     hud.element.querySelector<T>(selector)!
@@ -25,6 +28,9 @@ function setup() {
     time: get('.game-hud__time'),
     pause: get<HTMLButtonElement>('.game-hud__pause'),
     start: get<HTMLButtonElement>('.game-hud__start'),
+    difficulty: get<HTMLButtonElement>('.game-hud__difficulty'),
+    failOn: get('.game-hud__fail-on'),
+    mistakes: get('.game-hud__mistakes'),
     startOverlay: get('.game-hud__overlay--start'),
     pausedOverlay: get('.game-hud__overlay--paused'),
     finishedOverlay: get('.game-hud__overlay--finished'),
@@ -45,7 +51,7 @@ function setup() {
     }
   }
 
-  return { screen, lifecycle, loop, score, stage, hud, ui, shown }
+  return { screen, lifecycle, loop, score, mistakes, stage, hud, ui, shown }
 }
 
 describe('formatSeconds', () => {
@@ -57,8 +63,28 @@ describe('formatSeconds', () => {
     [10_000, '10'],
     [59_999, '59'],
     [60_000, '60'],
+    [125_000, '125'],
   ])('shows %s ms as %s', (ms, text) => {
     expect(formatSeconds(ms)).toBe(text)
+  })
+})
+
+describe('game HUD layout', () => {
+  it('has a 64 px bar across the top, and tells the CSS its height', () => {
+    const { hud } = setup()
+
+    expect(GAME_BAR_HEIGHT).toBe(64)
+    expect(hud.element.style.getPropertyValue('--game-bar-height')).toBe('64px')
+  })
+
+  it('takes its sizes from the game instead of repeating them in the CSS', () => {
+    const ruleFor = (selector: string) =>
+      new RegExp(`${selector.replace('.', '\\.')}\\s*\\{([^}]*)\\}`).exec(gameCss)![1]
+
+    expect(ruleFor('.game-hud')).toMatch(/width: var\(--game-width\);/)
+    expect(ruleFor('.game-hud')).toMatch(/height: var\(--game-height\);/)
+    expect(ruleFor('.game-hud__bar')).toMatch(/height: var\(--game-bar-height\);/)
+    expect(gameCss).not.toMatch(/\b(400|800|64)px\b/)
   })
 })
 
@@ -102,6 +128,99 @@ describe('game HUD', () => {
     expect(ui.start.textContent).toBe('Start')
     ui.start.click()
     expect(lifecycle.state).toBe('playing')
+  })
+
+  it('shows the difficulty, Easy at first, under the Start button', () => {
+    const { ui } = setup()
+
+    expect(ui.difficulty.textContent).toBe('Difficulty: Easy')
+    expect(ui.difficulty.parentElement).toBe(ui.startOverlay)
+    expect(ui.start.nextElementSibling).toBe(ui.difficulty)
+  })
+
+  it('shows under the difficulty how many mistakes fail the round', () => {
+    const { ui } = setup()
+    const failOn = [ui.failOn.textContent]
+
+    for (let i = 0; i < 3; i++) {
+      ui.difficulty.click()
+      failOn.push(ui.failOn.textContent)
+    }
+
+    expect(ui.difficulty.nextElementSibling).toBe(ui.failOn)
+    expect(failOn).toEqual([
+      'Fail on 10 mistakes',
+      'Fail on 6 mistakes',
+      'Fail on 3 mistakes',
+      'Fail on 1 mistake',
+    ])
+  })
+
+  it.each([0, 1, 2, 3])(
+    'counts up to the number shown under the difficulty when the round fails (%i presses)',
+    (presses) => {
+      const { lifecycle, mistakes, ui } = setup()
+      for (let i = 0; i < presses; i++) ui.difficulty.click()
+      const failOn = Number(/\d+/.exec(ui.failOn.textContent!)![0])
+      ui.start.click()
+
+      // More mistakes than needed: the ones after the round fails do not count.
+      for (let i = 0; i < failOn + 5; i++) mistakes.add()
+
+      expect(lifecycle.state).toBe('finished')
+      expect(ui.mistakes.textContent).toBe(`Mistakes: ${failOn}`)
+    },
+  )
+
+  it('shows "Mistakes: x" in the top bar, as they happen and back to 0 for a new round', () => {
+    const { lifecycle, mistakes, ui } = setup()
+    expect(ui.mistakes.textContent).toBe('Mistakes: 0')
+    expect(ui.mistakes.parentElement).toBe(ui.score.parentElement)
+    ui.start.click()
+
+    mistakes.add()
+    mistakes.add()
+    expect(ui.mistakes.textContent).toBe('Mistakes: 2')
+
+    lifecycle.pause()
+    lifecycle.restart()
+    expect(ui.mistakes.textContent).toBe('Mistakes: 0')
+  })
+
+  it('picks the next difficulty on each press, then starts again from Easy', () => {
+    const { mistakes, ui } = setup()
+    const shownNames: string[] = []
+
+    for (let i = 0; i < 4; i++) {
+      ui.difficulty.click()
+      shownNames.push(ui.difficulty.textContent!)
+    }
+
+    expect(shownNames).toEqual([
+      'Difficulty: Medium',
+      'Difficulty: Hard',
+      'Difficulty: Extreme',
+      'Difficulty: Easy',
+    ])
+    expect(mistakes.level).toBe('easy')
+  })
+
+  it('shows the difficulty only before a round, and keeps it for the next one', () => {
+    const { lifecycle, ui } = setup()
+    ui.difficulty.click()
+    ui.start.click()
+    const hidden = () => ui.difficulty.closest('[hidden]') !== null
+
+    expect(hidden()).toBe(true)
+    lifecycle.pause()
+    expect(hidden()).toBe(true)
+    lifecycle.resume()
+    lifecycle.finish()
+    expect(hidden()).toBe(true)
+
+    ui.finishedRestart.click()
+    expect(hidden()).toBe(false)
+    expect(ui.difficulty.textContent).toBe('Difficulty: Medium')
   })
 
   it('starts the game with the Start button', () => {
@@ -214,7 +333,7 @@ describe('game HUD', () => {
     lifecycle.finish()
 
     expect(ui.finalScore.textContent).toBe('Score: 7')
-    expect(ui.finishedOverlay.textContent).toContain("Time's up!")
+    expect(ui.finishedOverlay.textContent).toContain('Game over')
   })
 
   it('shows a game summary on the finished screen', () => {
@@ -316,7 +435,13 @@ describe('game HUD', () => {
   it('uses real buttons', () => {
     const { ui } = setup()
 
-    for (const button of [ui.start, ui.pause, ui.pausedRestart, ui.finishedRestart]) {
+    for (const button of [
+      ui.difficulty,
+      ui.start,
+      ui.pause,
+      ui.pausedRestart,
+      ui.finishedRestart,
+    ]) {
       expect(button.tagName).toBe('BUTTON')
       expect(button.type).toBe('button')
     }

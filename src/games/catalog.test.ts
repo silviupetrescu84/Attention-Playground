@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { gamePath, games, notBuiltYet, preloadGames, TOTAL_GAMES, type CatalogGame } from './catalog'
+import { gamePath, games, preloadGames, TOTAL_GAMES, type CatalogGame } from './catalog'
 
 describe('games catalog', () => {
   it('lists Emotions Rise and Align the Actions, in that order', () => {
@@ -60,18 +60,9 @@ describe('games catalog', () => {
     warn.mockRestore()
   })
 
-  it('preloads Emotions Rise', () => {
-    expect(games.find((game) => game.id === 'emotions-rise')?.preload).toBeTypeOf('function')
-  })
-
-  it('runs games that are not built yet as an empty game', () => {
-    const handlers = notBuiltYet({} as never)
-
-    expect(() => {
-      handlers.reset()
-      handlers.start()
-      handlers.frame({ deltaMs: 16, elapsedMs: 16 })
-    }).not.toThrow()
-    expect(handlers.tap).toBeUndefined()
+  it('preloads every game', () => {
+    for (const game of games) {
+      expect(game.preload, game.name).toBeTypeOf('function')
+    }
   })
 })

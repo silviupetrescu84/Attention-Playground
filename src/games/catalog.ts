@@ -1,5 +1,6 @@
 import alignTheActionsIcon from '../assets/game-icons/align-the-actions.png'
 import emotionsRiseIcon from '../assets/game-icons/emotions-rise.png'
+import { alignTheActionsGame, preloadAlignTheActions } from './align-the-actions'
 import { emotionsRiseGame, preloadEmotionsRise } from './emotions-rise'
 import type { GameDefinition } from './shared/game-shell'
 
@@ -23,13 +24,6 @@ export interface CatalogGame {
 /** How many games the playground will have; the rest show as "Coming soon". */
 export const TOTAL_GAMES = 10
 
-/** A game whose gameplay is not built yet: the shared shell only. */
-export const notBuiltYet: GameDefinition = () => ({
-  reset() {},
-  start() {},
-  frame() {},
-})
-
 export const games: readonly CatalogGame[] = [
   {
     id: 'emotions-rise',
@@ -42,7 +36,8 @@ export const games: readonly CatalogGame[] = [
     id: 'align-the-actions',
     name: 'Align the Actions',
     icon: alignTheActionsIcon,
-    create: () => notBuiltYet,
+    create: () => alignTheActionsGame(),
+    preload: () => preloadAlignTheActions(),
   },
 ]
 

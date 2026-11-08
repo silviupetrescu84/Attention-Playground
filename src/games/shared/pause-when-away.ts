@@ -21,7 +21,7 @@ export interface PageEvents {
  *   visible (this includes clicking into the browser's developer tools).
  *
  * It never resumes by itself: when the player comes back they see the pause
- * menu and choose to resume, finish or restart.
+ * menu and choose to resume or restart.
  *
  * Only a `playing` game is paused; other states are left alone.
  *

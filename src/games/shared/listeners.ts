@@ -1,6 +1,6 @@
 /**
  * A list of listeners to notify, shared by everything games can subscribe to
- * (the lifecycle, the score).
+ * (the lifecycle, the score, the mistakes).
  *
  * - Listeners removed while a notification is going on are not called.
  * - Listeners added while a notification is going on hear only later ones.

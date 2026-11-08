@@ -1,8 +1,11 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import goalsData from './games/align-the-actions/data/align_the_actions_goals.json'
+import { goalsFrom } from './games/align-the-actions/goals'
 import emotions from './games/emotions-rise/data/emotions.json'
-import { font, MAX_FONT_SIZE } from './games/emotions-rise/draw'
+import { cssCanvasFont, useCssVariables } from './test/css-variables'
 import { useFakeCanvasContexts, type FakeContext } from './test/fake-canvas-context'
+import { stubImages } from './test/fake-image'
 
 // main.ts registers listeners on `document` and `window` when it is imported.
 // Each test imports a fresh copy, so remember those listeners and remove them
@@ -39,14 +42,8 @@ beforeEach(() => {
   trackListeners(document)
   trackListeners(window)
   contexts = useFakeCanvasContexts()
-  vi.stubGlobal(
-    'Image',
-    vi.fn(() => {
-      const image = document.createElement('img')
-      queueMicrotask(() => image.dispatchEvent(new Event('load')))
-      return image
-    }),
-  )
+  stubImages()
+  useCssVariables()
 })
 
 afterEach(() => {
@@ -107,7 +104,7 @@ describe('app start', () => {
       await startApp('/')
 
       expect(currentScreen()).toBe('home')
-      expect(load).toHaveBeenCalledWith(font(MAX_FONT_SIZE))
+      expect(load).toHaveBeenCalledWith(expect.stringContaining(cssCanvasFont.family))
     } finally {
       delete (document as { fonts?: unknown }).fonts
     }
@@ -298,16 +295,20 @@ describe('games', () => {
     },
   )
 
-  it('runs the shared shell for a game whose gameplay is not built yet', async () => {
+  it('plays Align the Actions on its screen', async () => {
     const { app } = await startApp('/games/align-the-actions')
+    const start = app.querySelector<HTMLButtonElement>('.game-hud__start')!
+    // jsdom cannot load fonts, so the game soon gives up and uses a fallback.
+    await vi.waitFor(() => expect(start.disabled).toBe(false))
 
-    app.querySelector<HTMLButtonElement>('.game-hud__start')!.click()
-    await new Promise((resolve) => requestAnimationFrame(resolve))
-    await new Promise((resolve) => requestAnimationFrame(resolve))
+    start.click()
 
-    expect(app.querySelector<HTMLElement>('.game-hud__start')!.closest('[hidden]')).not.toBeNull()
+    // The goal and its row of 4 actions.
+    const drawn = contexts.at(-1)!.callsTo('fillText').map((call) => String(call.args[0]))
+    const titles = goalsFrom(goalsData).map((goal) => goal.title)
+    expect(drawn.some((text) => titles.some((title) => title.startsWith(text)))).toBe(true)
+    expect(contexts.at(-1)!.callsTo('roundRect')).toHaveLength(5)
     expect(app.querySelector<HTMLElement>('.game-hud__pause')!.hidden).toBe(false)
-    expect(app.querySelector('.game-hud__time')!.textContent).toBe('00')
   })
 
   it('plays Emotions Rise on its screen', async () => {

@@ -1,20 +1,25 @@
 import { pauseIcon, playIcon } from '../../components/icons'
 import type { GameLifecycle, GameState } from './game-lifecycle'
 import type { GameLoop } from './game-loop'
+import { DIFFICULTY_NAMES, MISTAKES_TO_FAIL, type Mistakes } from './mistakes'
 import type { Score, ScoreChange } from './score'
 
 /**
  * Everything shown over the canvas that is the same in every game:
  *
- * - ready:    the Start button ("Loading…" and disabled while the game loads).
+ * - ready:    the Start button ("Loading…" and disabled while the game
+ *             loads), the difficulty button under it ("Difficulty: Easy"; each
+ *             press picks the next difficulty) and, under that, the mistake
+ *             it fails on ("Fail on 10 mistakes").
  * - playing:  "Score: x" top left (flashing green when points are won, red
- *             when lost); the time in seconds and a Pause button top right.
+ *             when lost); "Mistakes: x" in the middle; the time in seconds and
+ *             a Pause button top right.
  * - paused:   the same bar, with Resume instead of Pause, over a dimmed game
  *             with a Restart button (back to the Start button).
- * - finished: "Time's up!", the final score, the game's own summary (if any)
+ * - finished: "Game over", the final score, the game's own summary (if any)
  *             and a Restart button.
  *
- * The score and time are always shown.
+ * The score, mistakes and time are always shown.
  */
 
 /** One line of a game's end-of-round summary, e.g. "Good emotions tapped: 12". */
@@ -37,22 +42,32 @@ export interface GameHudOptions {
   lifecycle: GameLifecycle
   loop: GameLoop
   score: Score
+  mistakes: Mistakes
 }
 
-/** Whole seconds, at least two digits: 00, 01, … 60. */
+/**
+ * Height of the score and time bar across the top of the canvas, in game
+ * units. Games keep what the player must see below it. (Passed to the CSS as
+ * `--game-bar-height`.)
+ */
+export const GAME_BAR_HEIGHT = 64
+
+/** Whole seconds, at least two digits: 00, 01, … 99, 100, … */
 export function formatSeconds(ms: number): string {
   return String(Math.floor(ms / 1000)).padStart(2, '0')
 }
 
 export function createGameHud(
   stage: HTMLElement,
-  { lifecycle, loop, score }: GameHudOptions,
+  { lifecycle, loop, score, mistakes }: GameHudOptions,
 ): GameHud {
   const element = document.createElement('div')
   element.className = 'game-hud'
+  element.style.setProperty('--game-bar-height', `${GAME_BAR_HEIGHT}px`)
   element.innerHTML = `
     <div class="game-hud__bar">
       <span class="game-hud__score"></span>
+      <span class="game-hud__mistakes"></span>
       <span class="game-hud__right">
         <span class="game-hud__time" aria-label="Time in seconds"></span>
         <button class="game-hud__pause" type="button"></button>
@@ -60,12 +75,14 @@ export function createGameHud(
     </div>
     <div class="game-hud__overlay game-hud__overlay--start">
       <button class="game-hud__button game-hud__start" type="button">Start</button>
+      <button class="game-hud__button game-hud__difficulty" type="button"></button>
+      <p class="game-hud__fail-on"></p>
     </div>
     <div class="game-hud__overlay game-hud__overlay--paused">
       <button class="game-hud__button game-hud__restart" type="button">Restart</button>
     </div>
     <div class="game-hud__overlay game-hud__overlay--finished">
-      <p class="game-hud__title">Time's up!</p>
+      <p class="game-hud__title">Game over</p>
       <p class="game-hud__final-score"></p>
       <dl class="game-hud__summary" hidden></dl>
       <button class="game-hud__button game-hud__restart" type="button">Restart</button>
@@ -78,11 +95,14 @@ export function createGameHud(
   }
 
   const scoreText = find('.game-hud__score')
+  const mistakesText = find('.game-hud__mistakes')
+  const failOnText = find('.game-hud__fail-on')
   const timeText = find('.game-hud__time')
   const pauseButton = find<HTMLButtonElement>('.game-hud__pause')
   const startOverlay = find('.game-hud__overlay--start')
   const pausedOverlay = find('.game-hud__overlay--paused')
   const finishedOverlay = find('.game-hud__overlay--finished')
+  const difficultyButton = find<HTMLButtonElement>('.game-hud__difficulty')
   const startButton = find<HTMLButtonElement>('.game-hud__start')
   const finalScoreText = find('.game-hud__final-score')
   const summaryList = find('.game-hud__summary')
@@ -153,6 +173,21 @@ export function createGameHud(
     startButton.textContent = ready ? 'Start' : 'Loading…'
   }
 
+  function showDifficulty() {
+    difficultyButton.textContent = `Difficulty: ${DIFFICULTY_NAMES[mistakes.level]}`
+    const failOn = MISTAKES_TO_FAIL[mistakes.level]
+    failOnText.textContent = `Fail on ${failOn} ${failOn === 1 ? 'mistake' : 'mistakes'}`
+  }
+
+  function showMistakes(count: number) {
+    mistakesText.textContent = `Mistakes: ${count}`
+  }
+
+  difficultyButton.addEventListener('click', () => {
+    mistakes.nextLevel()
+    showDifficulty()
+  })
+
   startButton.addEventListener('click', () => {
     if (lifecycle.can('start')) {
       lifecycle.start()
@@ -172,7 +207,10 @@ export function createGameHud(
     showScore(value)
     flashScore(value, change)
   })
+  mistakes.subscribe(showMistakes)
   showScore(score.value)
+  showMistakes(mistakes.count)
+  showDifficulty()
   showState(lifecycle.state)
 
   return { element, updateTime, showSummary, setStartReady }

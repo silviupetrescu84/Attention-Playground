@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createGameLifecycle } from '../shared/game-lifecycle'
 import { createScore } from '../shared/score'
-import { bubblesAt, findPoint } from '../../test/bubbles'
+import { bubblesAt, findPoint } from '../../test/emotions-rise/bubbles'
 import { constantRandom, seededRandom } from '../../test/random'
 import emotions from './data/emotions.json'
 import type { Emotion } from './emotion-generator'
@@ -11,6 +11,8 @@ import {
   BUBBLE_HIT_WIDTH,
   BUBBLE_WIDTH,
   createEmotionsRise,
+  DIFFICULTY_SETTINGS,
+  DIFFICULTY_STEPS,
   MAX_SPAWN_DELAY_MS,
   MAX_SPEED,
   MIN_SPAWN_DELAY_MS,
@@ -23,18 +25,28 @@ import {
   pickSpawnX,
   SPAWN_Y,
   type Bubble,
+  type EmotionsRiseOptions,
 } from './emotions-rise'
 
-function setup(random: () => number = seededRandom(1)) {
+type ExtraOptions = Pick<EmotionsRiseOptions, 'difficultySteps' | 'onMistake'>
+
+function setup(random: () => number = seededRandom(1), options: ExtraOptions = {}) {
   const lifecycle = createGameLifecycle({ signal: new AbortController().signal })
   const score = createScore({ lifecycle })
   const game = createEmotionsRise({
     emotions: { good: emotions.positive, bad: emotions.negative },
     score,
     random,
+    ...options,
   })
   return { score, game }
 }
+
+/** Long enough to play through every difficulty step, then a while at the hardest. */
+const WHOLE_RAMP_MS = DIFFICULTY_STEPS.at(-1)![0] + 50_000
+
+/** Never gets harder: the game keeps its starting values. */
+const noRamp: ExtraOptions = { difficultySteps: [] }
 
 /** Plays `untilMs` in small steps; returns every bubble ever spawned, in order. */
 function playAndRecord(game: ReturnType<typeof setup>['game'], untilMs: number) {
@@ -59,6 +71,22 @@ describe('settings', () => {
     expect([MIN_SPAWN_DELAY_MS, MAX_SPAWN_DELAY_MS]).toEqual([700, 1_500])
     expect(MIN_SIDEWAYS_DISTANCE).toBe(25)
     expect(MIN_CENTRE_DISTANCE).toBe(50)
+    expect(DIFFICULTY_STEPS).toEqual([
+      [20_000, 10],
+      [40_000, 25],
+      [60_000, 45],
+      [80_000, 70],
+      [100_000, 110],
+    ])
+  })
+
+  it('gets harder by making bubbles faster and bringing them sooner', () => {
+    expect(DIFFICULTY_SETTINGS).toEqual({
+      minSpeed: { start: 40, harder: 'higher' },
+      maxSpeed: { start: 80, harder: 'higher' },
+      minSpawnDelayMs: { start: 700, harder: 'lower' },
+      maxSpawnDelayMs: { start: 1_500, harder: 'lower' },
+    })
   })
 
   it('starts bubbles just under the canvas', () => {
@@ -185,8 +213,8 @@ describe('spawning', () => {
     }
   })
 
-  it('keeps every delay between 0.7 and 1.5 s and every speed between 40 and 80', () => {
-    const { game } = setup(seededRandom(3))
+  it('keeps delays of 0.7–1.5 s and speeds of 40–80 px/s when there is no ramp', () => {
+    const { game } = setup(seededRandom(3), noRamp)
     game.start()
 
     const bubbles = playAndRecord(game, 60_000)
@@ -218,7 +246,7 @@ describe('spawning', () => {
     const { game } = setup(seededRandom(4))
     game.start()
 
-    const spawned = playAndRecord(game, 60_000)
+    const spawned = playAndRecord(game, WHOLE_RAMP_MS)
     expect(spawned.length).toBeGreaterThan(40)
     for (let i = 1; i < spawned.length; i++) {
       const [before, bubble] = [spawned[i - 1], spawned[i]]
@@ -280,6 +308,148 @@ describe('spawning', () => {
     game.clear()
 
     expect(game.bubbles).toEqual([])
+  })
+})
+
+describe('getting harder', () => {
+  /** Emotions Rise's schedule, written out as multipliers, latest first. */
+  const schedule = [
+    [100_000, 2.1],
+    [80_000, 1.7],
+    [60_000, 1.45],
+    [40_000, 1.25],
+    [20_000, 1.1],
+  ] as const
+  const expectedMultiplierAt = (timeMs: number) =>
+    schedule.find(([atMs]) => atMs <= timeMs)?.[1] ?? 1
+
+  it('by default speeds bubbles up and brings them sooner, following its schedule', () => {
+    const { game } = setup(seededRandom(3))
+    game.start()
+
+    const bubbles = playAndRecord(game, WHOLE_RAMP_MS)
+
+    for (let i = 0; i < bubbles.length; i++) {
+      const { speed, spawnedAtMs } = bubbles[i]
+      const multiplier = expectedMultiplierAt(spawnedAtMs)
+      const where = `bubble ${i}, at ${spawnedAtMs} ms`
+      expect(speed, where).toBeGreaterThanOrEqual(40 * multiplier - 1e-9)
+      expect(speed, where).toBeLessThanOrEqual(80 * multiplier + 1e-9)
+      const next = bubbles[i + 1]
+      if (!next) continue
+      // The delay is chosen when this bubble appears, with the difficulty then.
+      const delay = next.spawnedAtMs - spawnedAtMs
+      expect(delay, where).toBeGreaterThanOrEqual(700 / multiplier - 1e-9)
+      expect(delay, where).toBeLessThanOrEqual(1_500 / multiplier + 1e-9)
+    }
+    // It really reached the last step: faster and closer together than at ×1.7.
+    expect(Math.max(...bubbles.map((b) => b.speed))).toBeGreaterThan(80 * 1.7)
+    const delays = bubbles.slice(1).map((b, i) => b.spawnedAtMs - bubbles[i].spawnedAtMs)
+    expect(Math.min(...delays)).toBeLessThan(700 / 1.7)
+  })
+
+  it('changes nothing before the first step, then applies it to the next bubble', () => {
+    // Random 0: the slowest speed and the shortest delay every time.
+    const { game } = setup(constantRandom(0))
+    game.start()
+
+    game.update(21_200)
+
+    // 0, 0.7, … 19.6 s at ×1. The delay after 19.6 s was chosen at ×1 too: 20.3 s.
+    // From 20.3 s it is ×1.1: 44 px/s, and the next one 700 / 1.1 ms later.
+    const spawned = game.bubbles.map(({ spawnedAtMs, speed }) => ({ spawnedAtMs, speed }))
+    expect(spawned.slice(0, 29)).toEqual(
+      Array.from({ length: 29 }, (_, i) => ({ spawnedAtMs: i * 700, speed: 40 })),
+    )
+    expect(spawned.slice(29)).toEqual([
+      { spawnedAtMs: 20_300, speed: expect.closeTo(44, 9) },
+      { spawnedAtMs: expect.closeTo(20_300 + 700 / 1.1, 9), speed: expect.closeTo(44, 9) },
+    ])
+  })
+
+  it('keeps the speed of bubbles already rising when the game gets harder', () => {
+    const { game } = setup(constantRandom(0))
+    game.start()
+    const first = game.bubbles[0]
+
+    game.update(21_000)
+
+    expect(first.speed).toBe(40)
+    expect(first.y).toBeCloseTo(SPAWN_Y - 40 * 21, 9)
+  })
+
+  it('uses the difficulty of the moment each bubble is due, even after a long frame', () => {
+    const stepByStep = setup(seededRandom(15))
+    const oneLongFrame = setup(seededRandom(15))
+    for (const { game } of [stepByStep, oneLongFrame]) game.start()
+
+    playAndRecord(stepByStep.game, 25_000)
+    oneLongFrame.game.update(25_000)
+
+    expect(oneLongFrame.game.bubbles.length).toBeGreaterThan(10)
+    expect(oneLongFrame.game.bubbles).toEqual(stepByStep.game.bubbles)
+  })
+
+  it('follows the steps it is given', () => {
+    // ×2 from 1 s and ×3 from 2 s: 40, 80, 120 px/s; delays 700, 350, 233 ms.
+    const { game } = setup(constantRandom(0), {
+      difficultySteps: [
+        [1_000, 100],
+        [2_000, 200],
+      ],
+    })
+    game.start()
+
+    game.update(2_100)
+
+    expect(game.bubbles.map(({ spawnedAtMs, speed }) => [spawnedAtMs, speed])).toEqual([
+      [0, 40],
+      [700, 40],
+      [1_400, 80],
+      [1_750, 80],
+      [2_100, 120],
+    ])
+  })
+
+  it('keeps about as many bubbles on screen late in the round as without a ramp', () => {
+    /** Average number of bubbles on screen from `fromMs` to the end of the ramp, over 8 rounds. */
+    function averageOnScreen(options: ExtraOptions, fromMs: number) {
+      let total = 0
+      let samples = 0
+      for (const seed of [31, 32, 33, 34, 35, 36, 37, 38]) {
+        const { game } = setup(seededRandom(seed), options)
+        game.start()
+        for (let t = 0; t <= WHOLE_RAMP_MS; t += 100) {
+          game.update(t)
+          if (t >= fromMs) {
+            total += game.bubbles.length
+            samples++
+          }
+        }
+      }
+      return total / samples
+    }
+
+    const withRamp = averageOnScreen({}, 80_000)
+    const withoutRamp = averageOnScreen(noRamp, 80_000)
+
+    // Bubbles come 1.7–2.1× as often but also leave 1.7–2.1× as fast.
+    expect(withRamp / withoutRamp).toBeGreaterThan(0.9)
+    expect(withRamp / withoutRamp).toBeLessThan(1.2)
+  })
+
+  it('starts every new round at the starting values again', () => {
+    const { game } = setup(constantRandom(0))
+    game.start()
+    game.update(90_000)
+
+    game.start()
+    game.update(700)
+
+    expect(game.bubbles.map(({ spawnedAtMs, speed }) => [spawnedAtMs, speed])).toEqual([
+      [0, 40],
+      [700, 40],
+    ])
   })
 })
 
@@ -419,23 +589,19 @@ describe('tapping', () => {
 
 describe('mistakes', () => {
   function setupWithMistakes(seed: number) {
-    const lifecycle = createGameLifecycle({ signal: new AbortController().signal })
-    const score = createScore({ lifecycle })
     const mistakes: { mistake: string; emotion: Emotion; scoreThen: number }[] = []
-    const game = createEmotionsRise({
-      emotions: { good: emotions.positive, bad: emotions.negative },
-      score,
-      random: seededRandom(seed),
-      onMistake: (mistake, emotion) => mistakes.push({ mistake, emotion, scoreThen: score.value }),
+    const played = setup(seededRandom(seed), {
+      onMistake: (mistake, emotion) =>
+        mistakes.push({ mistake, emotion, scoreThen: played.score.value }),
     })
-    return { game, score, mistakes }
+    return { ...played, mistakes }
   }
 
   it('reports every bad emotion tapped and every good one missed, and nothing else', () => {
     const { game, mistakes } = setupWithMistakes(21)
     game.start()
 
-    for (let t = 0; t <= 60_000; t += 100) {
+    for (let t = 0; t <= WHOLE_RAMP_MS; t += 100) {
       game.update(t)
       // Tap the oldest bubble every 4 s, so others escape.
       if (t % 4_000 === 0 && game.bubbles[0] && game.bubbles[0].y < 700) {
@@ -471,11 +637,76 @@ describe('mistakes', () => {
     game.start()
 
     expect(() => {
-      for (let t = 0; t <= 60_000; t += 500) {
+      for (let t = 0; t <= WHOLE_RAMP_MS; t += 500) {
         game.update(t)
         game.tap({ x: 200, y: 400 })
       }
     }).not.toThrow()
+  })
+})
+
+describe('stopping', () => {
+  /** A game that stops itself at its first mistake, as one too many would. */
+  function stoppingAtFirstMistake(random: () => number) {
+    const played = setup(random, { onMistake: () => played.game.stop() })
+    played.game.start()
+    return played
+  }
+
+  it('counts only the first of two bad bubbles under a tap if its mistake stops the round', () => {
+    const { game, score } = stoppingAtFirstMistake(seededRandom(8))
+    let point: ReturnType<typeof findPoint<Bubble>>
+    for (let t = 0; t <= 120_000 && !point; t += 250) {
+      game.update(t)
+      point = findPoint(
+        game.bubbles,
+        (under) => under.length >= 2 && under.every((b) => b.emotion.type === 'bad'),
+        { step: 10 },
+      )
+    }
+    const [first, ...rest] = point!.under
+    const scoreBefore = score.value
+
+    game.tap(point!)
+
+    expect(game.stats.badTapped).toBe(1)
+    expect(score.value).toBe(scoreBefore - 1)
+    expect(game.bubbles).not.toContain(first)
+    for (const bubble of rest) expect(game.bubbles).toContain(bubble)
+  })
+
+  it('counts only the first good bubble escaping if that mistake stops the round', () => {
+    const { game, score } = stoppingAtFirstMistake(seededRandom(12))
+
+    // One long frame: many bubbles escape at once.
+    game.update(60_000)
+
+    expect(game.stats.goodMissed).toBe(1)
+    expect(score.value).toBe(game.stats.badLetGo - 1)
+  })
+
+  it('moves nothing and brings nothing new once stopped', () => {
+    const { game } = setup(seededRandom(2))
+    game.start()
+    game.update(5_000)
+    const before = game.bubbles.map((bubble) => ({ ...bubble }))
+
+    game.stop()
+    game.update(10_000)
+    game.tap({ x: before[0].x, y: before[0].y })
+
+    expect(game.bubbles.map((bubble) => ({ ...bubble }))).toEqual(before)
+  })
+
+  it('plays normally again from the next start', () => {
+    const { game } = setup(constantRandom(0))
+    game.start()
+    game.stop()
+
+    game.start()
+    game.update(700)
+
+    expect(game.bubbles.map((b) => b.spawnedAtMs)).toEqual([0, 700])
   })
 })
 
@@ -517,7 +748,7 @@ describe('round record', () => {
       const { game, score } = setup(seededRandom(seed + 100))
       game.start()
 
-      for (let t = 0; t <= 60_000; t += 100) {
+      for (let t = 0; t <= WHOLE_RAMP_MS; t += 100) {
         game.update(t)
         if (random() < 0.1) game.tap({ x: random() * 400, y: random() * 800 })
       }
@@ -553,7 +784,7 @@ describe('escaping', () => {
     let goodEscaped = 0
     let badEscaped = 0
 
-    for (let t = 0; t <= 60_000; t += 50) {
+    for (let t = 0; t <= WHOLE_RAMP_MS; t += 50) {
       game.update(t)
       for (const bubble of previous.filter((b) => !game.bubbles.includes(b))) {
         // It left in exactly the step where it became fully hidden above.

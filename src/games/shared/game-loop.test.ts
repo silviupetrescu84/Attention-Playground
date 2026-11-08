@@ -4,7 +4,6 @@ import { FakeFrames } from '../../test/fake-frames'
 import {
   browserFrameScheduler,
   createGameLoop,
-  GAME_DURATION_MS,
   type GameFrame,
   type GameLoopOptions,
 } from './game-loop'
@@ -31,8 +30,6 @@ describe('game loop timer', () => {
     const { loop, frames } = setup()
 
     expect(loop.elapsedMs).toBe(0)
-    expect(loop.durationMs).toBe(GAME_DURATION_MS)
-    expect(loop.durationMs).toBe(60_000)
     expect(frames.pending).toBe(0)
   })
 
@@ -101,53 +98,11 @@ describe('game loop and the lifecycle', () => {
     expect(loop.elapsedMs).toBe(350)
   })
 
-  it('finishes the game when the timer reaches 60 seconds', () => {
-    const { lifecycle, loop, frames, seen } = setup()
-    lifecycle.start()
-
-    frames.frames(59, 1_000)
-    expect(lifecycle.state).toBe('playing')
-
-    frames.frame(1_000)
-
-    expect(lifecycle.state).toBe('finished')
-    expect(loop.elapsedMs).toBe(60_000)
-    expect(seen.at(-1)).toEqual({ deltaMs: 1_000, elapsedMs: 60_000 })
-    expect(frames.pending).toBe(0)
-  })
-
-  it('stops exactly at 60 seconds when the last frame goes past it', () => {
-    const { lifecycle, loop, frames, seen } = setup()
-    lifecycle.start()
-    frames.frame(59_990)
-
-    frames.frame(100)
-
-    expect(lifecycle.state).toBe('finished')
-    expect(loop.elapsedMs).toBe(60_000)
-    expect(seen.at(-1)?.deltaMs).toBe(10)
-  })
-
-  it('reaches exactly 60 seconds with uneven frame times', () => {
-    const { lifecycle, loop, frames } = setup()
-    lifecycle.start()
-
-    let count = 0
-    while (lifecycle.state === 'playing' && count < 10_000) {
-      frames.frame(1000 / 60)
-      count++
-    }
-
-    expect(lifecycle.state).toBe('finished')
-    expect(loop.elapsedMs).toBe(60_000)
-    expect(count).toBeGreaterThanOrEqual(3_600)
-    expect(count).toBeLessThanOrEqual(3_601)
-  })
-
   it('does not run frames after finishing', () => {
     const { lifecycle, frames, onFrame } = setup()
     lifecycle.start()
-    frames.frame(60_000)
+    frames.frame(5_000)
+    lifecycle.finish()
     onFrame.mockClear()
 
     frames.frames(5)
@@ -155,11 +110,10 @@ describe('game loop and the lifecycle', () => {
     expect(onFrame).not.toHaveBeenCalled()
   })
 
-  it('keeps the time when finished from the pause menu', () => {
+  it('keeps the time when the round finishes', () => {
     const { lifecycle, loop, frames } = setup()
     lifecycle.start()
     frames.frame(12_345)
-    lifecycle.pause()
 
     lifecycle.finish()
     frames.frames(5)
@@ -185,19 +139,6 @@ describe('game loop and the lifecycle', () => {
     lifecycle.start()
     frames.frame(16)
     expect(loop.elapsedMs).toBe(16)
-  })
-
-  it('runs a full 60 seconds again after a restart', () => {
-    const { lifecycle, frames } = setup()
-    lifecycle.start()
-    frames.frame(60_000)
-    lifecycle.restart()
-    lifecycle.start()
-
-    frames.frame(59_999)
-    expect(lifecycle.state).toBe('playing')
-    frames.frame(1)
-    expect(lifecycle.state).toBe('finished')
   })
 
   it('starts running if created while the game is already playing', () => {
@@ -227,23 +168,6 @@ describe('game loop and the game', () => {
     expect(lifecycle.state).toBe('finished')
     expect(loop.elapsedMs).toBe(3_000)
     expect(frames.pending).toBe(0)
-  })
-
-  it('does not finish twice when the game finishes on the last frame', () => {
-    const { lifecycle, frames } = setup({
-      onFrame: ({ elapsedMs }) => {
-        if (elapsedMs === 60_000) lifecycle.finish()
-      },
-    })
-    const finished = vi.fn()
-    lifecycle.subscribe(({ state }) => {
-      if (state === 'finished') finished()
-    })
-    lifecycle.start()
-
-    expect(() => frames.frame(60_000)).not.toThrow()
-    expect(lifecycle.state).toBe('finished')
-    expect(finished).toHaveBeenCalledTimes(1)
   })
 
   it('stops frames when the game pauses from a frame', () => {
@@ -288,50 +212,14 @@ describe('game loop and the game', () => {
     expect(loop.elapsedMs).toBe(32)
   })
 
-  it('still finishes at 60 seconds when the last frame throws', () => {
-    const failure = new Error('draw failed')
-    const { lifecycle, frames } = setup({
-      onFrame: ({ elapsedMs }) => {
-        if (elapsedMs === 60_000) throw failure
-      },
-    })
-    lifecycle.start()
-
-    expect(() => frames.frame(60_000)).toThrow(failure)
-    expect(lifecycle.state).toBe('finished')
-  })
-
   it('works without an onFrame callback', () => {
     const { lifecycle, loop, frames } = setup({ onFrame: undefined })
     lifecycle.start()
 
-    frames.frame(60_000)
+    frames.frame(1_000)
 
-    expect(loop.elapsedMs).toBe(60_000)
-    expect(lifecycle.state).toBe('finished')
+    expect(loop.elapsedMs).toBe(1_000)
   })
-})
-
-describe('game loop options', () => {
-  it('uses a custom duration', () => {
-    const { lifecycle, loop, frames } = setup({ durationMs: 10_000 })
-    lifecycle.start()
-
-    frames.frame(9_999)
-    expect(lifecycle.state).toBe('playing')
-    expect(loop.elapsedMs).toBe(9_999)
-    frames.frame(1)
-
-    expect(loop.durationMs).toBe(10_000)
-    expect(lifecycle.state).toBe('finished')
-  })
-
-  it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])(
-    'rejects a duration of %s',
-    (durationMs) => {
-      expect(() => setup({ durationMs })).toThrow(RangeError)
-    },
-  )
 })
 
 describe('game loop when leaving the screen', () => {

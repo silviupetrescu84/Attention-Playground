@@ -1,3 +1,4 @@
+import { checkNotNegative } from './checks'
 import { isNewRound, type GameLifecycle } from './game-lifecycle'
 import { createListeners } from './listeners'
 
@@ -41,12 +42,6 @@ export function createScore({ lifecycle }: ScoreOptions): Score {
     listeners.notify(value, change)
   }
 
-  function checkPoints(points: number) {
-    if (!Number.isFinite(points) || points < 0) {
-      throw new RangeError(`Points must be a finite number ≥ 0, got ${points}`)
-    }
-  }
-
   lifecycle.subscribe((change) => {
     if (isNewRound(change)) {
       set(0, 'reset')
@@ -58,11 +53,11 @@ export function createScore({ lifecycle }: ScoreOptions): Score {
       return value
     },
     add(points) {
-      checkPoints(points)
+      checkNotNegative(points, 'Points')
       set(value + points, 'add')
     },
     subtract(points) {
-      checkPoints(points)
+      checkNotNegative(points, 'Points')
       set(value - points, 'subtract')
     },
     subscribe: listeners.add,

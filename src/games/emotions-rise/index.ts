@@ -1,14 +1,10 @@
+import { CARD_COLORS, readCssVariables } from '../shared/canvas-style'
 import type { GameDefinition } from '../shared/game-shell'
-import { loadFont, type FontLoader } from '../shared/load-font'
+import type { FontLoader } from '../shared/load-font'
 import type { Random } from '../shared/random'
+import { CANVAS_FONT, fitFontSize, fontAt, loadCanvasFont } from '../shared/text'
 import emotions from './data/emotions.json'
-import {
-  drawScene,
-  fitFontSize,
-  font,
-  loadBubbleImage,
-  MAX_FONT_SIZE,
-} from './draw'
+import { drawScene, EMOTION_TEXT_FIT, loadBubbleImage, type BubbleLook } from './draw'
 import type { Emotion } from './emotion-generator'
 import { createEmotionsRise, POINTS, type Mistake } from './emotions-rise'
 
@@ -40,7 +36,7 @@ const allEmotions = [...emotions.positive, ...emotions.negative]
  */
 export async function preloadEmotionsRise(fonts?: FontLoader): Promise<HTMLImageElement> {
   const [, bubbleImage] = await Promise.all([
-    loadFont(font(MAX_FONT_SIZE), { fonts }),
+    loadCanvasFont({ fonts }),
     loadBubbleImage(),
   ])
   return bubbleImage
@@ -50,16 +46,21 @@ export function emotionsRiseGame({
   random = Math.random,
   fonts,
 }: EmotionsRiseGameOptions = {}): GameDefinition {
-  return ({ canvas, score, status }) => {
+  return ({ canvas, score, mistakes, status }) => {
     const game = createEmotionsRise({
       emotions: { good: emotions.positive, bad: emotions.negative },
       score,
       random,
-      onMistake: (mistake, emotion) => status.show(mistakeMessage(mistake, emotion), 'bad'),
+      onMistake: (mistake, emotion) => {
+        status.show(mistakeMessage(mistake, emotion), 'bad')
+        mistakes.add()
+      },
     })
-    let fontSize = MAX_FONT_SIZE
+    const colors = readCssVariables(canvas.element, CARD_COLORS)
+    const font = readCssVariables(canvas.element, CANVAS_FONT)
+    let look: BubbleLook = { font: fontAt(font, EMOTION_TEXT_FIT.maxSize), colors }
     let bubbleImage: HTMLImageElement | undefined
-    const draw = () => drawScene(canvas.context, game.bubbles, fontSize, bubbleImage)
+    const draw = () => drawScene(canvas.context, game.bubbles, look, bubbleImage)
 
     return {
       async load() {
@@ -71,7 +72,8 @@ export function emotionsRiseGame({
       },
       start() {
         // Measured now, with the font that actually loaded.
-        fontSize = fitFontSize(canvas.context, allEmotions)
+        const fontSize = fitFontSize(canvas.context, font, allEmotions, EMOTION_TEXT_FIT)
+        look = { font: fontAt(font, fontSize), colors }
         game.start()
         draw()
       },
@@ -82,6 +84,9 @@ export function emotionsRiseGame({
       tap(point) {
         game.tap(point)
         draw()
+      },
+      end() {
+        game.stop()
       },
       summary() {
         const { goodTapped, goodMissed, badTapped, badLetGo } = game.stats

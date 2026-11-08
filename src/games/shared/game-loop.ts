@@ -12,14 +12,9 @@ import { isNewRound, type GameLifecycle } from './game-lifecycle'
  * - finish:  frames stop; the timer keeps its value (e.g. to show it).
  * - restart: the timer resets to 0.
  *
- * When the timer reaches the game duration (60 seconds by default), the
- * last frame is shown and the loop calls `finish()`.
- *
  * The loop stops for good when the lifecycle is stopped (the player leaves
  * the screen).
  */
-
-export const GAME_DURATION_MS = 60_000
 
 export interface GameFrame {
   /** Time counted for this frame. */
@@ -45,36 +40,25 @@ export interface GameLoopOptions {
   lifecycle: GameLifecycle
   /** Called on every frame while playing. */
   onFrame?: (frame: GameFrame) => void
-  /** How long a game lasts. Defaults to 60 seconds. */
-  durationMs?: number
   scheduler?: FrameScheduler
 }
 
 export interface GameLoop {
   /** Time played in the current round. */
   readonly elapsedMs: number
-  readonly durationMs: number
 }
 
 export function createGameLoop({
   lifecycle,
   onFrame,
-  durationMs = GAME_DURATION_MS,
   scheduler = browserFrameScheduler,
 }: GameLoopOptions): GameLoop {
-  if (!Number.isFinite(durationMs) || durationMs <= 0) {
-    throw new RangeError(`Game duration must be a positive number of ms, got ${durationMs}`)
-  }
-
   let elapsedMs = 0
   let previousFrameTime = 0
   let frameId: number | undefined
 
   function requestFrame() {
-    // Safety net: two pending frames would make the timer run twice as fast.
-    if (frameId === undefined) {
-      frameId = scheduler.requestFrame(onAnimationFrame)
-    }
+    frameId = scheduler.requestFrame(onAnimationFrame)
   }
 
   function cancelFrame() {
@@ -99,28 +83,12 @@ export function createGameLoop({
     const sincePrevious = Math.max(0, timestamp - previousFrameTime)
     previousFrameTime = Math.max(previousFrameTime, timestamp)
 
-    const remainingBefore = durationMs - elapsedMs
-    const timeUp = sincePrevious >= remainingBefore
-    const deltaMs = timeUp ? remainingBefore : sincePrevious
-    elapsedMs = timeUp ? durationMs : elapsedMs + deltaMs
+    elapsedMs += sincePrevious
 
-    const frame: GameFrame = { deltaMs, elapsedMs }
-
-    if (!timeUp) {
-      // Request the next frame first so an error in `onFrame` does not
-      // freeze the game. Pausing or finishing in `onFrame` cancels it.
-      requestFrame()
-      onFrame?.(frame)
-      return
-    }
-
-    try {
-      onFrame?.(frame)
-    } finally {
-      if (lifecycle.can('finish')) {
-        lifecycle.finish()
-      }
-    }
+    // Request the next frame first so an error in `onFrame` does not freeze
+    // the game. Pausing or finishing in `onFrame` cancels it.
+    requestFrame()
+    onFrame?.({ deltaMs: sincePrevious, elapsedMs })
   }
 
   // Leaving the screen needs no extra handling: the lifecycle pauses a
@@ -145,6 +113,5 @@ export function createGameLoop({
     get elapsedMs() {
       return elapsedMs
     },
-    durationMs,
   }
 }

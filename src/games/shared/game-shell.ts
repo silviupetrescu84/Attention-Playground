@@ -8,22 +8,28 @@ import {
   type GameLoop,
 } from './game-loop'
 import { createGameStatus, type GameStatus } from './game-status'
+import { createMistakes, type Mistakes } from './mistakes'
 import { pauseWhenAway } from './pause-when-away'
 import { createScore, type Score } from './score'
 import './game.css'
 
 /**
  * Sets up everything a minigame shares (lifecycle, auto-pause, canvas, score,
- * timer, Start/Pause/Restart buttons, status bar and taps) and runs a game in
- * it.
+ * timer, difficulty and mistakes, Start/Pause/Restart buttons, status bar and
+ * taps) and runs a game in it.
  *
- * A game only provides its own rules as `GameHandlers`.
+ * A game only provides its own rules as `GameHandlers`, and reports each
+ * mistake the player makes to `mistakes`. A round goes on until the player
+ * makes one mistake more than the chosen difficulty allows, and ends the
+ * moment they do, even in the middle of a frame or tap (see `end`).
  */
 
 export interface GameSession {
   readonly lifecycle: GameLifecycle
   readonly loop: GameLoop
   readonly score: Score
+  /** The difficulty chosen, and the mistakes made this round. */
+  readonly mistakes: Mistakes
   readonly canvas: GameCanvas
   readonly hud: GameHud
   readonly status: GameStatus
@@ -43,6 +49,11 @@ export interface GameHandlers {
   frame(frame: GameFrame): void
   /** The player tapped the game while playing, in game units. */
   tap?(point: GamePoint): void
+  /**
+   * The round has just ended (one mistake too many), possibly in the middle
+   * of `frame` or `tap`: stop at once, so nothing after that mistake counts.
+   */
+  end?(): void
   /** Extra lines for the finished screen, below the score. */
   summary?(): readonly SummaryItem[]
 }
@@ -65,6 +76,7 @@ export function mountGame(
   pauseWhenAway(lifecycle)
   const canvas = createGameCanvas(container, { signal })
   const score = createScore({ lifecycle })
+  const mistakes = createMistakes({ lifecycle })
 
   let handlers: GameHandlers | undefined
   const loop = createGameLoop({
@@ -76,15 +88,16 @@ export function mountGame(
       status.update()
     },
   })
-  const hud = createGameHud(canvas.stage, { lifecycle, loop, score })
+  const hud = createGameHud(canvas.stage, { lifecycle, loop, score, mistakes })
   const status = createGameStatus(container, { loop })
-  const session: GameSession = { lifecycle, loop, score, canvas, hud, status }
+  const session: GameSession = { lifecycle, loop, score, mistakes, canvas, hud, status }
   const rules = game(session)
   handlers = rules
 
   lifecycle.subscribe(({ state, action }) => {
-    // A new round, a restart or the end: old messages no longer apply.
-    if (action === 'start' || state === 'ready' || state === 'finished') {
+    // A new round or a restart: old messages no longer apply. (At the end,
+    // the message about the last mistake stays, to show why the round ended.)
+    if (action === 'start' || state === 'ready') {
       status.clear()
     }
 
@@ -93,6 +106,7 @@ export function mountGame(
     } else if (state === 'ready') {
       rules.reset()
     } else if (state === 'finished') {
+      rules.end?.()
       hud.showSummary(rules.summary?.() ?? [])
     }
   })

@@ -1,0 +1,6 @@
+/* Colours Align the Actions draws on the canvas with (read by draw.ts). */
+:root {
+  --align-lane-line: color-mix(in srgb, var(--color-ink) 20%, transparent);
+  /* Light green, half see-through. */
+  --align-circle: rgb(134 239 172 / 50%);
+}

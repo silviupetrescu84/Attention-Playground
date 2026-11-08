@@ -21,7 +21,6 @@ const validTransitions: [from: GameState, action: GameAction, to: GameState][] =
     ['playing', 'pause', 'paused'],
     ['playing', 'finish', 'finished'],
     ['paused', 'resume', 'playing'],
-    ['paused', 'finish', 'finished'],
     ['paused', 'restart', 'ready'],
     ['finished', 'restart', 'ready'],
   ]

@@ -14,6 +14,8 @@ games connected to Practice of Happiness.
 
 - **Emotions Rise**: emotions float up in bubbles; tap the good ones before
   they escape and leave the bad ones alone.
+- **Align the Actions**: actions move down four lanes under a goal; move the
+  circle to catch the one that serves the goal.
 
 ## Prerequisites
 
@@ -50,6 +52,9 @@ Open the local URL printed in the terminal (usually `http://localhost:5173`).
 ```sh
 npm test
 ```
+
+This also reports test coverage (open `coverage/index.html` for the full
+report) and fails if any code is left untested.
 
 ## License and rights
 

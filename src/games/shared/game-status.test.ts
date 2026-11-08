@@ -5,7 +5,7 @@ import { createGameStatus, STATUS_DURATION_MS } from './game-status'
 
 function setup() {
   const container = document.createElement('main')
-  const loop = { elapsedMs: 10_000, durationMs: 60_000 } satisfies GameLoop
+  const loop = { elapsedMs: 10_000 } satisfies GameLoop
   const status = createGameStatus(container, { loop })
   return { container, loop, status }
 }

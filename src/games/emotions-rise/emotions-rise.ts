@@ -1,3 +1,8 @@
+import {
+  createDifficulty,
+  type DifficultySettings,
+  type DifficultyStep,
+} from '../shared/difficulty'
 import { GAME_HEIGHT, GAME_WIDTH, type GamePoint } from '../shared/game-canvas'
 import { randomBetween, type Random } from '../shared/random'
 import type { Score } from '../shared/score'
@@ -17,9 +22,19 @@ import {
  * previous bubble's centre, and at least 50 px from it in a straight line
  * (counting how far the previous bubble has risen since it appeared).
  *
+ * Those are the starting values of DIFFICULTY_SETTINGS: the game gets harder
+ * as the round goes on, following DIFFICULTY_STEPS (see the shared
+ * difficulty). Each bubble takes the speed and the delay until the next one
+ * from the difficulty at the moment it appears, and keeps its speed until it
+ * leaves. Because speeds and how often bubbles appear grow
+ * by the same factor, about as many bubbles are on screen at once all round;
+ * they just come and go faster.
+ *
  * Tapping a good emotion: +1. Tapping a bad one: −1. A good emotion that
  * escapes at the top: −1. A bad one that escapes: +1. Tapped bubbles
- * disappear, and a tap counts for every bubble under it.
+ * disappear, and a tap counts for every bubble under it, one at a time: if
+ * the round is stopped after one of them (one mistake too many), the rest
+ * stay and do not count.
  *
  * Each round also counts how many good and bad emotions were tapped or
  * escaped, to show at the end.
@@ -49,6 +64,25 @@ export const MAX_SPAWN_DELAY_MS = 1_500
 export const MIN_SIDEWAYS_DISTANCE = 25
 /** …and at least this far from it in a straight line, centre to centre. */
 export const MIN_CENTRE_DISTANCE = 50
+/**
+ * When the game gets harder, and how much harder than the starting values:
+ * ×1.1 from 20 s, ×1.25 from 40 s, ×1.45 from 60 s, ×1.7 from 80 s and
+ * ×2.1 from 100 s on.
+ */
+export const DIFFICULTY_STEPS: readonly DifficultyStep[] = [
+  [20_000, 10],
+  [40_000, 25],
+  [60_000, 45],
+  [80_000, 70],
+  [100_000, 110],
+]
+/** What gets harder: bubbles rise faster and come sooner. */
+export const DIFFICULTY_SETTINGS = {
+  minSpeed: { start: MIN_SPEED, harder: 'higher' },
+  maxSpeed: { start: MAX_SPEED, harder: 'higher' },
+  minSpawnDelayMs: { start: MIN_SPAWN_DELAY_MS, harder: 'lower' },
+  maxSpawnDelayMs: { start: MAX_SPAWN_DELAY_MS, harder: 'lower' },
+} as const satisfies DifficultySettings
 
 export const POINTS = {
   tapGood: 1,
@@ -142,6 +176,8 @@ export interface EmotionsRiseOptions {
   emotions: EmotionLists
   score: Score
   random?: Random
+  /** When the game gets harder during a round. Defaults to DIFFICULTY_STEPS. */
+  difficultySteps?: readonly DifficultyStep[]
   /** Called for every mistake, after the score has changed. */
   onMistake?: (mistake: Mistake, emotion: Emotion) => void
 }
@@ -159,14 +195,18 @@ export interface EmotionsRise {
   update(elapsedMs: number): void
   /** Scores and removes every bubble under `point`. */
   tap(point: GamePoint): void
+  /** Stops the round at once: nothing more moves, appears or counts until the next start. */
+  stop(): void
 }
 
 export function createEmotionsRise({
   emotions,
   score,
   random = Math.random,
+  difficultySteps = DIFFICULTY_STEPS,
   onMistake,
 }: EmotionsRiseOptions): EmotionsRise {
+  const difficulty = createDifficulty({ steps: difficultySteps, settings: DIFFICULTY_SETTINGS })
   let bubbles: Bubble[] = []
   let generator: EmotionGenerator
   /** The last bubble that appeared (even if it has since been tapped). */
@@ -181,22 +221,31 @@ export function createEmotionsRise({
 
   function spawn(atMs: number) {
     const x = pickSpawnX(previous && { x: previous.x, y: heightAt(previous, atMs) }, random)
+    const now = difficulty.valuesAt(atMs)
     const bubble: Bubble = {
       emotion: generator.next(),
       x,
       y: SPAWN_Y,
-      speed: randomBetween(random, MIN_SPEED, MAX_SPEED),
+      speed: randomBetween(random, now.minSpeed, now.maxSpeed),
       spawnedAtMs: atMs,
     }
     bubbles.push(bubble)
     previous = bubble
-    nextSpawnAtMs = atMs + randomBetween(random, MIN_SPAWN_DELAY_MS, MAX_SPAWN_DELAY_MS)
+    nextSpawnAtMs = atMs + randomBetween(random, now.minSpawnDelayMs, now.maxSpawnDelayMs)
   }
+
+  /** Set when the round is stopped, even in the middle of an update or tap. */
+  let stopped = false
 
   function clear() {
     bubbles = []
     previous = undefined
     stats = noStats
+    stopped = false
+  }
+
+  function remove(bubble: Bubble) {
+    bubbles = bubbles.filter((other) => other !== bubble)
   }
 
   return {
@@ -213,6 +262,10 @@ export function createEmotionsRise({
       spawn(0)
     },
     update(elapsedMs) {
+      if (stopped) {
+        return
+      }
+
       // Spawn at the exact moments due, even if a frame took long.
       while (nextSpawnAtMs <= elapsedMs) {
         spawn(nextSpawnAtMs)
@@ -228,31 +281,31 @@ export function createEmotionsRise({
         }
       }
 
-      if (escaped.length > 0) {
-        bubbles = bubbles.filter((bubble) => !escaped.includes(bubble))
+      for (const bubble of escaped) {
+        if (stopped) {
+          return
+        }
 
-        for (const bubble of escaped) {
-          if (bubble.emotion.type === 'good') {
-            count('goodMissed')
-            score.subtract(POINTS.goodEscaped)
-            onMistake?.('goodMissed', bubble.emotion)
-          } else {
-            count('badLetGo')
-            score.add(POINTS.badEscaped)
-          }
+        remove(bubble)
+
+        if (bubble.emotion.type === 'good') {
+          count('goodMissed')
+          score.subtract(POINTS.goodEscaped)
+          onMistake?.('goodMissed', bubble.emotion)
+        } else {
+          count('badLetGo')
+          score.add(POINTS.badEscaped)
         }
       }
     },
     tap(point) {
-      const hit = bubbles.filter((bubble) => isInBubble(bubble, point))
+      for (const bubble of bubbles.filter((candidate) => isInBubble(candidate, point))) {
+        if (stopped) {
+          return
+        }
 
-      if (hit.length === 0) {
-        return
-      }
+        remove(bubble)
 
-      bubbles = bubbles.filter((bubble) => !hit.includes(bubble))
-
-      for (const bubble of hit) {
         if (bubble.emotion.type === 'good') {
           count('goodTapped')
           score.add(POINTS.tapGood)
@@ -262,6 +315,9 @@ export function createEmotionsRise({
           onMistake?.('badTapped', bubble.emotion)
         }
       }
+    },
+    stop() {
+      stopped = true
     },
   }
 }

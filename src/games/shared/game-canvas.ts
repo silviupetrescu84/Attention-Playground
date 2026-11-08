@@ -62,6 +62,14 @@ export function fitGameCanvas(
   }
 }
 
+/**
+ * Clears everything drawn. The canvas background is CSS (see game.css), so
+ * games keep the drawing layer transparent and draw over it.
+ */
+export function clearGameCanvas(context: CanvasRenderingContext2D): void {
+  context.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT)
+}
+
 export interface GamePoint {
   readonly x: number
   readonly y: number
@@ -95,6 +103,9 @@ export function createGameCanvas(
 ): GameCanvas {
   const stage = document.createElement('div')
   stage.className = 'game-stage'
+  // The game size, for layers on the stage laid out in game units.
+  stage.style.setProperty('--game-width', `${GAME_WIDTH}px`)
+  stage.style.setProperty('--game-height', `${GAME_HEIGHT}px`)
   const element = document.createElement('canvas')
   element.className = 'game-canvas'
   stage.append(element)

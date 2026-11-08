@@ -25,6 +25,8 @@ export interface FakeContext {
   textBaseline: string
   /** Calls named `name`, in order. */
   callsTo(name: string): DrawCall[]
+  /** The calls since the canvas was last cleared (`clearRect`), that one included. */
+  lastDrawing(): DrawCall[]
   asContext(): CanvasRenderingContext2D
 }
 
@@ -46,6 +48,10 @@ export function createFakeContext(): FakeContext {
     textBaseline: 'alphabetic',
     callsTo(name: string) {
       return calls.filter((call) => call.name === name)
+    },
+    lastDrawing() {
+      const lastClear = calls.map((call) => call.name).lastIndexOf('clearRect')
+      return calls.slice(Math.max(0, lastClear))
     },
     asContext() {
       return context as unknown as CanvasRenderingContext2D
@@ -73,8 +79,15 @@ export function createFakeContext(): FakeContext {
     fillRect: record('fillRect'),
     fillText: record('fillText'),
     beginPath: record('beginPath'),
+    moveTo: record('moveTo'),
+    lineTo: record('lineTo'),
+    rect: record('rect'),
+    roundRect: record('roundRect'),
     arc: record('arc'),
     ellipse: record('ellipse'),
+    clip: record('clip'),
+    save: record('save'),
+    restore: record('restore'),
     fill: record('fill'),
     stroke: record('stroke'),
     createLinearGradient: record('createLinearGradient', () => ({

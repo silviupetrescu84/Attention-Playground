@@ -92,28 +92,101 @@ describe('playing', () => {
     expect(container.querySelector('.game-hud__time')!.textContent).toBe('01')
   })
 
-  it('finishes after 60 seconds and shows the final score', () => {
-    const { frames, session, button, container } = setup()
-    button('.game-hud__start').click()
-    session.score.add(5)
-
-    frames.frame(60_000)
-
-    expect(session.lifecycle.state).toBe('finished')
-    expect(container.querySelector('.game-hud__time')!.textContent).toBe('60')
-    expect(container.querySelector('.game-hud__final-score')!.textContent).toBe('Score: 5')
-  })
-
   it('starts each round with a score of 0', () => {
-    const { session, button, frames } = setup()
+    const { session, button } = setup()
     button('.game-hud__start').click()
     session.score.add(3)
-    frames.frame(60_000)
+    session.lifecycle.finish()
 
     button('.game-hud__overlay--finished .game-hud__restart').click()
     button('.game-hud__start').click()
 
     expect(session.score.value).toBe(0)
+  })
+})
+
+describe('mistakes', () => {
+  it('gives the game the difficulty and the mistakes of the round', () => {
+    const { session } = setup()
+
+    expect(session.mistakes.level).toBe('easy')
+    expect(session.mistakes.count).toBe(0)
+  })
+
+  it('plays at the difficulty picked with the difficulty button', () => {
+    const { session, button } = setup()
+
+    button('.game-hud__difficulty').click()
+    button('.game-hud__start').click()
+
+    expect(session.mistakes.level).toBe('medium')
+  })
+
+  it('keeps playing while the mistakes are within what the difficulty allows', () => {
+    const { handlers, frames, session, button } = setup()
+    button('.game-hud__start').click()
+    handlers.frame.mockImplementation(() => session.mistakes.add())
+
+    // Easy allows 9.
+    frames.frames(9)
+
+    expect(session.lifecycle.state).toBe('playing')
+  })
+
+  it('ends the round the moment of the mistake too many, in the middle of a frame', () => {
+    const { handlers, frames, session, button, container } = setup()
+    button('.game-hud__start').click()
+    frames.frame(3_000)
+    handlers.frame.mockImplementation(() => session.mistakes.add())
+    frames.frames(9)
+    session.score.add(5)
+    const statesAfterMistake: string[] = []
+    handlers.frame.mockImplementation(() => {
+      session.mistakes.add()
+      statesAfterMistake.push(session.lifecycle.state)
+    })
+
+    frames.frame(1_000)
+
+    expect(statesAfterMistake).toEqual(['finished'])
+    // 3 s, nine 16 ms frames, then 1 s.
+    expect(container.querySelector('.game-hud__time')!.textContent).toBe('04')
+    expect(container.querySelector('.game-hud__final-score')!.textContent).toBe('Score: 5')
+  })
+
+  it('lets the game stop at once before showing its summary', () => {
+    const { handlers, frames, session, button } = setup()
+    const order: string[] = []
+    const end = vi.fn(() => order.push('end'))
+    Object.assign(handlers, { end })
+    handlers.summary = () => {
+      order.push('summary')
+      return []
+    }
+    // Extreme: the first mistake ends the round.
+    for (let i = 0; i < 3; i++) button('.game-hud__difficulty').click()
+    button('.game-hud__start').click()
+    handlers.frame.mockImplementation(() => session.mistakes.add())
+
+    frames.frame()
+
+    expect(order).toEqual(['end', 'summary'])
+    expect(end).toHaveBeenCalledOnce()
+  })
+
+  it('ends the round the moment a tap makes one mistake too many', () => {
+    const { handlers, session, button, tapAt } = setup()
+    for (let i = 0; i < 3; i++) button('.game-hud__difficulty').click()
+    button('.game-hud__start').click()
+    handlers.tap.mockImplementation(() => {
+      session.mistakes.add()
+      expect(session.lifecycle.state).toBe('finished')
+    })
+
+    tapAt(10, 10)
+
+    expect(handlers.tap).toHaveBeenCalledOnce()
+    expect(session.lifecycle.state).toBe('finished')
   })
 })
 
@@ -245,7 +318,6 @@ describe('status bar', () => {
       s.lifecycle.pause()
       s.lifecycle.restart()
     }],
-    ['the game finishes', (s: GameSession) => s.lifecycle.finish()],
   ])('is cleared when %s', (_when, act) => {
     const { session, button } = setup()
     button('.game-hud__start').click()
@@ -254,6 +326,16 @@ describe('status bar', () => {
     act(session)
 
     expect(session.status.text).toBe('')
+  })
+
+  it('keeps the last message when the round ends, to show why it ended', () => {
+    const { session, button } = setup()
+    button('.game-hud__start').click()
+    session.status.show('Oops', 'bad')
+
+    session.lifecycle.finish()
+
+    expect(session.status.text).toBe('Oops')
   })
 
   it('keeps the message when paused and resumed', () => {
@@ -270,14 +352,15 @@ describe('status bar', () => {
 
 describe('summary', () => {
   it("shows the game's summary on the finished screen, as it is at the end", () => {
-    const { handlers, frames, button, container } = setup()
+    const { handlers, frames, session, button, container } = setup()
     let tapped = 0
     const summary = vi.fn(() => [{ label: 'Tapped', value: tapped }])
     handlers.summary = summary
     button('.game-hud__start').click()
+    frames.frame()
     tapped = 4
 
-    frames.frame(60_000)
+    session.lifecycle.finish()
 
     expect(summary).toHaveBeenCalledOnce()
     const list = container.querySelector<HTMLElement>('.game-hud__summary')!
@@ -286,10 +369,10 @@ describe('summary', () => {
   })
 
   it('shows no summary for games without one', () => {
-    const { frames, button, container } = setup()
+    const { session, button, container } = setup()
     button('.game-hud__start').click()
 
-    frames.frame(60_000)
+    session.lifecycle.finish()
 
     expect(container.querySelector<HTMLElement>('.game-hud__summary')!.hidden).toBe(true)
   })

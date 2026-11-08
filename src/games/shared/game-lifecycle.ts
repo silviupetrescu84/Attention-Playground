@@ -5,9 +5,8 @@ import { createListeners } from './listeners'
  *
  *   ready    --start-->   playing
  *   playing  --pause-->   paused
- *   playing  --finish-->  finished   (the game ends itself: time up, last round)
+ *   playing  --finish-->  finished   (the game ends itself: too many mistakes)
  *   paused   --resume-->  playing    (pause menu)
- *   paused   --finish-->  finished   (pause menu)
  *   paused   --restart--> ready      (pause menu)
  *   finished --restart--> ready
  *
@@ -39,7 +38,7 @@ const transitions: Readonly<
 > = {
   ready: { start: 'playing' },
   playing: { pause: 'paused', finish: 'finished' },
-  paused: { resume: 'playing', finish: 'finished', restart: 'ready' },
+  paused: { resume: 'playing', restart: 'ready' },
   finished: { restart: 'ready' },
 }
 

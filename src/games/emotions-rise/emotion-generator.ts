@@ -1,4 +1,4 @@
-import { randomIndex, type Random } from '../shared/random'
+import { randomItem, type Random } from '../shared/random'
 
 /**
  * Picks the emotions for Emotions Rise.
@@ -69,7 +69,7 @@ export function createEmotionGenerator({
       const candidates = emotions[type].filter(
         (text) => !recent[type].includes(text),
       )
-      const text = candidates[randomIndex(random, candidates.length)]
+      const text = randomItem(random, candidates)
 
       recent[type].push(text)
       if (recent[type].length > REPEAT_WINDOW - 1) {

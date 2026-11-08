@@ -1,5 +1,5 @@
-import { GAME_HEIGHT, GAME_WIDTH } from '../games/shared/game-canvas'
-import { BUBBLE_HEIGHT, BUBBLE_WIDTH } from '../games/emotions-rise/emotions-rise'
+import { GAME_HEIGHT, GAME_WIDTH } from '../../games/shared/game-canvas'
+import { BUBBLE_HIT_HEIGHT, BUBBLE_HIT_WIDTH } from '../../games/emotions-rise/emotions-rise'
 
 /** Anything with a centre: bubbles, or bubbles read back from a drawing. */
 export interface Centred {
@@ -9,8 +9,8 @@ export interface Centred {
 
 /** The bubbles that a tap at (x, y) would hit (written independently of the game's own check). */
 export function bubblesAt<T extends Centred>(bubbles: readonly T[], x: number, y: number): T[] {
-  const rx = BUBBLE_WIDTH / 2
-  const ry = BUBBLE_HEIGHT / 2
+  const rx = BUBBLE_HIT_WIDTH / 2
+  const ry = BUBBLE_HIT_HEIGHT / 2
   return bubbles.filter((b) => ((b.x - x) / rx) ** 2 + ((b.y - y) / ry) ** 2 <= 1)
 }
 

@@ -1,7 +1,12 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { useFakeCanvasContexts, type FakeContext } from '../../test/fake-canvas-context'
 import {
+  createFakeContext,
+  useFakeCanvasContexts,
+  type FakeContext,
+} from '../../test/fake-canvas-context'
+import {
+  clearGameCanvas,
   createGameCanvas,
   fitGameCanvas,
   GAME_BOTTOM_PADDING,
@@ -11,6 +16,18 @@ import {
 } from './game-canvas'
 
 const ratio = GAME_WIDTH / GAME_HEIGHT
+
+describe('clearGameCanvas', () => {
+  it('clears the whole 400 × 800 drawing layer, so the CSS background shows', () => {
+    const context = createFakeContext()
+
+    clearGameCanvas(context.asContext())
+
+    expect(context.calls.map(({ name, args }) => [name, args])).toEqual([
+      ['clearRect', [0, 0, 400, 800]],
+    ])
+  })
+})
 
 describe('fitGameCanvas', () => {
   it('is 400 × 800 with space for the Home button above and the status bar below', () => {
@@ -213,6 +230,13 @@ describe('createGameCanvas', () => {
       left: '400px',
       top: '100px',
     })
+  })
+
+  it('tells layers on the stage the game size, to lay out in game units', () => {
+    const { canvas } = setup()
+
+    expect(canvas.stage.style.getPropertyValue('--game-width')).toBe('400px')
+    expect(canvas.stage.style.getPropertyValue('--game-height')).toBe('800px')
   })
 
   it('tells layers on the stage how much the game is scaled', () => {

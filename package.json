@@ -14,8 +14,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:coverage": "vitest run --coverage",
+    "test": "vitest run --coverage",
     "test:watch": "vitest"
   },
   "devDependencies": {
