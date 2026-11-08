@@ -1,4 +1,5 @@
 import '@fontsource/roboto-condensed/600.css'
+import ovalImageUrl from '../../assets/emotions-rise/oval.png'
 import { GAME_HEIGHT, GAME_WIDTH } from '../shared/game-canvas'
 import { BUBBLE_HEIGHT, BUBBLE_WIDTH, type Bubble } from './emotions-rise'
 
@@ -22,6 +23,27 @@ export const MAX_FONT_SIZE = 22
 export const MIN_FONT_SIZE = 10
 /** Widest the text may be: the bubble's width minus a margin on each side. */
 export const MAX_TEXT_WIDTH = BUBBLE_WIDTH - 20
+
+let bubbleImagePromise: Promise<HTMLImageElement> | undefined
+
+/** Loads and caches the oval artwork used by every bubble. */
+export function loadBubbleImage(): Promise<HTMLImageElement> {
+  if (!bubbleImagePromise) {
+    bubbleImagePromise = new Promise<HTMLImageElement>((resolve, reject) => {
+      const image = new Image()
+      image.addEventListener('load', () => resolve(image), { once: true })
+      image.addEventListener('error', () => reject(new Error('Could not load oval.png')), {
+        once: true,
+      })
+      image.src = ovalImageUrl
+    }).catch((error: unknown) => {
+      bubbleImagePromise = undefined
+      throw error
+    })
+  }
+
+  return bubbleImagePromise
+}
 
 export function font(size: number) {
   return `600 ${size}px ${EMOTION_FONT_FAMILY}`
@@ -54,33 +76,45 @@ export function drawBubble(
   context: CanvasRenderingContext2D,
   bubble: Bubble,
   fontSize: number,
+  bubbleImage?: CanvasImageSource,
 ) {
   const { x, y, emotion } = bubble
 
-  // Text first, so it shows through the bubble.
+  if (bubbleImage) {
+    context.drawImage(
+      bubbleImage,
+      x - BUBBLE_WIDTH / 2,
+      y - BUBBLE_HEIGHT / 2,
+      BUBBLE_WIDTH,
+      BUBBLE_HEIGHT,
+    )
+  } else {
+    // Keep the game usable if the image cannot load.
+    context.beginPath()
+    context.ellipse(x, y, BUBBLE_WIDTH / 2, BUBBLE_HEIGHT / 2, 0, 0, Math.PI * 2)
+    context.fillStyle = BUBBLE_FILL
+    context.fill()
+    context.lineWidth = BUBBLE_BORDER_WIDTH
+    context.strokeStyle = BUBBLE_BORDER
+    context.stroke()
+  }
+
   context.font = font(fontSize)
   context.fillStyle = TEXT_COLOR
   context.textAlign = 'center'
   context.textBaseline = 'middle'
   context.fillText(emotion.text, x, y)
-
-  context.beginPath()
-  context.ellipse(x, y, BUBBLE_WIDTH / 2, BUBBLE_HEIGHT / 2, 0, 0, Math.PI * 2)
-  context.fillStyle = BUBBLE_FILL
-  context.fill()
-  context.lineWidth = BUBBLE_BORDER_WIDTH
-  context.strokeStyle = BUBBLE_BORDER
-  context.stroke()
 }
 
 export function drawScene(
   context: CanvasRenderingContext2D,
   bubbles: readonly Bubble[],
   fontSize: number,
+  bubbleImage?: CanvasImageSource,
 ) {
   drawBackground(context)
 
   for (const bubble of bubbles) {
-    drawBubble(context, bubble, fontSize)
+    drawBubble(context, bubble, fontSize, bubbleImage)
   }
 }

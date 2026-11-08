@@ -7,6 +7,8 @@ import emotions from './data/emotions.json'
 import type { Emotion } from './emotion-generator'
 import {
   BUBBLE_HEIGHT,
+  BUBBLE_HIT_HEIGHT,
+  BUBBLE_HIT_WIDTH,
   BUBBLE_WIDTH,
   createEmotionsRise,
   MAX_SPAWN_DELAY_MS,
@@ -51,7 +53,8 @@ function tapValue(bubbles: readonly Bubble[]) {
 
 describe('settings', () => {
   it('uses the agreed numbers', () => {
-    expect([BUBBLE_WIDTH, BUBBLE_HEIGHT]).toEqual([140, 88])
+    expect([BUBBLE_WIDTH, BUBBLE_HEIGHT]).toEqual([140, 77])
+    expect([BUBBLE_HIT_WIDTH, BUBBLE_HIT_HEIGHT]).toEqual([137, 74])
     expect([MIN_SPEED, MAX_SPEED]).toEqual([40, 80])
     expect([MIN_SPAWN_DELAY_MS, MAX_SPAWN_DELAY_MS]).toEqual([700, 1_500])
     expect(MIN_SIDEWAYS_DISTANCE).toBe(25)
@@ -306,26 +309,33 @@ describe('rising', () => {
 
 describe('the oval', () => {
   const bubble = { x: 200, y: 400 }
+  const side = BUBBLE_HIT_WIDTH / 2
+  const top = BUBBLE_HIT_HEIGHT / 2
 
   it('includes its centre and its edges', () => {
     expect(isInBubble(bubble, { x: 200, y: 400 })).toBe(true)
-    expect(isInBubble(bubble, { x: 270, y: 400 })).toBe(true)
-    expect(isInBubble(bubble, { x: 130, y: 400 })).toBe(true)
-    expect(isInBubble(bubble, { x: 200, y: 444 })).toBe(true)
-    expect(isInBubble(bubble, { x: 200, y: 356 })).toBe(true)
+    expect(isInBubble(bubble, { x: 200 + side, y: 400 })).toBe(true)
+    expect(isInBubble(bubble, { x: 200 - side, y: 400 })).toBe(true)
+    expect(isInBubble(bubble, { x: 200, y: 400 + top })).toBe(true)
+    expect(isInBubble(bubble, { x: 200, y: 400 - top })).toBe(true)
   })
 
   it('excludes points just outside its edges', () => {
-    expect(isInBubble(bubble, { x: 270.5, y: 400 })).toBe(false)
-    expect(isInBubble(bubble, { x: 200, y: 444.5 })).toBe(false)
+    expect(isInBubble(bubble, { x: 200 + side + 0.5, y: 400 })).toBe(false)
+    expect(isInBubble(bubble, { x: 200, y: 400 + top + 0.5 })).toBe(false)
   })
 
   it('is an oval, not a circle: wider than it is tall', () => {
     // 50 px from the centre: inside sideways, outside up or down.
     expect(isInBubble(bubble, { x: 250, y: 400 })).toBe(true)
     expect(isInBubble(bubble, { x: 200, y: 450 })).toBe(false)
-    // Near a "corner": inside a 140 × 88 box, but outside the oval.
-    expect(isInBubble(bubble, { x: 260, y: 435 })).toBe(false)
+    // Inside the PNG rectangle but in a transparent corner outside the oval.
+    expect(
+      isInBubble(bubble, {
+        x: 200 + BUBBLE_WIDTH * 0.4,
+        y: 400 + BUBBLE_HEIGHT * 0.4,
+      }),
+    ).toBe(false)
   })
 })
 
@@ -382,7 +392,7 @@ describe('tapping', () => {
 
   it('counts a tap on the very edge of an oval, but not just outside it', () => {
     const { game } = playedFor(9, 10_000)
-    const side = BUBBLE_WIDTH / 2
+    const side = BUBBLE_HIT_WIDTH / 2
     const bubble = game.bubbles.find(
       (b) =>
         bubblesAt(game.bubbles, b.x + side, b.y).length === 1 &&
@@ -570,12 +580,12 @@ describe('escaping', () => {
     const { game } = setup(constantRandom(0))
     game.start()
     const first = game.bubbles[0]
-    // Speed 40 px/s: the bottom reaches y = 0 after (844 + 44) / 40 = 22.2 s.
-    game.update(22_199)
+    // Speed 40 px/s: the bottom reaches y = 0 after (838.5 + 38.5) / 40 = 21.925 s.
+    game.update(21_924)
     expect(game.bubbles).toContain(first)
-    game.update(22_200)
+    game.update(21_925)
     expect(game.bubbles).toContain(first)
-    game.update(22_201)
+    game.update(21_926)
     expect(game.bubbles).not.toContain(first)
   })
 })

@@ -69,6 +69,7 @@ export function createFakeContext(): FakeContext {
   Object.assign(context, {
     setTransform: record('setTransform'),
     clearRect: record('clearRect'),
+    drawImage: record('drawImage'),
     fillRect: record('fillRect'),
     fillText: record('fillText'),
     beginPath: record('beginPath'),

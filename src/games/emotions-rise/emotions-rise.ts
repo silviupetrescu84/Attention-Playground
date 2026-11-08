@@ -26,13 +26,21 @@ import {
  */
 
 /**
- * Every bubble is the same oval: 140 × 88 game px, wide enough for the
- * longest emotion. Like everything on the canvas it scales with the canvas.
+ * The cropped oval artwork is shown at 140 × 77 game px, preserving its
+ * aspect ratio. Like everything on the canvas it scales with the canvas.
  */
 export const BUBBLE_WIDTH = 140
-export const BUBBLE_HEIGHT = 88
-const RADIUS_X = BUBBLE_WIDTH / 2
-const RADIUS_Y = BUBBLE_HEIGHT / 2
+export const BUBBLE_HEIGHT = 77
+/**
+ * The visible alpha is slightly inset from the cropped image edges. Taps use
+ * this ellipse, so transparent edge pixels and corners do not count.
+ */
+export const BUBBLE_HIT_WIDTH = 137
+export const BUBBLE_HIT_HEIGHT = 74
+const HALF_WIDTH = BUBBLE_WIDTH / 2
+const HALF_HEIGHT = BUBBLE_HEIGHT / 2
+const HIT_RADIUS_X = BUBBLE_HIT_WIDTH / 2
+const HIT_RADIUS_Y = BUBBLE_HIT_HEIGHT / 2
 export const MIN_SPEED = 40
 export const MAX_SPEED = 80
 export const MIN_SPAWN_DELAY_MS = 700
@@ -60,7 +68,7 @@ export interface EmotionsRiseStats {
 }
 
 /** Centre height of a new bubble: its top touches the bottom of the canvas. */
-export const SPAWN_Y = GAME_HEIGHT + RADIUS_Y
+export const SPAWN_Y = GAME_HEIGHT + HALF_HEIGHT
 
 export interface Bubble {
   readonly emotion: Emotion
@@ -72,9 +80,11 @@ export interface Bubble {
   readonly spawnedAtMs: number
 }
 
-/** Whether `point` is on `bubble` (inside its oval or on its edge). */
+/** Whether `point` is on the visible oval, excluding transparent PNG pixels. */
 export function isInBubble(bubble: Centre, { x, y }: GamePoint): boolean {
-  return ((x - bubble.x) / RADIUS_X) ** 2 + ((y - bubble.y) / RADIUS_Y) ** 2 <= 1
+  return (
+    ((x - bubble.x) / HIT_RADIUS_X) ** 2 + ((y - bubble.y) / HIT_RADIUS_Y) ** 2 <= 1
+  )
 }
 
 interface Centre {
@@ -108,8 +118,8 @@ export function minSidewaysGap(heightGap: number): number {
  * bubble's centre at this moment. Uniform over all allowed positions.
  */
 export function pickSpawnX(previous: GamePoint | undefined, random: Random): number {
-  const min = RADIUS_X
-  const max = GAME_WIDTH - RADIUS_X
+  const min = HALF_WIDTH
+  const max = GAME_WIDTH - HALF_WIDTH
 
   if (!previous) {
     return randomBetween(random, min, max)
@@ -213,7 +223,7 @@ export function createEmotionsRise({
       for (const bubble of bubbles) {
         bubble.y = heightAt(bubble, elapsedMs)
 
-        if (bubble.y + RADIUS_Y < 0) {
+        if (bubble.y + HALF_HEIGHT < 0) {
           escaped.push(bubble)
         }
       }

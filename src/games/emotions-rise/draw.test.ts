@@ -2,9 +2,6 @@ import { describe, expect, it } from 'vitest'
 import { createFakeContext, fontSizeOf } from '../../test/fake-canvas-context'
 import emotions from './data/emotions.json'
 import {
-  BUBBLE_BORDER,
-  BUBBLE_BORDER_WIDTH,
-  BUBBLE_FILL,
   drawBubble,
   drawScene,
   EMOTION_FONT_FAMILY,
@@ -18,6 +15,7 @@ import {
 import { BUBBLE_HEIGHT, BUBBLE_WIDTH, type Bubble } from './emotions-rise'
 
 const allEmotions = [...emotions.positive, ...emotions.negative]
+const bubbleImage = {} as CanvasImageSource
 
 function bubble(text: string, type: 'good' | 'bad', x = 200, y = 400): Bubble {
   return { emotion: { text, type }, x, y, speed: 50, spawnedAtMs: 0 }
@@ -42,56 +40,53 @@ describe('the emotion font', () => {
 })
 
 describe('drawing a bubble', () => {
-  it('draws the text first, then the oval over it', () => {
+  it('draws the oval image, then the text over it', () => {
     const context = createFakeContext()
 
-    drawBubble(context.asContext(), bubble('Joy', 'good'), 19)
+    drawBubble(context.asContext(), bubble('Joy', 'good'), 19, bubbleImage)
 
-    expect(context.calls.map((call) => call.name)).toEqual([
-      'fillText',
-      'beginPath',
-      'ellipse',
-      'fill',
-      'stroke',
-    ])
+    expect(context.calls.map((call) => call.name)).toEqual(['drawImage', 'fillText'])
   })
 
-  it('centres the text and the 140 × 88 oval on the bubble position', () => {
+  it('centres the text and the 140 × 77 image on the bubble position', () => {
     const context = createFakeContext()
 
-    drawBubble(context.asContext(), bubble('Calm', 'good', 123, 456), 19)
+    drawBubble(context.asContext(), bubble('Calm', 'good', 123, 456), 19, bubbleImage)
 
     expect(context.callsTo('fillText')[0].args).toEqual(['Calm', 123, 456])
     expect(context.textAlign).toBe('center')
     expect(context.textBaseline).toBe('middle')
-    expect(context.callsTo('ellipse')[0].args).toEqual([123, 456, 70, 44, 0, 0, Math.PI * 2])
-    expect([BUBBLE_WIDTH, BUBBLE_HEIGHT]).toEqual([140, 88])
+    expect(context.callsTo('drawImage')[0].args).toEqual([
+      bubbleImage,
+      123 - BUBBLE_WIDTH / 2,
+      456 - BUBBLE_HEIGHT / 2,
+      BUBBLE_WIDTH,
+      BUBBLE_HEIGHT,
+    ])
+    expect([BUBBLE_WIDTH, BUBBLE_HEIGHT]).toEqual([140, 77])
   })
 
   it('draws the text at the given size', () => {
     const context = createFakeContext()
 
-    drawBubble(context.asContext(), bubble('Hope', 'good'), 18.5)
+    drawBubble(context.asContext(), bubble('Hope', 'good'), 18.5, bubbleImage)
 
     expect(context.callsTo('fillText')[0].font).toBe(font(18.5))
   })
 
-  it('uses a translucent white bubble with a thin border', () => {
+  it('uses the supplied image instead of generating an oval', () => {
     const context = createFakeContext()
 
-    drawBubble(context.asContext(), bubble('Hope', 'good'), 19)
+    drawBubble(context.asContext(), bubble('Hope', 'good'), 19, bubbleImage)
 
-    expect(context.callsTo('fill')[0].fillStyle).toBe(BUBBLE_FILL)
-    expect(BUBBLE_FILL).toMatch(/^rgb\(255 255 255 \/ \d+%\)$/)
-    expect(context.callsTo('stroke')[0].strokeStyle).toBe(BUBBLE_BORDER)
-    expect(context.callsTo('stroke')[0].lineWidth).toBe(BUBBLE_BORDER_WIDTH)
-    expect(BUBBLE_BORDER_WIDTH).toBeLessThanOrEqual(2)
+    expect(context.callsTo('drawImage')[0].args[0]).toBe(bubbleImage)
+    expect(context.callsTo('ellipse')).toEqual([])
   })
 
   it('draws every emotion exactly alike (same size too), so only the word differs', () => {
     const looks = allEmotions.map((text, i) => {
       const context = createFakeContext()
-      drawBubble(context.asContext(), bubble(text, i % 2 ? 'good' : 'bad'), 19)
+      drawBubble(context.asContext(), bubble(text, i % 2 ? 'good' : 'bad'), 19, bubbleImage)
       return lookOf(context.calls)
     })
 
@@ -178,9 +173,15 @@ describe('drawing the scene', () => {
   it('clears the drawing layer, then draws the bubbles in order', () => {
     const context = createFakeContext()
 
-    drawScene(context.asContext(), [bubble('Joy', 'good'), bubble('Fear', 'bad')], 19)
+    drawScene(
+      context.asContext(),
+      [bubble('Joy', 'good'), bubble('Fear', 'bad')],
+      19,
+      bubbleImage,
+    )
 
     expect(context.callsTo('clearRect')[0].args).toEqual([0, 0, 400, 800])
+    expect(context.callsTo('drawImage')).toHaveLength(2)
     expect(context.callsTo('fillText').map((call) => call.args[0])).toEqual(['Joy', 'Fear'])
     expect(context.callsTo('fillText').map((call) => call.font)).toEqual([font(19), font(19)])
     const names = context.calls.map((call) => call.name)

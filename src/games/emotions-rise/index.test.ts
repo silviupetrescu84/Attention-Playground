@@ -15,6 +15,14 @@ let contexts: FakeContext[]
 
 beforeEach(() => {
   contexts = useFakeCanvasContexts()
+  vi.stubGlobal(
+    'Image',
+    vi.fn(() => {
+      const image = document.createElement('img')
+      queueMicrotask(() => image.dispatchEvent(new Event('load')))
+      return image
+    }),
+  )
 })
 
 /** The context of the game mounted in the test. */
@@ -22,6 +30,7 @@ const context = () => contexts.at(-1)!
 
 afterEach(() => {
   vi.restoreAllMocks()
+  vi.unstubAllGlobals()
 })
 
 /** A font loader whose font is always ready. */
@@ -57,7 +66,7 @@ async function setup(seed = 1) {
 /** The bubbles in the most recent drawing: word and centre. */
 function lastDrawnBubbles() {
   const calls = context().calls
-  const lastBackground = calls.map((c) => c.name).lastIndexOf('fillRect')
+  const lastBackground = calls.map((c) => c.name).lastIndexOf('clearRect')
   return calls
     .slice(lastBackground)
     .filter((call) => call.name === 'fillText')
@@ -120,7 +129,7 @@ describe('Emotions Rise', () => {
     await setup()
 
     expect(lastDrawnBubbles()).toEqual([])
-    expect(context().callsTo('fillRect')).toHaveLength(1)
+    expect(context().callsTo('clearRect')).toHaveLength(1)
   })
 
   it('draws the first emotion just under the canvas when Start is pressed', async () => {

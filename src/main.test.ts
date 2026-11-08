@@ -39,6 +39,14 @@ beforeEach(() => {
   trackListeners(document)
   trackListeners(window)
   contexts = useFakeCanvasContexts()
+  vi.stubGlobal(
+    'Image',
+    vi.fn(() => {
+      const image = document.createElement('img')
+      queueMicrotask(() => image.dispatchEvent(new Event('load')))
+      return image
+    }),
+  )
 })
 
 afterEach(() => {
@@ -46,6 +54,7 @@ afterEach(() => {
     cleanup()
   }
   vi.restoreAllMocks()
+  vi.unstubAllGlobals()
   window.removeEventListener('error', onError)
   expect(uncaughtErrors).toEqual([])
 })
