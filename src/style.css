@@ -1,5 +1,10 @@
 :root {
-  color: #17345d;
+  --color-ink: #17345d;
+  --color-good: #15803d;
+  --color-bad: #c62828;
+  --color-focus: #255fbc;
+
+  color: var(--color-ink);
   background: #f5f8ff;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -10,6 +15,12 @@
 
 * {
   box-sizing: border-box;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
 }
 
 body {
@@ -102,7 +113,6 @@ h1 {
 }
 
 .game-link:focus-visible {
-  outline: 3px solid #255fbc;
   outline-offset: 4px;
 }
 
@@ -123,7 +133,7 @@ h1 {
 .game-title {
   display: block;
   margin: 0.85rem 0 0;
-  color: #17345d;
+  color: var(--color-ink);
   font-size: clamp(0.95rem, 1.6vw, 1.1rem);
   font-weight: 700;
   line-height: 1.3;
@@ -156,27 +166,6 @@ footer {
 
 footer p {
   margin-bottom: 0;
-}
-
-.game-screen {
-  width: min(100% - 2rem, 82rem);
-}
-
-.back-link {
-  display: inline-block;
-  border-radius: 0.4rem;
-  color: #17345d;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.back-link:focus-visible {
-  outline: 3px solid #255fbc;
-  outline-offset: 4px;
-}
-
-.game-name {
-  margin-top: 2rem;
 }
 
 @media (min-width: 44rem) {

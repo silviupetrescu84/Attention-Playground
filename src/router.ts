@@ -1,25 +1,9 @@
-const gameRoutes = {
-  '/games/emotions-flow': 'Emotions Flow',
-  '/games/align-the-actions': 'Align the Actions',
-} as const
+import { gamePath, games, type CatalogGame } from './games/catalog'
 
-type GamePath = keyof typeof gameRoutes
-
-export type Route =
-  | { page: 'home' }
-  | { page: 'game'; gameName: (typeof gameRoutes)[GamePath] }
-
-function isGamePath(pathname: string): pathname is GamePath {
-  return pathname in gameRoutes
-}
+export type Route = { page: 'home' } | { page: 'game'; game: CatalogGame }
 
 export function resolveRoute(pathname: string): Route {
-  if (isGamePath(pathname)) {
-    return {
-      page: 'game',
-      gameName: gameRoutes[pathname],
-    }
-  }
+  const game = games.find((candidate) => gamePath(candidate) === pathname)
 
-  return { page: 'home' }
+  return game ? { page: 'game', game } : { page: 'home' }
 }

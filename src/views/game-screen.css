@@ -1,0 +1,40 @@
+/* The game screen around the canvas (game-screen.ts). */
+
+.game-screen {
+  position: fixed;
+  inset: 0;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* The canvas fills the screen, so the name is only announced to screen readers. */
+.game-name {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Centred in the space kept free above the canvas (set by game-canvas.ts). */
+.home-link {
+  position: absolute;
+  z-index: 1;
+  top: calc(var(--game-canvas-top) - var(--game-top-padding) / 2);
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  color: var(--color-ink);
+  background: #fff;
+  box-shadow: 0 0.25rem 1rem color-mix(in srgb, var(--color-ink) 12%, transparent);
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  transform: translate(-50%, -50%);
+}
