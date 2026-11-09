@@ -1,0 +1,4204 @@
+{
+  "thoughts": [
+    {
+      "id": "thought-001",
+      "thought": "They did not reply",
+      "choices": {
+        "good": [
+          {
+            "id": "t001-g1",
+            "text": "They may be busy"
+          },
+          {
+            "id": "t001-g2",
+            "text": "I can follow up"
+          },
+          {
+            "id": "t001-g3",
+            "text": "I do not know why"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t001-b1",
+            "text": "They hate me"
+          },
+          {
+            "id": "t001-b2",
+            "text": "I annoyed them"
+          },
+          {
+            "id": "t001-b3",
+            "text": "They always ignore me"
+          },
+          {
+            "id": "t001-b4",
+            "text": "I mean nothing"
+          },
+          {
+            "id": "t001-b5",
+            "text": "This friendship is over"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-002",
+      "thought": "I made a mistake",
+      "choices": {
+        "good": [
+          {
+            "id": "t002-g1",
+            "text": "I can learn"
+          },
+          {
+            "id": "t002-g2",
+            "text": "Mistakes are human"
+          },
+          {
+            "id": "t002-g3",
+            "text": "I can correct it"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t002-b1",
+            "text": "I always fail"
+          },
+          {
+            "id": "t002-b2",
+            "text": "I am useless"
+          },
+          {
+            "id": "t002-b3",
+            "text": "I ruin everything"
+          },
+          {
+            "id": "t002-b4",
+            "text": "I should give up"
+          },
+          {
+            "id": "t002-b5",
+            "text": "Everyone will judge me"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-003",
+      "thought": "My plan changed",
+      "choices": {
+        "good": [
+          {
+            "id": "t003-g1",
+            "text": "I can adapt"
+          },
+          {
+            "id": "t003-g2",
+            "text": "Another route may work"
+          },
+          {
+            "id": "t003-g3",
+            "text": "I can reset priorities"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t003-b1",
+            "text": "The day is ruined"
+          },
+          {
+            "id": "t003-b2",
+            "text": "Nothing ever works"
+          },
+          {
+            "id": "t003-b3",
+            "text": "I cannot cope"
+          },
+          {
+            "id": "t003-b4",
+            "text": "I must control everything"
+          },
+          {
+            "id": "t003-b5",
+            "text": "It is all pointless"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-004",
+      "thought": "Someone disagreed with me",
+      "choices": {
+        "good": [
+          {
+            "id": "t004-g1",
+            "text": "We see it differently"
+          },
+          {
+            "id": "t004-g2",
+            "text": "I can stay curious"
+          },
+          {
+            "id": "t004-g3",
+            "text": "Disagreement is normal"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t004-b1",
+            "text": "They are against me"
+          },
+          {
+            "id": "t004-b2",
+            "text": "I must win"
+          },
+          {
+            "id": "t004-b3",
+            "text": "They think I am stupid"
+          },
+          {
+            "id": "t004-b4",
+            "text": "They never respect me"
+          },
+          {
+            "id": "t004-b5",
+            "text": "I should attack back"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-005",
+      "thought": "I feel behind",
+      "choices": {
+        "good": [
+          {
+            "id": "t005-g1",
+            "text": "My pace can differ"
+          },
+          {
+            "id": "t005-g2",
+            "text": "I can take one step"
+          },
+          {
+            "id": "t005-g3",
+            "text": "Progress is not a race"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t005-b1",
+            "text": "Everyone is ahead"
+          },
+          {
+            "id": "t005-b2",
+            "text": "I have wasted life"
+          },
+          {
+            "id": "t005-b3",
+            "text": "I will never catch up"
+          },
+          {
+            "id": "t005-b4",
+            "text": "I am a failure"
+          },
+          {
+            "id": "t005-b5",
+            "text": "It is too late"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-006",
+      "thought": "I was not invited",
+      "choices": {
+        "good": [
+          {
+            "id": "t006-g1",
+            "text": "I lack the full story"
+          },
+          {
+            "id": "t006-g2",
+            "text": "I can reach out"
+          },
+          {
+            "id": "t006-g3",
+            "text": "One event is not everything"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t006-b1",
+            "text": "Nobody likes me"
+          },
+          {
+            "id": "t006-b2",
+            "text": "They excluded me deliberately"
+          },
+          {
+            "id": "t006-b3",
+            "text": "I have no friends"
+          },
+          {
+            "id": "t006-b4",
+            "text": "I must confront everyone"
+          },
+          {
+            "id": "t006-b5",
+            "text": "I am unwanted"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-007",
+      "thought": "My work was criticized",
+      "choices": {
+        "good": [
+          {
+            "id": "t007-g1",
+            "text": "Feedback may help"
+          },
+          {
+            "id": "t007-g2",
+            "text": "I can ask specifics"
+          },
+          {
+            "id": "t007-g3",
+            "text": "My work is not me"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t007-b1",
+            "text": "I am incompetent"
+          },
+          {
+            "id": "t007-b2",
+            "text": "They want me gone"
+          },
+          {
+            "id": "t007-b3",
+            "text": "I should stop trying"
+          },
+          {
+            "id": "t007-b4",
+            "text": "They hate my work"
+          },
+          {
+            "id": "t007-b5",
+            "text": "I can do nothing right"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-008",
+      "thought": "I feel nervous",
+      "choices": {
+        "good": [
+          {
+            "id": "t008-g1",
+            "text": "Nerves can coexist"
+          },
+          {
+            "id": "t008-g2",
+            "text": "I can start small"
+          },
+          {
+            "id": "t008-g3",
+            "text": "I can slow down"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t008-b1",
+            "text": "I cannot do this"
+          },
+          {
+            "id": "t008-b2",
+            "text": "Something awful will happen"
+          },
+          {
+            "id": "t008-b3",
+            "text": "I must escape now"
+          },
+          {
+            "id": "t008-b4",
+            "text": "I am too weak"
+          },
+          {
+            "id": "t008-b5",
+            "text": "Nerves mean failure"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-009",
+      "thought": "The task looks huge",
+      "choices": {
+        "good": [
+          {
+            "id": "t009-g1",
+            "text": "Start with one part"
+          },
+          {
+            "id": "t009-g2",
+            "text": "Break it into steps"
+          },
+          {
+            "id": "t009-g3",
+            "text": "Small progress counts"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t009-b1",
+            "text": "It is impossible"
+          },
+          {
+            "id": "t009-b2",
+            "text": "I should quit now"
+          },
+          {
+            "id": "t009-b3",
+            "text": "I need perfect results"
+          },
+          {
+            "id": "t009-b4",
+            "text": "I cannot even start"
+          },
+          {
+            "id": "t009-b5",
+            "text": "It will take forever"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-010",
+      "thought": "I forgot something",
+      "choices": {
+        "good": [
+          {
+            "id": "t010-g1",
+            "text": "I can make a note"
+          },
+          {
+            "id": "t010-g2",
+            "text": "I can fix what matters"
+          },
+          {
+            "id": "t010-g3",
+            "text": "Forgetting happens"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t010-b1",
+            "text": "My mind is failing"
+          },
+          {
+            "id": "t010-b2",
+            "text": "I am hopeless"
+          },
+          {
+            "id": "t010-b3",
+            "text": "I never remember anything"
+          },
+          {
+            "id": "t010-b4",
+            "text": "I ruin every plan"
+          },
+          {
+            "id": "t010-b5",
+            "text": "People cannot trust me"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-011",
+      "thought": "They seemed distant",
+      "choices": {
+        "good": [
+          {
+            "id": "t011-g1",
+            "text": "They may need space"
+          },
+          {
+            "id": "t011-g2",
+            "text": "I can check in"
+          },
+          {
+            "id": "t011-g3",
+            "text": "I cannot read minds"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t011-b1",
+            "text": "They dislike me"
+          },
+          {
+            "id": "t011-b2",
+            "text": "I did something terrible"
+          },
+          {
+            "id": "t011-b3",
+            "text": "They are rejecting me"
+          },
+          {
+            "id": "t011-b4",
+            "text": "I must demand answers"
+          },
+          {
+            "id": "t011-b5",
+            "text": "I should cut them off"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-012",
+      "thought": "I missed a day",
+      "choices": {
+        "good": [
+          {
+            "id": "t012-g1",
+            "text": "I can restart today"
+          },
+          {
+            "id": "t012-g2",
+            "text": "One day is not all"
+          },
+          {
+            "id": "t012-g3",
+            "text": "Consistency includes returns"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t012-b1",
+            "text": "My streak is worthless"
+          },
+          {
+            "id": "t012-b2",
+            "text": "I have no discipline"
+          },
+          {
+            "id": "t012-b3",
+            "text": "I must start over forever"
+          },
+          {
+            "id": "t012-b4",
+            "text": "I have ruined progress"
+          },
+          {
+            "id": "t012-b5",
+            "text": "Why even bother"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-013",
+      "thought": "I am tired today",
+      "choices": {
+        "good": [
+          {
+            "id": "t013-g1",
+            "text": "Rest may help"
+          },
+          {
+            "id": "t013-g2",
+            "text": "I can lower the bar"
+          },
+          {
+            "id": "t013-g3",
+            "text": "I can listen to myself"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t013-b1",
+            "text": "I am lazy"
+          },
+          {
+            "id": "t013-b2",
+            "text": "I must push harder"
+          },
+          {
+            "id": "t013-b3",
+            "text": "Rest is weakness"
+          },
+          {
+            "id": "t013-b4",
+            "text": "I deserve no break"
+          },
+          {
+            "id": "t013-b5",
+            "text": "I should ignore it"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-014",
+      "thought": "Someone succeeded",
+      "choices": {
+        "good": [
+          {
+            "id": "t014-g1",
+            "text": "I can celebrate them"
+          },
+          {
+            "id": "t014-g2",
+            "text": "Their path is different"
+          },
+          {
+            "id": "t014-g3",
+            "text": "I can learn something"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t014-b1",
+            "text": "They stole my chance"
+          },
+          {
+            "id": "t014-b2",
+            "text": "I am falling behind"
+          },
+          {
+            "id": "t014-b3",
+            "text": "Their win means my loss"
+          },
+          {
+            "id": "t014-b4",
+            "text": "I will never succeed"
+          },
+          {
+            "id": "t014-b5",
+            "text": "I should resent them"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-015",
+      "thought": "I did not finish",
+      "choices": {
+        "good": [
+          {
+            "id": "t015-g1",
+            "text": "I made some progress"
+          },
+          {
+            "id": "t015-g2",
+            "text": "I can continue later"
+          },
+          {
+            "id": "t015-g3",
+            "text": "I can adjust the scope"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t015-b1",
+            "text": "It was all wasted"
+          },
+          {
+            "id": "t015-b2",
+            "text": "I am never productive"
+          },
+          {
+            "id": "t015-b3",
+            "text": "I should work all night"
+          },
+          {
+            "id": "t015-b4",
+            "text": "I cannot finish anything"
+          },
+          {
+            "id": "t015-b5",
+            "text": "Only finished work counts"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-016",
+      "thought": "I said something awkward",
+      "choices": {
+        "good": [
+          {
+            "id": "t016-g1",
+            "text": "People move on"
+          },
+          {
+            "id": "t016-g2",
+            "text": "I can clarify"
+          },
+          {
+            "id": "t016-g3",
+            "text": "Awkward moments happen"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t016-b1",
+            "text": "They will remember forever"
+          },
+          {
+            "id": "t016-b2",
+            "text": "I embarrassed myself badly"
+          },
+          {
+            "id": "t016-b3",
+            "text": "Everyone is laughing"
+          },
+          {
+            "id": "t016-b4",
+            "text": "I should avoid people"
+          },
+          {
+            "id": "t016-b5",
+            "text": "I am socially hopeless"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-017",
+      "thought": "I got a rejection",
+      "choices": {
+        "good": [
+          {
+            "id": "t017-g1",
+            "text": "One outcome is limited"
+          },
+          {
+            "id": "t017-g2",
+            "text": "I can try elsewhere"
+          },
+          {
+            "id": "t017-g3",
+            "text": "I can learn and adjust"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t017-b1",
+            "text": "I am not wanted"
+          },
+          {
+            "id": "t017-b2",
+            "text": "I will always be rejected"
+          },
+          {
+            "id": "t017-b3",
+            "text": "I am not good enough"
+          },
+          {
+            "id": "t017-b4",
+            "text": "I should never try again"
+          },
+          {
+            "id": "t017-b5",
+            "text": "Everyone else is better"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-018",
+      "thought": "I am uncertain",
+      "choices": {
+        "good": [
+          {
+            "id": "t018-g1",
+            "text": "I can gather facts"
+          },
+          {
+            "id": "t018-g2",
+            "text": "Uncertainty is normal"
+          },
+          {
+            "id": "t018-g3",
+            "text": "I can choose a next step"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t018-b1",
+            "text": "I must know everything"
+          },
+          {
+            "id": "t018-b2",
+            "text": "Any choice is dangerous"
+          },
+          {
+            "id": "t018-b3",
+            "text": "I cannot move forward"
+          },
+          {
+            "id": "t018-b4",
+            "text": "I need a guarantee"
+          },
+          {
+            "id": "t018-b5",
+            "text": "I will definitely fail"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-019",
+      "thought": "I lost my temper",
+      "choices": {
+        "good": [
+          {
+            "id": "t019-g1",
+            "text": "I can repair this"
+          },
+          {
+            "id": "t019-g2",
+            "text": "I can pause next time"
+          },
+          {
+            "id": "t019-g3",
+            "text": "I can own my part"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t019-b1",
+            "text": "I am a bad person"
+          },
+          {
+            "id": "t019-b2",
+            "text": "They deserved it all"
+          },
+          {
+            "id": "t019-b3",
+            "text": "I can never change"
+          },
+          {
+            "id": "t019-b4",
+            "text": "It is always their fault"
+          },
+          {
+            "id": "t019-b5",
+            "text": "I must hide it"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-020",
+      "thought": "I feel lonely",
+      "choices": {
+        "good": [
+          {
+            "id": "t020-g1",
+            "text": "I can reach out"
+          },
+          {
+            "id": "t020-g2",
+            "text": "Connection takes effort"
+          },
+          {
+            "id": "t020-g3",
+            "text": "This feeling may change"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t020-b1",
+            "text": "Nobody cares"
+          },
+          {
+            "id": "t020-b2",
+            "text": "I will always be alone"
+          },
+          {
+            "id": "t020-b3",
+            "text": "I am unlovable"
+          },
+          {
+            "id": "t020-b4",
+            "text": "Everyone has someone else"
+          },
+          {
+            "id": "t020-b5",
+            "text": "There is no point trying"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-021",
+      "thought": "My idea was ignored",
+      "choices": {
+        "good": [
+          {
+            "id": "t021-g1",
+            "text": "I can ask for feedback"
+          },
+          {
+            "id": "t021-g2",
+            "text": "Timing may matter"
+          },
+          {
+            "id": "t021-g3",
+            "text": "I can explain it differently"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t021-b1",
+            "text": "My ideas are worthless"
+          },
+          {
+            "id": "t021-b2",
+            "text": "They are all against me"
+          },
+          {
+            "id": "t021-b3",
+            "text": "I should stop speaking"
+          },
+          {
+            "id": "t021-b4",
+            "text": "They never listen"
+          },
+          {
+            "id": "t021-b5",
+            "text": "I am not respected"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-022",
+      "thought": "I cannot focus",
+      "choices": {
+        "good": [
+          {
+            "id": "t022-g1",
+            "text": "I can remove distractions"
+          },
+          {
+            "id": "t022-g2",
+            "text": "Try one small task"
+          },
+          {
+            "id": "t022-g3",
+            "text": "A pause may help"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t022-b1",
+            "text": "My brain is broken"
+          },
+          {
+            "id": "t022-b2",
+            "text": "I will never focus"
+          },
+          {
+            "id": "t022-b3",
+            "text": "I must force it"
+          },
+          {
+            "id": "t022-b4",
+            "text": "I am wasting everything"
+          },
+          {
+            "id": "t022-b5",
+            "text": "Nothing can help"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-023",
+      "thought": "Someone canceled plans",
+      "choices": {
+        "good": [
+          {
+            "id": "t023-g1",
+            "text": "Plans sometimes change"
+          },
+          {
+            "id": "t023-g2",
+            "text": "I can reschedule"
+          },
+          {
+            "id": "t023-g3",
+            "text": "I can enjoy this time"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t023-b1",
+            "text": "They do not value me"
+          },
+          {
+            "id": "t023-b2",
+            "text": "They always disappoint"
+          },
+          {
+            "id": "t023-b3",
+            "text": "I should punish them"
+          },
+          {
+            "id": "t023-b4",
+            "text": "No one is reliable"
+          },
+          {
+            "id": "t023-b5",
+            "text": "My evening is ruined"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-024",
+      "thought": "I feel jealous",
+      "choices": {
+        "good": [
+          {
+            "id": "t024-g1",
+            "text": "I can notice it"
+          },
+          {
+            "id": "t024-g2",
+            "text": "This shows a wish"
+          },
+          {
+            "id": "t024-g3",
+            "text": "I can act on my values"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t024-b1",
+            "text": "They deserve less"
+          },
+          {
+            "id": "t024-b2",
+            "text": "I should compare more"
+          },
+          {
+            "id": "t024-b3",
+            "text": "Their joy hurts me"
+          },
+          {
+            "id": "t024-b4",
+            "text": "I must outdo them"
+          },
+          {
+            "id": "t024-b5",
+            "text": "I am a bad friend"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-025",
+      "thought": "I am starting late",
+      "choices": {
+        "good": [
+          {
+            "id": "t025-g1",
+            "text": "Starting still matters"
+          },
+          {
+            "id": "t025-g2",
+            "text": "I can begin now"
+          },
+          {
+            "id": "t025-g3",
+            "text": "Small steps add up"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t025-b1",
+            "text": "It is already pointless"
+          },
+          {
+            "id": "t025-b2",
+            "text": "I missed my chance"
+          },
+          {
+            "id": "t025-b3",
+            "text": "I will never improve"
+          },
+          {
+            "id": "t025-b4",
+            "text": "I am too old"
+          },
+          {
+            "id": "t025-b5",
+            "text": "Why begin at all"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-026",
+      "thought": "I received no praise",
+      "choices": {
+        "good": [
+          {
+            "id": "t026-g1",
+            "text": "My effort still matters"
+          },
+          {
+            "id": "t026-g2",
+            "text": "I can seek feedback"
+          },
+          {
+            "id": "t026-g3",
+            "text": "Praise is not the measure"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t026-b1",
+            "text": "I did nothing valuable"
+          },
+          {
+            "id": "t026-b2",
+            "text": "They all disapprove"
+          },
+          {
+            "id": "t026-b3",
+            "text": "I need their approval"
+          },
+          {
+            "id": "t026-b4",
+            "text": "I should stop caring"
+          },
+          {
+            "id": "t026-b5",
+            "text": "I am invisible"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-027",
+      "thought": "Today feels ordinary",
+      "choices": {
+        "good": [
+          {
+            "id": "t027-g1",
+            "text": "Small moments matter"
+          },
+          {
+            "id": "t027-g2",
+            "text": "I can notice something"
+          },
+          {
+            "id": "t027-g3",
+            "text": "Ordinary can be enough"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t027-b1",
+            "text": "Nothing good happens"
+          },
+          {
+            "id": "t027-b2",
+            "text": "My life is boring"
+          },
+          {
+            "id": "t027-b3",
+            "text": "Everyone else is happier"
+          },
+          {
+            "id": "t027-b4",
+            "text": "This day is wasted"
+          },
+          {
+            "id": "t027-b5",
+            "text": "I need constant excitement"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-028",
+      "thought": "I feel frustrated",
+      "choices": {
+        "good": [
+          {
+            "id": "t028-g1",
+            "text": "I can pause"
+          },
+          {
+            "id": "t028-g2",
+            "text": "I can name the obstacle"
+          },
+          {
+            "id": "t028-g3",
+            "text": "One step may help"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t028-b1",
+            "text": "I should explode"
+          },
+          {
+            "id": "t028-b2",
+            "text": "Everything is terrible"
+          },
+          {
+            "id": "t028-b3",
+            "text": "This always happens"
+          },
+          {
+            "id": "t028-b4",
+            "text": "I cannot stand anything"
+          },
+          {
+            "id": "t028-b5",
+            "text": "Someone must pay"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-029",
+      "thought": "I need help",
+      "choices": {
+        "good": [
+          {
+            "id": "t029-g1",
+            "text": "Asking is reasonable"
+          },
+          {
+            "id": "t029-g2",
+            "text": "I can be specific"
+          },
+          {
+            "id": "t029-g3",
+            "text": "Support is human"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t029-b1",
+            "text": "I am weak"
+          },
+          {
+            "id": "t029-b2",
+            "text": "I must do it alone"
+          },
+          {
+            "id": "t029-b3",
+            "text": "They will judge me"
+          },
+          {
+            "id": "t029-b4",
+            "text": "I am a burden"
+          },
+          {
+            "id": "t029-b5",
+            "text": "I should pretend"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-030",
+      "thought": "I chose poorly",
+      "choices": {
+        "good": [
+          {
+            "id": "t030-g1",
+            "text": "I can reassess"
+          },
+          {
+            "id": "t030-g2",
+            "text": "I learned something"
+          },
+          {
+            "id": "t030-g3",
+            "text": "Next choice can differ"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t030-b1",
+            "text": "I ruin every choice"
+          },
+          {
+            "id": "t030-b2",
+            "text": "I cannot trust myself"
+          },
+          {
+            "id": "t030-b3",
+            "text": "This decides my future"
+          },
+          {
+            "id": "t030-b4",
+            "text": "I should never choose"
+          },
+          {
+            "id": "t030-b5",
+            "text": "I am hopeless"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-031",
+      "thought": "A friend is thriving",
+      "choices": {
+        "good": [
+          {
+            "id": "t031-g1",
+            "text": "I can feel glad"
+          },
+          {
+            "id": "t031-g2",
+            "text": "I can learn from them"
+          },
+          {
+            "id": "t031-g3",
+            "text": "Our lives can differ"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t031-b1",
+            "text": "They are better than me"
+          },
+          {
+            "id": "t031-b2",
+            "text": "I should avoid them"
+          },
+          {
+            "id": "t031-b3",
+            "text": "Their life is perfect"
+          },
+          {
+            "id": "t031-b4",
+            "text": "Mine is a disaster"
+          },
+          {
+            "id": "t031-b5",
+            "text": "I must compete"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-032",
+      "thought": "I am overwhelmed",
+      "choices": {
+        "good": [
+          {
+            "id": "t032-g1",
+            "text": "One thing at a time"
+          },
+          {
+            "id": "t032-g2",
+            "text": "I can ask for support"
+          },
+          {
+            "id": "t032-g3",
+            "text": "I can reduce demands"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t032-b1",
+            "text": "I must fix everything"
+          },
+          {
+            "id": "t032-b2",
+            "text": "I cannot handle life"
+          },
+          {
+            "id": "t032-b3",
+            "text": "I am failing everyone"
+          },
+          {
+            "id": "t032-b4",
+            "text": "It will never ease"
+          },
+          {
+            "id": "t032-b5",
+            "text": "I should do more"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-033",
+      "thought": "I got interrupted",
+      "choices": {
+        "good": [
+          {
+            "id": "t033-g1",
+            "text": "I can return to focus"
+          },
+          {
+            "id": "t033-g2",
+            "text": "I can set a boundary"
+          },
+          {
+            "id": "t033-g3",
+            "text": "Interruptions happen"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t033-b1",
+            "text": "My work is ruined"
+          },
+          {
+            "id": "t033-b2",
+            "text": "They have no respect"
+          },
+          {
+            "id": "t033-b3",
+            "text": "I should snap back"
+          },
+          {
+            "id": "t033-b4",
+            "text": "I will never finish"
+          },
+          {
+            "id": "t033-b5",
+            "text": "The whole day is lost"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-034",
+      "thought": "Someone seems upset",
+      "choices": {
+        "good": [
+          {
+            "id": "t034-g1",
+            "text": "I can ask gently"
+          },
+          {
+            "id": "t034-g2",
+            "text": "It may not involve me"
+          },
+          {
+            "id": "t034-g3",
+            "text": "I can give space"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t034-b1",
+            "text": "I caused it"
+          },
+          {
+            "id": "t034-b2",
+            "text": "They are angry at me"
+          },
+          {
+            "id": "t034-b3",
+            "text": "I must fix them"
+          },
+          {
+            "id": "t034-b4",
+            "text": "I should avoid them forever"
+          },
+          {
+            "id": "t034-b5",
+            "text": "They must explain now"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-035",
+      "thought": "I am not improving fast",
+      "choices": {
+        "good": [
+          {
+            "id": "t035-g1",
+            "text": "Progress varies"
+          },
+          {
+            "id": "t035-g2",
+            "text": "Practice takes time"
+          },
+          {
+            "id": "t035-g3",
+            "text": "I can adjust my method"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t035-b1",
+            "text": "I have no talent"
+          },
+          {
+            "id": "t035-b2",
+            "text": "I should quit"
+          },
+          {
+            "id": "t035-b3",
+            "text": "Others learn instantly"
+          },
+          {
+            "id": "t035-b4",
+            "text": "I am stuck forever"
+          },
+          {
+            "id": "t035-b5",
+            "text": "Slow means failure"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-036",
+      "thought": "I got nervous speaking",
+      "choices": {
+        "good": [
+          {
+            "id": "t036-g1",
+            "text": "I showed up anyway"
+          },
+          {
+            "id": "t036-g2",
+            "text": "I can practice"
+          },
+          {
+            "id": "t036-g3",
+            "text": "One talk is not all"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t036-b1",
+            "text": "Everyone noticed"
+          },
+          {
+            "id": "t036-b2",
+            "text": "I sounded ridiculous"
+          },
+          {
+            "id": "t036-b3",
+            "text": "I should never speak"
+          },
+          {
+            "id": "t036-b4",
+            "text": "I embarrassed the team"
+          },
+          {
+            "id": "t036-b5",
+            "text": "I am terrible at this"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-037",
+      "thought": "I feel disappointed",
+      "choices": {
+        "good": [
+          {
+            "id": "t037-g1",
+            "text": "It is okay to care"
+          },
+          {
+            "id": "t037-g2",
+            "text": "I can review expectations"
+          },
+          {
+            "id": "t037-g3",
+            "text": "Another chance may come"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t037-b1",
+            "text": "Nothing works for me"
+          },
+          {
+            "id": "t037-b2",
+            "text": "I should expect nothing"
+          },
+          {
+            "id": "t037-b3",
+            "text": "Life is unfair to me"
+          },
+          {
+            "id": "t037-b4",
+            "text": "I always lose"
+          },
+          {
+            "id": "t037-b5",
+            "text": "It cannot get better"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-038",
+      "thought": "I cannot decide",
+      "choices": {
+        "good": [
+          {
+            "id": "t038-g1",
+            "text": "I can narrow options"
+          },
+          {
+            "id": "t038-g2",
+            "text": "A small choice helps"
+          },
+          {
+            "id": "t038-g3",
+            "text": "I can set a deadline"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t038-b1",
+            "text": "Every option is wrong"
+          },
+          {
+            "id": "t038-b2",
+            "text": "I must be certain"
+          },
+          {
+            "id": "t038-b3",
+            "text": "I will regret anything"
+          },
+          {
+            "id": "t038-b4",
+            "text": "I cannot trust judgment"
+          },
+          {
+            "id": "t038-b5",
+            "text": "I should avoid deciding"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-039",
+      "thought": "The room is messy",
+      "choices": {
+        "good": [
+          {
+            "id": "t039-g1",
+            "text": "I can clear one thing"
+          },
+          {
+            "id": "t039-g2",
+            "text": "A small reset helps"
+          },
+          {
+            "id": "t039-g3",
+            "text": "It need not be perfect"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t039-b1",
+            "text": "I live in chaos"
+          },
+          {
+            "id": "t039-b2",
+            "text": "I must clean everything"
+          },
+          {
+            "id": "t039-b3",
+            "text": "I am disgusting"
+          },
+          {
+            "id": "t039-b4",
+            "text": "Why try at all"
+          },
+          {
+            "id": "t039-b5",
+            "text": "It is hopeless"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-040",
+      "thought": "I feel left out",
+      "choices": {
+        "good": [
+          {
+            "id": "t040-g1",
+            "text": "I can make contact"
+          },
+          {
+            "id": "t040-g2",
+            "text": "Groups shift sometimes"
+          },
+          {
+            "id": "t040-g3",
+            "text": "I can express my need"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t040-b1",
+            "text": "Nobody wants me"
+          },
+          {
+            "id": "t040-b2",
+            "text": "They all planned this"
+          },
+          {
+            "id": "t040-b3",
+            "text": "I should withdraw completely"
+          },
+          {
+            "id": "t040-b4",
+            "text": "I do not belong anywhere"
+          },
+          {
+            "id": "t040-b5",
+            "text": "Everyone excludes me"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-041",
+      "thought": "I did not sleep well",
+      "choices": {
+        "good": [
+          {
+            "id": "t041-g1",
+            "text": "I can pace today"
+          },
+          {
+            "id": "t041-g2",
+            "text": "A gentler day is okay"
+          },
+          {
+            "id": "t041-g3",
+            "text": "I can rest earlier"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t041-b1",
+            "text": "Today is doomed"
+          },
+          {
+            "id": "t041-b2",
+            "text": "I will fail at everything"
+          },
+          {
+            "id": "t041-b3",
+            "text": "I must ignore fatigue"
+          },
+          {
+            "id": "t041-b4",
+            "text": "I cannot function ever"
+          },
+          {
+            "id": "t041-b5",
+            "text": "I should blame myself"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-042",
+      "thought": "I am afraid to ask",
+      "choices": {
+        "good": [
+          {
+            "id": "t042-g1",
+            "text": "I can ask simply"
+          },
+          {
+            "id": "t042-g2",
+            "text": "A no is survivable"
+          },
+          {
+            "id": "t042-g3",
+            "text": "I can try once"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t042-b1",
+            "text": "They will ridicule me"
+          },
+          {
+            "id": "t042-b2",
+            "text": "I must stay silent"
+          },
+          {
+            "id": "t042-b3",
+            "text": "Asking is humiliating"
+          },
+          {
+            "id": "t042-b4",
+            "text": "I cannot face rejection"
+          },
+          {
+            "id": "t042-b5",
+            "text": "I do not deserve help"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-043",
+      "thought": "I compare my progress",
+      "choices": {
+        "good": [
+          {
+            "id": "t043-g1",
+            "text": "My goals are personal"
+          },
+          {
+            "id": "t043-g2",
+            "text": "I can track my steps"
+          },
+          {
+            "id": "t043-g3",
+            "text": "Different paths are normal"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t043-b1",
+            "text": "They are all ahead"
+          },
+          {
+            "id": "t043-b2",
+            "text": "I am worth less"
+          },
+          {
+            "id": "t043-b3",
+            "text": "I will never measure up"
+          },
+          {
+            "id": "t043-b4",
+            "text": "Comparison proves failure"
+          },
+          {
+            "id": "t043-b5",
+            "text": "I must beat everyone"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-044",
+      "thought": "I feel unmotivated",
+      "choices": {
+        "good": [
+          {
+            "id": "t044-g1",
+            "text": "Start very small"
+          },
+          {
+            "id": "t044-g2",
+            "text": "Action can come first"
+          },
+          {
+            "id": "t044-g3",
+            "text": "I can lower friction"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t044-b1",
+            "text": "I must wait for inspiration"
+          },
+          {
+            "id": "t044-b2",
+            "text": "I am just lazy"
+          },
+          {
+            "id": "t044-b3",
+            "text": "I cannot change"
+          },
+          {
+            "id": "t044-b4",
+            "text": "Nothing is worth effort"
+          },
+          {
+            "id": "t044-b5",
+            "text": "I should force hours"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-045",
+      "thought": "I made someone upset",
+      "choices": {
+        "good": [
+          {
+            "id": "t045-g1",
+            "text": "I can listen"
+          },
+          {
+            "id": "t045-g2",
+            "text": "I can apologize if needed"
+          },
+          {
+            "id": "t045-g3",
+            "text": "I can learn their view"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t045-b1",
+            "text": "I am terrible"
+          },
+          {
+            "id": "t045-b2",
+            "text": "They must forgive me"
+          },
+          {
+            "id": "t045-b3",
+            "text": "They are too sensitive"
+          },
+          {
+            "id": "t045-b4",
+            "text": "I should disappear"
+          },
+          {
+            "id": "t045-b5",
+            "text": "I always hurt people"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-046",
+      "thought": "I have too many tasks",
+      "choices": {
+        "good": [
+          {
+            "id": "t046-g1",
+            "text": "Choose one priority"
+          },
+          {
+            "id": "t046-g2",
+            "text": "I can say no"
+          },
+          {
+            "id": "t046-g3",
+            "text": "I can defer some"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t046-b1",
+            "text": "All must be done now"
+          },
+          {
+            "id": "t046-b2",
+            "text": "I cannot stop"
+          },
+          {
+            "id": "t046-b3",
+            "text": "I am drowning forever"
+          },
+          {
+            "id": "t046-b4",
+            "text": "Every task is urgent"
+          },
+          {
+            "id": "t046-b5",
+            "text": "I must work nonstop"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-047",
+      "thought": "I feel uncertain about us",
+      "choices": {
+        "good": [
+          {
+            "id": "t047-g1",
+            "text": "We can talk openly"
+          },
+          {
+            "id": "t047-g2",
+            "text": "I can notice my needs"
+          },
+          {
+            "id": "t047-g3",
+            "text": "I can ask questions"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t047-b1",
+            "text": "They will leave me"
+          },
+          {
+            "id": "t047-b2",
+            "text": "I must test them"
+          },
+          {
+            "id": "t047-b3",
+            "text": "I should assume the worst"
+          },
+          {
+            "id": "t047-b4",
+            "text": "Love never lasts"
+          },
+          {
+            "id": "t047-b5",
+            "text": "I need constant proof"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-048",
+      "thought": "I was corrected publicly",
+      "choices": {
+        "good": [
+          {
+            "id": "t048-g1",
+            "text": "Correction can be useful"
+          },
+          {
+            "id": "t048-g2",
+            "text": "I can ask privately"
+          },
+          {
+            "id": "t048-g3",
+            "text": "One moment is limited"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t048-b1",
+            "text": "Everyone thinks I am dumb"
+          },
+          {
+            "id": "t048-b2",
+            "text": "They humiliated me on purpose"
+          },
+          {
+            "id": "t048-b3",
+            "text": "I must retaliate"
+          },
+          {
+            "id": "t048-b4",
+            "text": "My reputation is destroyed"
+          },
+          {
+            "id": "t048-b5",
+            "text": "I should stop contributing"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-049",
+      "thought": "I feel restless",
+      "choices": {
+        "good": [
+          {
+            "id": "t049-g1",
+            "text": "A short walk may help"
+          },
+          {
+            "id": "t049-g2",
+            "text": "I can change pace"
+          },
+          {
+            "id": "t049-g3",
+            "text": "I can notice the feeling"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t049-b1",
+            "text": "I am incapable of peace"
+          },
+          {
+            "id": "t049-b2",
+            "text": "I must stay busy"
+          },
+          {
+            "id": "t049-b3",
+            "text": "Something is wrong with me"
+          },
+          {
+            "id": "t049-b4",
+            "text": "I cannot sit still ever"
+          },
+          {
+            "id": "t049-b5",
+            "text": "I should distract endlessly"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-050",
+      "thought": "My effort went unnoticed",
+      "choices": {
+        "good": [
+          {
+            "id": "t050-g1",
+            "text": "I know what I did"
+          },
+          {
+            "id": "t050-g2",
+            "text": "I can share the result"
+          },
+          {
+            "id": "t050-g3",
+            "text": "Recognition varies"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t050-b1",
+            "text": "My work means nothing"
+          },
+          {
+            "id": "t050-b2",
+            "text": "They are using me"
+          },
+          {
+            "id": "t050-b3",
+            "text": "I should stop helping"
+          },
+          {
+            "id": "t050-b4",
+            "text": "No one appreciates anything"
+          },
+          {
+            "id": "t050-b5",
+            "text": "I will never be seen"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-051",
+      "thought": "I avoided a hard task",
+      "choices": {
+        "good": [
+          {
+            "id": "t051-g1",
+            "text": "I can restart small"
+          },
+          {
+            "id": "t051-g2",
+            "text": "Avoidance makes sense sometimes"
+          },
+          {
+            "id": "t051-g3",
+            "text": "I can name the fear"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t051-b1",
+            "text": "I am a coward"
+          },
+          {
+            "id": "t051-b2",
+            "text": "I will never do it"
+          },
+          {
+            "id": "t051-b3",
+            "text": "I ruined everything"
+          },
+          {
+            "id": "t051-b4",
+            "text": "I have no willpower"
+          },
+          {
+            "id": "t051-b5",
+            "text": "I should hide forever"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-052",
+      "thought": "I feel embarrassed",
+      "choices": {
+        "good": [
+          {
+            "id": "t052-g1",
+            "text": "This feeling will shift"
+          },
+          {
+            "id": "t052-g2",
+            "text": "Others make mistakes too"
+          },
+          {
+            "id": "t052-g3",
+            "text": "I can keep going"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t052-b1",
+            "text": "Everyone is judging"
+          },
+          {
+            "id": "t052-b2",
+            "text": "I should never return"
+          },
+          {
+            "id": "t052-b3",
+            "text": "This defines who I am"
+          },
+          {
+            "id": "t052-b4",
+            "text": "I cannot recover"
+          },
+          {
+            "id": "t052-b5",
+            "text": "I must replay it forever"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-053",
+      "thought": "I cannot control this",
+      "choices": {
+        "good": [
+          {
+            "id": "t053-g1",
+            "text": "I can choose my response"
+          },
+          {
+            "id": "t053-g2",
+            "text": "Focus on my part"
+          },
+          {
+            "id": "t053-g3",
+            "text": "Some things are uncertain"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t053-b1",
+            "text": "I must force an outcome"
+          },
+          {
+            "id": "t053-b2",
+            "text": "Everything depends on me"
+          },
+          {
+            "id": "t053-b3",
+            "text": "I am powerless everywhere"
+          },
+          {
+            "id": "t053-b4",
+            "text": "I should panic"
+          },
+          {
+            "id": "t053-b5",
+            "text": "Nothing I do matters"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-054",
+      "thought": "I feel angry at them",
+      "choices": {
+        "good": [
+          {
+            "id": "t054-g1",
+            "text": "I can set a boundary"
+          },
+          {
+            "id": "t054-g2",
+            "text": "I can respond later"
+          },
+          {
+            "id": "t054-g3",
+            "text": "I can explain my concern"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t054-b1",
+            "text": "I must get even"
+          },
+          {
+            "id": "t054-b2",
+            "text": "They are always awful"
+          },
+          {
+            "id": "t054-b3",
+            "text": "I should send insults"
+          },
+          {
+            "id": "t054-b4",
+            "text": "I cannot calm down"
+          },
+          {
+            "id": "t054-b5",
+            "text": "I should cut everyone off"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-055",
+      "thought": "I do not feel confident",
+      "choices": {
+        "good": [
+          {
+            "id": "t055-g1",
+            "text": "Confidence can grow"
+          },
+          {
+            "id": "t055-g2",
+            "text": "I can try carefully"
+          },
+          {
+            "id": "t055-g3",
+            "text": "I can prepare one step"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t055-b1",
+            "text": "I am not capable"
+          },
+          {
+            "id": "t055-b2",
+            "text": "I will embarrass myself"
+          },
+          {
+            "id": "t055-b3",
+            "text": "I need certainty first"
+          },
+          {
+            "id": "t055-b4",
+            "text": "Everyone can tell"
+          },
+          {
+            "id": "t055-b5",
+            "text": "I should not attempt"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-056",
+      "thought": "My friend forgot",
+      "choices": {
+        "good": [
+          {
+            "id": "t056-g1",
+            "text": "They may be distracted"
+          },
+          {
+            "id": "t056-g2",
+            "text": "I can remind them"
+          },
+          {
+            "id": "t056-g3",
+            "text": "One lapse is limited"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t056-b1",
+            "text": "They do not care"
+          },
+          {
+            "id": "t056-b2",
+            "text": "They always betray me"
+          },
+          {
+            "id": "t056-b3",
+            "text": "I must stop trusting"
+          },
+          {
+            "id": "t056-b4",
+            "text": "It was intentional"
+          },
+          {
+            "id": "t056-b5",
+            "text": "Our friendship is fake"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-057",
+      "thought": "I have a difficult talk",
+      "choices": {
+        "good": [
+          {
+            "id": "t057-g1",
+            "text": "I can prepare calmly"
+          },
+          {
+            "id": "t057-g2",
+            "text": "I can listen too"
+          },
+          {
+            "id": "t057-g3",
+            "text": "I can speak honestly"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t057-b1",
+            "text": "It will be a disaster"
+          },
+          {
+            "id": "t057-b2",
+            "text": "I must win the argument"
+          },
+          {
+            "id": "t057-b3",
+            "text": "I should avoid forever"
+          },
+          {
+            "id": "t057-b4",
+            "text": "They will hate me"
+          },
+          {
+            "id": "t057-b5",
+            "text": "I must rehearse every word"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-058",
+      "thought": "I did less than planned",
+      "choices": {
+        "good": [
+          {
+            "id": "t058-g1",
+            "text": "Some progress counts"
+          },
+          {
+            "id": "t058-g2",
+            "text": "I can revise tomorrow"
+          },
+          {
+            "id": "t058-g3",
+            "text": "Plans can be flexible"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t058-b1",
+            "text": "I wasted the day"
+          },
+          {
+            "id": "t058-b2",
+            "text": "I cannot keep promises"
+          },
+          {
+            "id": "t058-b3",
+            "text": "I should skip rest"
+          },
+          {
+            "id": "t058-b4",
+            "text": "I am failing badly"
+          },
+          {
+            "id": "t058-b5",
+            "text": "Anything less is worthless"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-059",
+      "thought": "I feel stuck",
+      "choices": {
+        "good": [
+          {
+            "id": "t059-g1",
+            "text": "I can change one thing"
+          },
+          {
+            "id": "t059-g2",
+            "text": "A small test helps"
+          },
+          {
+            "id": "t059-g3",
+            "text": "I can seek perspective"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t059-b1",
+            "text": "Nothing can change"
+          },
+          {
+            "id": "t059-b2",
+            "text": "I am trapped forever"
+          },
+          {
+            "id": "t059-b3",
+            "text": "I should give up"
+          },
+          {
+            "id": "t059-b4",
+            "text": "I have no options"
+          },
+          {
+            "id": "t059-b5",
+            "text": "Everyone else moves forward"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-060",
+      "thought": "I want instant results",
+      "choices": {
+        "good": [
+          {
+            "id": "t060-g1",
+            "text": "Growth takes repetition"
+          },
+          {
+            "id": "t060-g2",
+            "text": "I can notice small gains"
+          },
+          {
+            "id": "t060-g3",
+            "text": "Patience is a practice"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t060-b1",
+            "text": "Slow progress is worthless"
+          },
+          {
+            "id": "t060-b2",
+            "text": "I need results now"
+          },
+          {
+            "id": "t060-b3",
+            "text": "If not today, never"
+          },
+          {
+            "id": "t060-b4",
+            "text": "I should switch constantly"
+          },
+          {
+            "id": "t060-b5",
+            "text": "It must be easy"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-061",
+      "thought": "I feel guilty resting",
+      "choices": {
+        "good": [
+          {
+            "id": "t061-g1",
+            "text": "Rest supports effort"
+          },
+          {
+            "id": "t061-g2",
+            "text": "I can allow a break"
+          },
+          {
+            "id": "t061-g3",
+            "text": "I am more than output"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t061-b1",
+            "text": "Rest must be earned"
+          },
+          {
+            "id": "t061-b2",
+            "text": "I am wasting time"
+          },
+          {
+            "id": "t061-b3",
+            "text": "I should keep working"
+          },
+          {
+            "id": "t061-b4",
+            "text": "I am lazy for stopping"
+          },
+          {
+            "id": "t061-b5",
+            "text": "Productivity is my worth"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-062",
+      "thought": "They misunderstood me",
+      "choices": {
+        "good": [
+          {
+            "id": "t062-g1",
+            "text": "I can clarify kindly"
+          },
+          {
+            "id": "t062-g2",
+            "text": "Intent and impact differ"
+          },
+          {
+            "id": "t062-g3",
+            "text": "I can ask what they heard"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t062-b1",
+            "text": "They never listen"
+          },
+          {
+            "id": "t062-b2",
+            "text": "I must raise my voice"
+          },
+          {
+            "id": "t062-b3",
+            "text": "They are deliberately cruel"
+          },
+          {
+            "id": "t062-b4",
+            "text": "I should give up speaking"
+          },
+          {
+            "id": "t062-b5",
+            "text": "They are the problem"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-063",
+      "thought": "My weekend was quiet",
+      "choices": {
+        "good": [
+          {
+            "id": "t063-g1",
+            "text": "Quiet can be restorative"
+          },
+          {
+            "id": "t063-g2",
+            "text": "I can enjoy simplicity"
+          },
+          {
+            "id": "t063-g3",
+            "text": "I can plan connection"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t063-b1",
+            "text": "I wasted free time"
+          },
+          {
+            "id": "t063-b2",
+            "text": "Everyone had more fun"
+          },
+          {
+            "id": "t063-b3",
+            "text": "My life is empty"
+          },
+          {
+            "id": "t063-b4",
+            "text": "I need to stay busy"
+          },
+          {
+            "id": "t063-b5",
+            "text": "Nothing happened so it failed"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-064",
+      "thought": "I cannot stop worrying",
+      "choices": {
+        "good": [
+          {
+            "id": "t064-g1",
+            "text": "I can name one concern"
+          },
+          {
+            "id": "t064-g2",
+            "text": "I can return to now"
+          },
+          {
+            "id": "t064-g3",
+            "text": "I can take a small step"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t064-b1",
+            "text": "Worry keeps me safe"
+          },
+          {
+            "id": "t064-b2",
+            "text": "Everything will go wrong"
+          },
+          {
+            "id": "t064-b3",
+            "text": "I must solve all futures"
+          },
+          {
+            "id": "t064-b4",
+            "text": "I cannot handle uncertainty"
+          },
+          {
+            "id": "t064-b5",
+            "text": "I should keep checking"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-065",
+      "thought": "I am worried about money",
+      "choices": {
+        "good": [
+          {
+            "id": "t065-g1",
+            "text": "I can review facts"
+          },
+          {
+            "id": "t065-g2",
+            "text": "One budget step helps"
+          },
+          {
+            "id": "t065-g3",
+            "text": "I can seek advice"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t065-b1",
+            "text": "I will lose everything"
+          },
+          {
+            "id": "t065-b2",
+            "text": "There is no solution"
+          },
+          {
+            "id": "t065-b3",
+            "text": "I must avoid looking"
+          },
+          {
+            "id": "t065-b4",
+            "text": "I am bad with money"
+          },
+          {
+            "id": "t065-b5",
+            "text": "It is hopeless forever"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-066",
+      "thought": "I feel taken for granted",
+      "choices": {
+        "good": [
+          {
+            "id": "t066-g1",
+            "text": "I can express my needs"
+          },
+          {
+            "id": "t066-g2",
+            "text": "A boundary may help"
+          },
+          {
+            "id": "t066-g3",
+            "text": "I can ask directly"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t066-b1",
+            "text": "Nobody values me"
+          },
+          {
+            "id": "t066-b2",
+            "text": "I must keep giving"
+          },
+          {
+            "id": "t066-b3",
+            "text": "They owe me everything"
+          },
+          {
+            "id": "t066-b4",
+            "text": "I should silently resent"
+          },
+          {
+            "id": "t066-b5",
+            "text": "I never matter"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-067",
+      "thought": "I had an awkward date",
+      "choices": {
+        "good": [
+          {
+            "id": "t067-g1",
+            "text": "One meeting is limited"
+          },
+          {
+            "id": "t067-g2",
+            "text": "I can be myself"
+          },
+          {
+            "id": "t067-g3",
+            "text": "I learned my preferences"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t067-b1",
+            "text": "I am undateable"
+          },
+          {
+            "id": "t067-b2",
+            "text": "Everyone will reject me"
+          },
+          {
+            "id": "t067-b3",
+            "text": "I should fake who I am"
+          },
+          {
+            "id": "t067-b4",
+            "text": "I ruined my chance"
+          },
+          {
+            "id": "t067-b5",
+            "text": "I will stay alone"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-068",
+      "thought": "I am scared of change",
+      "choices": {
+        "good": [
+          {
+            "id": "t068-g1",
+            "text": "Change can be gradual"
+          },
+          {
+            "id": "t068-g2",
+            "text": "I can prepare"
+          },
+          {
+            "id": "t068-g3",
+            "text": "I can hold uncertainty"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t068-b1",
+            "text": "Change always ruins things"
+          },
+          {
+            "id": "t068-b2",
+            "text": "I must stay stuck"
+          },
+          {
+            "id": "t068-b3",
+            "text": "I cannot adapt"
+          },
+          {
+            "id": "t068-b4",
+            "text": "Everything familiar will vanish"
+          },
+          {
+            "id": "t068-b5",
+            "text": "I am too fragile"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-069",
+      "thought": "I feel ignored at work",
+      "choices": {
+        "good": [
+          {
+            "id": "t069-g1",
+            "text": "I can speak up"
+          },
+          {
+            "id": "t069-g2",
+            "text": "I can request feedback"
+          },
+          {
+            "id": "t069-g3",
+            "text": "I can clarify expectations"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t069-b1",
+            "text": "I have no value"
+          },
+          {
+            "id": "t069-b2",
+            "text": "They want me out"
+          },
+          {
+            "id": "t069-b3",
+            "text": "I must work twice as hard"
+          },
+          {
+            "id": "t069-b4",
+            "text": "I should say nothing"
+          },
+          {
+            "id": "t069-b5",
+            "text": "They all dislike me"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-070",
+      "thought": "I was late",
+      "choices": {
+        "good": [
+          {
+            "id": "t070-g1",
+            "text": "I can acknowledge it"
+          },
+          {
+            "id": "t070-g2",
+            "text": "I can plan a buffer"
+          },
+          {
+            "id": "t070-g3",
+            "text": "One delay is manageable"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t070-b1",
+            "text": "I always mess up"
+          },
+          {
+            "id": "t070-b2",
+            "text": "They will never trust me"
+          },
+          {
+            "id": "t070-b3",
+            "text": "The whole day is broken"
+          },
+          {
+            "id": "t070-b4",
+            "text": "I am irresponsible forever"
+          },
+          {
+            "id": "t070-b5",
+            "text": "I should panic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-071",
+      "thought": "I forgot their birthday",
+      "choices": {
+        "good": [
+          {
+            "id": "t071-g1",
+            "text": "I can reach out now"
+          },
+          {
+            "id": "t071-g2",
+            "text": "Care can be shown"
+          },
+          {
+            "id": "t071-g3",
+            "text": "I can set a reminder"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t071-b1",
+            "text": "I am a terrible friend"
+          },
+          {
+            "id": "t071-b2",
+            "text": "They will never forgive me"
+          },
+          {
+            "id": "t071-b3",
+            "text": "I should avoid them"
+          },
+          {
+            "id": "t071-b4",
+            "text": "I ruin relationships"
+          },
+          {
+            "id": "t071-b5",
+            "text": "It is too late to care"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-072",
+      "thought": "I feel envious",
+      "choices": {
+        "good": [
+          {
+            "id": "t072-g1",
+            "text": "I can name the wish"
+          },
+          {
+            "id": "t072-g2",
+            "text": "Their success is theirs"
+          },
+          {
+            "id": "t072-g3",
+            "text": "I can act on mine"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t072-b1",
+            "text": "I deserve their life"
+          },
+          {
+            "id": "t072-b2",
+            "text": "I should belittle them"
+          },
+          {
+            "id": "t072-b3",
+            "text": "I will never have enough"
+          },
+          {
+            "id": "t072-b4",
+            "text": "Their win harms me"
+          },
+          {
+            "id": "t072-b5",
+            "text": "I must compare constantly"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-073",
+      "thought": "My body feels tense",
+      "choices": {
+        "good": [
+          {
+            "id": "t073-g1",
+            "text": "I can slow my breath"
+          },
+          {
+            "id": "t073-g2",
+            "text": "A gentle stretch may help"
+          },
+          {
+            "id": "t073-g3",
+            "text": "I can pause briefly"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t073-b1",
+            "text": "Something must be wrong"
+          },
+          {
+            "id": "t073-b2",
+            "text": "I must ignore it"
+          },
+          {
+            "id": "t073-b3",
+            "text": "I cannot relax ever"
+          },
+          {
+            "id": "t073-b4",
+            "text": "This feeling will never leave"
+          },
+          {
+            "id": "t073-b5",
+            "text": "I should push harder"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-074",
+      "thought": "I lost an opportunity",
+      "choices": {
+        "good": [
+          {
+            "id": "t074-g1",
+            "text": "I can mourn it"
+          },
+          {
+            "id": "t074-g2",
+            "text": "Other doors may exist"
+          },
+          {
+            "id": "t074-g3",
+            "text": "I can review what happened"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t074-b1",
+            "text": "My future is ruined"
+          },
+          {
+            "id": "t074-b2",
+            "text": "I get no chances"
+          },
+          {
+            "id": "t074-b3",
+            "text": "I can never recover"
+          },
+          {
+            "id": "t074-b4",
+            "text": "Everything is unfair"
+          },
+          {
+            "id": "t074-b5",
+            "text": "I should never risk again"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-075",
+      "thought": "I feel pressured to agree",
+      "choices": {
+        "good": [
+          {
+            "id": "t075-g1",
+            "text": "I can ask for time"
+          },
+          {
+            "id": "t075-g2",
+            "text": "No can be respectful"
+          },
+          {
+            "id": "t075-g3",
+            "text": "My needs matter"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t075-b1",
+            "text": "I must please everyone"
+          },
+          {
+            "id": "t075-b2",
+            "text": "Saying no is selfish"
+          },
+          {
+            "id": "t075-b3",
+            "text": "They will hate me"
+          },
+          {
+            "id": "t075-b4",
+            "text": "I have no choice"
+          },
+          {
+            "id": "t075-b5",
+            "text": "I should ignore myself"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-076",
+      "thought": "I do not like this result",
+      "choices": {
+        "good": [
+          {
+            "id": "t076-g1",
+            "text": "I can inspect it"
+          },
+          {
+            "id": "t076-g2",
+            "text": "I can try another approach"
+          },
+          {
+            "id": "t076-g3",
+            "text": "One result is information"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t076-b1",
+            "text": "I am terrible"
+          },
+          {
+            "id": "t076-b2",
+            "text": "The effort was useless"
+          },
+          {
+            "id": "t076-b3",
+            "text": "Nothing ever changes"
+          },
+          {
+            "id": "t076-b4",
+            "text": "I should blame someone"
+          },
+          {
+            "id": "t076-b5",
+            "text": "I should abandon everything"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-077",
+      "thought": "My message sounded harsh",
+      "choices": {
+        "good": [
+          {
+            "id": "t077-g1",
+            "text": "I can clarify tone"
+          },
+          {
+            "id": "t077-g2",
+            "text": "I can apologize"
+          },
+          {
+            "id": "t077-g3",
+            "text": "I can respond thoughtfully"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t077-b1",
+            "text": "I ruined everything"
+          },
+          {
+            "id": "t077-b2",
+            "text": "I should send ten more"
+          },
+          {
+            "id": "t077-b3",
+            "text": "They will never forgive me"
+          },
+          {
+            "id": "t077-b4",
+            "text": "I am always cruel"
+          },
+          {
+            "id": "t077-b5",
+            "text": "I must defend every word"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-078",
+      "thought": "I need a break",
+      "choices": {
+        "good": [
+          {
+            "id": "t078-g1",
+            "text": "A pause is allowed"
+          },
+          {
+            "id": "t078-g2",
+            "text": "I can return refreshed"
+          },
+          {
+            "id": "t078-g3",
+            "text": "My limits matter"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t078-b1",
+            "text": "Breaks are for failures"
+          },
+          {
+            "id": "t078-b2",
+            "text": "I must finish first"
+          },
+          {
+            "id": "t078-b3",
+            "text": "I am being weak"
+          },
+          {
+            "id": "t078-b4",
+            "text": "I cannot afford rest ever"
+          },
+          {
+            "id": "t078-b5",
+            "text": "I should ignore exhaustion"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-079",
+      "thought": "I feel unnoticed",
+      "choices": {
+        "good": [
+          {
+            "id": "t079-g1",
+            "text": "I can connect with someone"
+          },
+          {
+            "id": "t079-g2",
+            "text": "My presence matters"
+          },
+          {
+            "id": "t079-g3",
+            "text": "I can express a need"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t079-b1",
+            "text": "I am invisible to everyone"
+          },
+          {
+            "id": "t079-b2",
+            "text": "I never matter"
+          },
+          {
+            "id": "t079-b3",
+            "text": "I should stop reaching out"
+          },
+          {
+            "id": "t079-b4",
+            "text": "Nobody would notice"
+          },
+          {
+            "id": "t079-b5",
+            "text": "I must demand attention"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-080",
+      "thought": "I am afraid of failing",
+      "choices": {
+        "good": [
+          {
+            "id": "t080-g1",
+            "text": "Trying teaches me"
+          },
+          {
+            "id": "t080-g2",
+            "text": "I can define a small test"
+          },
+          {
+            "id": "t080-g3",
+            "text": "Failure is possible, not certain"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t080-b1",
+            "text": "I must guarantee success"
+          },
+          {
+            "id": "t080-b2",
+            "text": "I should never try"
+          },
+          {
+            "id": "t080-b3",
+            "text": "One failure defines me"
+          },
+          {
+            "id": "t080-b4",
+            "text": "People will laugh"
+          },
+          {
+            "id": "t080-b5",
+            "text": "Only winning matters"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-081",
+      "thought": "I feel rushed",
+      "choices": {
+        "good": [
+          {
+            "id": "t081-g1",
+            "text": "I can slow one step"
+          },
+          {
+            "id": "t081-g2",
+            "text": "I can prioritize"
+          },
+          {
+            "id": "t081-g3",
+            "text": "I can leave some tasks"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t081-b1",
+            "text": "I must do it all now"
+          },
+          {
+            "id": "t081-b2",
+            "text": "Slow means lazy"
+          },
+          {
+            "id": "t081-b3",
+            "text": "Everything will collapse"
+          },
+          {
+            "id": "t081-b4",
+            "text": "I have no time ever"
+          },
+          {
+            "id": "t081-b5",
+            "text": "I must ignore my needs"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-082",
+      "thought": "I am waiting for news",
+      "choices": {
+        "good": [
+          {
+            "id": "t082-g1",
+            "text": "I can live meanwhile"
+          },
+          {
+            "id": "t082-g2",
+            "text": "I can choose a check time"
+          },
+          {
+            "id": "t082-g3",
+            "text": "Uncertainty is tolerable"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t082-b1",
+            "text": "I must refresh constantly"
+          },
+          {
+            "id": "t082-b2",
+            "text": "No news means bad news"
+          },
+          {
+            "id": "t082-b3",
+            "text": "I cannot do anything else"
+          },
+          {
+            "id": "t082-b4",
+            "text": "It will be terrible"
+          },
+          {
+            "id": "t082-b5",
+            "text": "I need answers immediately"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-083",
+      "thought": "I got a low score",
+      "choices": {
+        "good": [
+          {
+            "id": "t083-g1",
+            "text": "One score is feedback"
+          },
+          {
+            "id": "t083-g2",
+            "text": "I can practice again"
+          },
+          {
+            "id": "t083-g3",
+            "text": "I can learn a pattern"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t083-b1",
+            "text": "I am stupid"
+          },
+          {
+            "id": "t083-b2",
+            "text": "I should quit"
+          },
+          {
+            "id": "t083-b3",
+            "text": "The game proves my worth"
+          },
+          {
+            "id": "t083-b4",
+            "text": "I always lose"
+          },
+          {
+            "id": "t083-b5",
+            "text": "Improvement is impossible"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-084",
+      "thought": "I do not fit in",
+      "choices": {
+        "good": [
+          {
+            "id": "t084-g1",
+            "text": "I can find my people"
+          },
+          {
+            "id": "t084-g2",
+            "text": "Different is not lesser"
+          },
+          {
+            "id": "t084-g3",
+            "text": "I can be curious"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t084-b1",
+            "text": "I must change completely"
+          },
+          {
+            "id": "t084-b2",
+            "text": "Nobody will accept me"
+          },
+          {
+            "id": "t084-b3",
+            "text": "I should hide myself"
+          },
+          {
+            "id": "t084-b4",
+            "text": "I belong nowhere"
+          },
+          {
+            "id": "t084-b5",
+            "text": "Everyone is judging"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-085",
+      "thought": "I feel discouraged",
+      "choices": {
+        "good": [
+          {
+            "id": "t085-g1",
+            "text": "One step may help"
+          },
+          {
+            "id": "t085-g2",
+            "text": "I can seek encouragement"
+          },
+          {
+            "id": "t085-g3",
+            "text": "This feeling can shift"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t085-b1",
+            "text": "Nothing will work"
+          },
+          {
+            "id": "t085-b2",
+            "text": "I am not capable"
+          },
+          {
+            "id": "t085-b3",
+            "text": "I should give up now"
+          },
+          {
+            "id": "t085-b4",
+            "text": "All efforts are pointless"
+          },
+          {
+            "id": "t085-b5",
+            "text": "Everyone is stronger"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-086",
+      "thought": "I wish I said more",
+      "choices": {
+        "good": [
+          {
+            "id": "t086-g1",
+            "text": "I can follow up"
+          },
+          {
+            "id": "t086-g2",
+            "text": "I spoke as I could"
+          },
+          {
+            "id": "t086-g3",
+            "text": "Next time is another chance"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t086-b1",
+            "text": "I blew my chance"
+          },
+          {
+            "id": "t086-b2",
+            "text": "They think I am boring"
+          },
+          {
+            "id": "t086-b3",
+            "text": "I always freeze"
+          },
+          {
+            "id": "t086-b4",
+            "text": "I should never speak again"
+          },
+          {
+            "id": "t086-b5",
+            "text": "It is too late"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-087",
+      "thought": "I said too much",
+      "choices": {
+        "good": [
+          {
+            "id": "t087-g1",
+            "text": "I can clarify boundaries"
+          },
+          {
+            "id": "t087-g2",
+            "text": "I can be kind to myself"
+          },
+          {
+            "id": "t087-g3",
+            "text": "One conversation is not all"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t087-b1",
+            "text": "Everyone knows my flaws"
+          },
+          {
+            "id": "t087-b2",
+            "text": "I am so embarrassing"
+          },
+          {
+            "id": "t087-b3",
+            "text": "I cannot trust myself"
+          },
+          {
+            "id": "t087-b4",
+            "text": "They will use it against me"
+          },
+          {
+            "id": "t087-b5",
+            "text": "I must hide now"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-088",
+      "thought": "I am having a bad day",
+      "choices": {
+        "good": [
+          {
+            "id": "t088-g1",
+            "text": "One day does not define me"
+          },
+          {
+            "id": "t088-g2",
+            "text": "I can do one kind thing"
+          },
+          {
+            "id": "t088-g3",
+            "text": "I can lower expectations"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t088-b1",
+            "text": "Every day is awful"
+          },
+          {
+            "id": "t088-b2",
+            "text": "I will never feel better"
+          },
+          {
+            "id": "t088-b3",
+            "text": "I am failing at life"
+          },
+          {
+            "id": "t088-b4",
+            "text": "Nothing good can happen"
+          },
+          {
+            "id": "t088-b5",
+            "text": "I should punish myself"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-089",
+      "thought": "I feel impatient",
+      "choices": {
+        "good": [
+          {
+            "id": "t089-g1",
+            "text": "I can pause and notice"
+          },
+          {
+            "id": "t089-g2",
+            "text": "Waiting can be useful"
+          },
+          {
+            "id": "t089-g3",
+            "text": "I can choose my response"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t089-b1",
+            "text": "They are wasting my life"
+          },
+          {
+            "id": "t089-b2",
+            "text": "I must push everyone"
+          },
+          {
+            "id": "t089-b3",
+            "text": "I cannot tolerate delays"
+          },
+          {
+            "id": "t089-b4",
+            "text": "Everything must happen now"
+          },
+          {
+            "id": "t089-b5",
+            "text": "I should snap"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-090",
+      "thought": "Someone got more attention",
+      "choices": {
+        "good": [
+          {
+            "id": "t090-g1",
+            "text": "Attention is not a ranking"
+          },
+          {
+            "id": "t090-g2",
+            "text": "I can celebrate them"
+          },
+          {
+            "id": "t090-g3",
+            "text": "I can ask to contribute"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t090-b1",
+            "text": "They matter more than me"
+          },
+          {
+            "id": "t090-b2",
+            "text": "I must compete for notice"
+          },
+          {
+            "id": "t090-b3",
+            "text": "I am forgettable"
+          },
+          {
+            "id": "t090-b4",
+            "text": "Everyone likes them better"
+          },
+          {
+            "id": "t090-b5",
+            "text": "I should resent them"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-091",
+      "thought": "My routine got disrupted",
+      "choices": {
+        "good": [
+          {
+            "id": "t091-g1",
+            "text": "I can restart anywhere"
+          },
+          {
+            "id": "t091-g2",
+            "text": "Flexibility is useful"
+          },
+          {
+            "id": "t091-g3",
+            "text": "I can keep one habit"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t091-b1",
+            "text": "My progress is gone"
+          },
+          {
+            "id": "t091-b2",
+            "text": "Everything must be perfect"
+          },
+          {
+            "id": "t091-b3",
+            "text": "I cannot adapt"
+          },
+          {
+            "id": "t091-b4",
+            "text": "I should quit the routine"
+          },
+          {
+            "id": "t091-b5",
+            "text": "This week is ruined"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-092",
+      "thought": "I am afraid to say no",
+      "choices": {
+        "good": [
+          {
+            "id": "t092-g1",
+            "text": "I can be polite"
+          },
+          {
+            "id": "t092-g2",
+            "text": "Boundaries protect time"
+          },
+          {
+            "id": "t092-g3",
+            "text": "I can answer later"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t092-b1",
+            "text": "No makes me selfish"
+          },
+          {
+            "id": "t092-b2",
+            "text": "They will abandon me"
+          },
+          {
+            "id": "t092-b3",
+            "text": "I owe everyone yes"
+          },
+          {
+            "id": "t092-b4",
+            "text": "I cannot disappoint anyone"
+          },
+          {
+            "id": "t092-b5",
+            "text": "I must accept everything"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-093",
+      "thought": "I feel proud of progress",
+      "choices": {
+        "good": [
+          {
+            "id": "t093-g1",
+            "text": "I can appreciate it"
+          },
+          {
+            "id": "t093-g2",
+            "text": "I can keep practicing"
+          },
+          {
+            "id": "t093-g3",
+            "text": "Small wins count"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t093-b1",
+            "text": "It is not enough"
+          },
+          {
+            "id": "t093-b2",
+            "text": "I must outperform everyone"
+          },
+          {
+            "id": "t093-b3",
+            "text": "Pride is foolish"
+          },
+          {
+            "id": "t093-b4",
+            "text": "I should hide success"
+          },
+          {
+            "id": "t093-b5",
+            "text": "I can never slow down"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-094",
+      "thought": "I do not know my next step",
+      "choices": {
+        "good": [
+          {
+            "id": "t094-g1",
+            "text": "I can explore options"
+          },
+          {
+            "id": "t094-g2",
+            "text": "One question can help"
+          },
+          {
+            "id": "t094-g3",
+            "text": "I can try something small"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t094-b1",
+            "text": "I am completely lost"
+          },
+          {
+            "id": "t094-b2",
+            "text": "I need the whole plan"
+          },
+          {
+            "id": "t094-b3",
+            "text": "I will never figure it out"
+          },
+          {
+            "id": "t094-b4",
+            "text": "I should do nothing"
+          },
+          {
+            "id": "t094-b5",
+            "text": "Everyone else knows"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-095",
+      "thought": "Someone spoke sharply",
+      "choices": {
+        "good": [
+          {
+            "id": "t095-g1",
+            "text": "They may be stressed"
+          },
+          {
+            "id": "t095-g2",
+            "text": "I can set a boundary"
+          },
+          {
+            "id": "t095-g3",
+            "text": "I can ask calmly"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t095-b1",
+            "text": "They despise me"
+          },
+          {
+            "id": "t095-b2",
+            "text": "I must snap back"
+          },
+          {
+            "id": "t095-b3",
+            "text": "They are always cruel"
+          },
+          {
+            "id": "t095-b4",
+            "text": "I deserved it"
+          },
+          {
+            "id": "t095-b5",
+            "text": "This relationship is doomed"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-096",
+      "thought": "I feel awkward reaching out",
+      "choices": {
+        "good": [
+          {
+            "id": "t096-g1",
+            "text": "A small hello works"
+          },
+          {
+            "id": "t096-g2",
+            "text": "They can choose to reply"
+          },
+          {
+            "id": "t096-g3",
+            "text": "Connection starts small"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t096-b1",
+            "text": "I will bother them"
+          },
+          {
+            "id": "t096-b2",
+            "text": "They will think I am needy"
+          },
+          {
+            "id": "t096-b3",
+            "text": "I must write perfectly"
+          },
+          {
+            "id": "t096-b4",
+            "text": "I should stay silent"
+          },
+          {
+            "id": "t096-b5",
+            "text": "Nobody wants to hear me"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-097",
+      "thought": "I missed a good moment",
+      "choices": {
+        "good": [
+          {
+            "id": "t097-g1",
+            "text": "More moments will come"
+          },
+          {
+            "id": "t097-g2",
+            "text": "I can notice now"
+          },
+          {
+            "id": "t097-g3",
+            "text": "I can be present next time"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t097-b1",
+            "text": "I wasted everything"
+          },
+          {
+            "id": "t097-b2",
+            "text": "I never appreciate life"
+          },
+          {
+            "id": "t097-b3",
+            "text": "That was my only chance"
+          },
+          {
+            "id": "t097-b4",
+            "text": "I should dwell on it"
+          },
+          {
+            "id": "t097-b5",
+            "text": "I ruin all joy"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-098",
+      "thought": "I want to avoid conflict",
+      "choices": {
+        "good": [
+          {
+            "id": "t098-g1",
+            "text": "I can speak gently"
+          },
+          {
+            "id": "t098-g2",
+            "text": "Honesty can be respectful"
+          },
+          {
+            "id": "t098-g3",
+            "text": "I can choose good timing"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t098-b1",
+            "text": "Any conflict is disaster"
+          },
+          {
+            "id": "t098-b2",
+            "text": "I must agree to everything"
+          },
+          {
+            "id": "t098-b3",
+            "text": "They will reject me"
+          },
+          {
+            "id": "t098-b4",
+            "text": "Silence solves everything"
+          },
+          {
+            "id": "t098-b5",
+            "text": "My needs do not matter"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-099",
+      "thought": "I feel unsure about myself",
+      "choices": {
+        "good": [
+          {
+            "id": "t099-g1",
+            "text": "I can explore my values"
+          },
+          {
+            "id": "t099-g2",
+            "text": "I can be a work in progress"
+          },
+          {
+            "id": "t099-g3",
+            "text": "I can act with care"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t099-b1",
+            "text": "I have no identity"
+          },
+          {
+            "id": "t099-b2",
+            "text": "I must copy others"
+          },
+          {
+            "id": "t099-b3",
+            "text": "I am not enough"
+          },
+          {
+            "id": "t099-b4",
+            "text": "I will never know myself"
+          },
+          {
+            "id": "t099-b5",
+            "text": "I need everyone to approve"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thought-100",
+      "thought": "I am disappointed in myself",
+      "choices": {
+        "good": [
+          {
+            "id": "t100-g1",
+            "text": "I can take responsibility"
+          },
+          {
+            "id": "t100-g2",
+            "text": "I can offer myself patience"
+          },
+          {
+            "id": "t100-g3",
+            "text": "I can choose one repair"
+          }
+        ],
+        "bad": [
+          {
+            "id": "t100-b1",
+            "text": "I deserve harshness"
+          },
+          {
+            "id": "t100-b2",
+            "text": "I never improve"
+          },
+          {
+            "id": "t100-b3",
+            "text": "I should give up"
+          },
+          {
+            "id": "t100-b4",
+            "text": "I am beyond help"
+          },
+          {
+            "id": "t100-b5",
+            "text": "One mistake defines me"
+          }
+        ]
+      }
+    }
+  ]
+}
