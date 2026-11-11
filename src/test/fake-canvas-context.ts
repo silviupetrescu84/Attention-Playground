@@ -13,6 +13,9 @@ export interface DrawCall {
   readonly strokeStyle: unknown
   readonly lineWidth: number
   readonly font: string
+  readonly globalAlpha: number
+  readonly globalCompositeOperation: string
+  readonly shadowBlur: number
 }
 
 export interface FakeContext {
@@ -21,6 +24,12 @@ export interface FakeContext {
   fillStyle: unknown
   strokeStyle: unknown
   lineWidth: number
+  globalAlpha: number
+  globalCompositeOperation: string
+  shadowColor: string
+  shadowBlur: number
+  shadowOffsetY: number
+  lineCap: string
   textAlign: string
   textBaseline: string
   /** Calls named `name`, in order. */
@@ -44,6 +53,12 @@ export function createFakeContext(): FakeContext {
     fillStyle: '#000' as unknown,
     strokeStyle: '#000' as unknown,
     lineWidth: 1,
+    globalAlpha: 1,
+    globalCompositeOperation: 'source-over',
+    shadowColor: 'rgba(0, 0, 0, 0)',
+    shadowBlur: 0,
+    shadowOffsetY: 0,
+    lineCap: 'butt',
     textAlign: 'start',
     textBaseline: 'alphabetic',
     callsTo(name: string) {
@@ -67,6 +82,9 @@ export function createFakeContext(): FakeContext {
         strokeStyle: context.strokeStyle,
         lineWidth: context.lineWidth,
         font: context.font,
+        globalAlpha: context.globalAlpha,
+        globalCompositeOperation: context.globalCompositeOperation,
+        shadowBlur: context.shadowBlur,
       })
       return result?.(...args)
     }
@@ -81,6 +99,7 @@ export function createFakeContext(): FakeContext {
     beginPath: record('beginPath'),
     moveTo: record('moveTo'),
     lineTo: record('lineTo'),
+    closePath: record('closePath'),
     rect: record('rect'),
     roundRect: record('roundRect'),
     arc: record('arc'),

@@ -42,8 +42,8 @@ export function goalsFrom(data: GoalsData): Goal[] {
 
 /**
  * - `aligned`: serves the row's goal (+1).
- * - `against`: works against the row's goal (−1).
- * - `otherGoal`: serves a different goal, not this one (−1).
+ * - `against`: works against the row's goal (a mistake).
+ * - `otherGoal`: serves a different goal, not this one (a mistake).
  */
 export type ActionKind = 'aligned' | 'against' | 'otherGoal'
 

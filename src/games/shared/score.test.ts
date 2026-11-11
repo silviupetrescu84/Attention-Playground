@@ -15,34 +15,25 @@ describe('score', () => {
     expect(setup().score.value).toBe(0)
   })
 
-  it('adds and subtracts any number of points', () => {
+  it('adds any number of points', () => {
     const { score } = setup()
 
     score.add(1)
     score.add(5)
-    score.subtract(2)
     score.add(0.5)
 
-    expect(score.value).toBe(4.5)
-  })
-
-  it('can go below 0', () => {
-    const { score } = setup()
-
-    score.subtract(3)
-
-    expect(score.value).toBe(-3)
+    expect(score.value).toBe(6.5)
   })
 
   it('notifies subscribers with the new value on every change', () => {
     const { score, listener } = setup()
 
     score.add(2)
-    score.subtract(1)
+    score.add(1)
 
     expect(listener.mock.calls).toEqual([
-      [2, { previous: 0, reason: 'add' }],
-      [1, { previous: 2, reason: 'subtract' }],
+      [2, { reason: 'add' }],
+      [3, { reason: 'add' }],
     ])
   })
 
@@ -50,7 +41,6 @@ describe('score', () => {
     const { score, listener } = setup()
 
     score.add(0)
-    score.subtract(0)
 
     expect(listener).not.toHaveBeenCalled()
   })
@@ -89,7 +79,7 @@ describe('score', () => {
     lifecycle.start()
 
     expect(score.value).toBe(0)
-    expect(listener).toHaveBeenCalledExactlyOnceWith(0, { previous: 7, reason: 'reset' })
+    expect(listener).toHaveBeenCalledExactlyOnceWith(0, { reason: 'reset' })
   })
 
   it('resets to 0 on restart, and again on the next start', () => {
@@ -128,7 +118,6 @@ describe('score', () => {
       const { score } = setup()
 
       expect(() => score.add(points)).toThrow(RangeError)
-      expect(() => score.subtract(points)).toThrow(RangeError)
       expect(score.value).toBe(0)
     },
   )

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { cssCanvasFont, useCssVariables } from '../../test/css-variables'
+import { cssCanvasFont, cssVariables, useCssVariables } from '../../test/css-variables'
 import {
   fontSizeOf,
   useFakeCanvasContexts,
@@ -13,10 +13,11 @@ import { mountGame } from '../shared/game-shell'
 import type { FontLoader } from '../shared/load-font'
 import { fitFontSize, fontAt } from '../shared/text'
 import {
+  ACTION_SIZE,
   CHECK_Y,
   laneCentre,
+  SPAWN_Y,
   START_LANE,
-  START_SPAWN_INTERVAL_MS,
   START_SPEED,
 } from './align-the-actions'
 import data from './data/align_the_actions_goals.json'
@@ -43,8 +44,8 @@ function setup(seed = 1) {
   return mountForTest(alignTheActionsGame({ random: seededRandom(seed), fonts: loadedFonts }))
 }
 
-/** 50 ms frames until just after the first row reaches the circle (and before the second). */
-const framesToFirstChoice = Math.ceil((START_SPAWN_INTERVAL_MS + 500) / 50)
+/** 50 ms frames until just after the first row reaches the circle (10.7 s). */
+const framesToFirstChoice = Math.ceil((((CHECK_Y - SPAWN_Y) / START_SPEED) * 1_000 + 500) / 50)
 
 /**
  * What the most recent drawing shows, read back from the text drawn: the
@@ -101,11 +102,33 @@ describe('loading', () => {
 })
 
 describe('Align the Actions', () => {
-  it('shows the empty lanes and the circle behind the Start button', async () => {
-    await setup()
+  it('explains how to play with the Start button, before every round', async () => {
+    const { container, click } = await setup()
+    const card = container.querySelector<HTMLElement>('.game-hud__instructions')!
+    const paragraphs = () => [...card.querySelectorAll('p')].map((p) => p.textContent)
 
+    expect(card.closest('[hidden]')).toBeNull()
+    expect(paragraphs()).toEqual([
+      'Big goals or ways of living are defined by the actions we do',
+      'Choose the action that aligns with the stated goal. Stay the course until it’s fulfilled',
+    ])
+
+    click('.game-hud__start')
+    expect(card.closest('[hidden]')).not.toBeNull()
+    click('.game-hud__pause')
+    click('.game-hud__overlay--paused .game-hud__restart')
+    expect(card.closest('[hidden]')).toBeNull()
+  })
+
+  it('shows nothing of the game behind the Start button, then all of it once started', async () => {
+    const { click } = await setup()
+
+    expect(context().calls.map((call) => call.name)).toEqual(['setTransform', 'clearRect'])
+
+    click('.game-hud__start')
+    // The lanes, the goal and its row, and the circle in its starting lane.
     expect(context().callsTo('moveTo')).toHaveLength(3)
-    expect(context().callsTo('fillText')).toEqual([])
+    expect(lastDrawn().goal).toBeDefined()
     expect(lastDrawn().circleX).toBe(laneCentre(START_LANE))
   })
 
@@ -152,6 +175,50 @@ describe('Align the Actions', () => {
     expect(yOf()).toBeCloseTo(before + START_SPEED * 2, 6)
   })
 
+  it('shows one row on its way at a time; the one chosen from moves on down, tinted', async () => {
+    const { click, frames } = await setup(5)
+    click('.game-hud__start')
+    const tints = [cssVariables.get('--canvas-good-tint'), cssVariables.get('--canvas-bad-tint')]
+    /** How far the fastest row (210 px/s) moves in one 50 ms frame. */
+    const oneFrame = 210 * 0.05
+    let rowsBefore = 1
+    let newRows = 0
+
+    for (let i = 0; i < 1_200; i++) {
+      // Only this frame's drawing is recorded.
+      context().calls.splice(0)
+      frames.frame(50)
+      const drawing = context().lastDrawing()
+      // Each row is 4 squares, oldest row first; the last card is the goal's.
+      const squares = drawing.filter((call) => call.name === 'roundRect').slice(0, -1)
+      const fills = drawing
+        .filter((call) => call.name === 'fill')
+        .map((call) => `${call.fillStyle}`)
+      const centres = [0, 4]
+        .slice(0, squares.length / 4)
+        .map((first) => (squares[first].args[1] as number) + ACTION_SIZE / 2)
+      const onItsWay = centres.at(-1)!
+
+      expect([4, 8]).toContain(squares.length)
+      expect(onItsWay).toBeLessThan(CHECK_Y)
+      if (centres.length === 2) {
+        // Chosen from: past the circle, with the chosen square tinted.
+        expect(centres[0]).toBeGreaterThanOrEqual(CHECK_Y)
+        expect(fills.slice(0, 4).filter((fill) => tints.includes(fill))).toHaveLength(1)
+        if (rowsBefore === 1) {
+          // It has only just reached the circle, and the next row only just come out.
+          expect(centres[0] - CHECK_Y).toBeLessThanOrEqual(oneFrame)
+          expect(onItsWay - SPAWN_Y).toBeLessThanOrEqual(oneFrame)
+          newRows++
+        }
+      }
+      rowsBefore = centres.length
+    }
+
+    // 60 s: 3 rows at 60 px/s (10.7 s each), then rows at 80 px/s (8 s each).
+    expect(newRows).toBeGreaterThanOrEqual(5)
+  })
+
   it('moves the circle to the lane tapped', async () => {
     const { click, tapAt } = await setup()
     click('.game-hud__start')
@@ -175,9 +242,9 @@ describe('Align the Actions', () => {
   })
 
   it.each<[ActionKind, (action: string, goal: string, other: string) => string]>([
-    ['against', (action, goal) => `Works against “${goal}”: ${action} (−1)`],
-    ['otherGoal', (action, _goal, other) => `Belongs to “${other}”: ${action} (−1)`],
-  ])('takes a point for choosing the %s action, and says why in red', async (kind, message) => {
+    ['against', (action, goal) => `Works against “${goal}”: ${action}`],
+    ['otherGoal', (action, _goal, other) => `Belongs to “${other}”: ${action}`],
+  ])('scores nothing for choosing the %s action, and says why in red', async (kind, message) => {
     const { click, frames, tapAt, text, session } = await setup(3)
     click('.game-hud__start')
     const { goal, actions, laneOf } = lastDrawn()
@@ -193,7 +260,7 @@ describe('Align the Actions', () => {
       }
     }
 
-    expect(text('.game-hud__score')).toBe('Score: -1')
+    expect(text('.game-hud__score')).toBe('Score: 0')
     expect([...messages]).toEqual([`bad: ${message(action, goal!.title, other?.title ?? '')}`])
   })
 
@@ -203,10 +270,10 @@ describe('Align the Actions', () => {
     const other = { text: move.aligned[0], kind: 'otherGoal' as const, goal: move }
 
     expect(mistakeMessage('against', against, pause)).toBe(
-      `Works against “${pause.title}”: ${pause.against[0]} (−1)`,
+      `Works against “${pause.title}”: ${pause.against[0]}`,
     )
     expect(mistakeMessage('otherGoal', other, pause)).toBe(
-      `Belongs to “${move.title}”: ${move.aligned[0]} (−1)`,
+      `Belongs to “${move.title}”: ${move.aligned[0]}`,
     )
   })
 
@@ -231,7 +298,7 @@ describe('Align the Actions', () => {
     const [aligned, against, otherGoal] = values
     expect(against + otherGoal).toBe(10)
     expect(aligned).toBeGreaterThan(0)
-    expect(session.score.value).toBe(aligned - against - otherGoal)
+    expect(session.score.value).toBe(aligned)
   })
 
   it('ends with the first mistake on Extreme, and says what it was', async () => {
@@ -265,7 +332,7 @@ describe('Align the Actions', () => {
     const [aligned, against, otherGoal] = summaryValues()
     expect(against + otherGoal).toBe(1)
     expect(session.mistakes.count).toBe(1)
-    expect(session.score.value).toBe(aligned - 1)
+    expect(session.score.value).toBe(aligned)
   })
 
   it('clears the board on restart and starts fresh on the next Start', async () => {
@@ -276,10 +343,10 @@ describe('Align the Actions', () => {
     click('.game-hud__pause')
 
     click('.game-hud__overlay--paused .game-hud__restart')
-    expect(context().lastDrawing().filter((call) => call.name === 'fillText')).toEqual([])
-    expect(lastDrawn().circleX).toBe(laneCentre(START_LANE))
+    expect(context().lastDrawing().map((call) => call.name)).toEqual(['clearRect'])
 
     click('.game-hud__start')
     expect(lastDrawn().goal).toBeDefined()
+    expect(lastDrawn().circleX).toBe(laneCentre(START_LANE))
   })
 })

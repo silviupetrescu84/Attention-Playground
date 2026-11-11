@@ -23,11 +23,11 @@ describe('game status bar', () => {
   it('shows a message with its tone', () => {
     const { status } = setup()
 
-    status.show('Tapped a bad emotion: Fear (−1)', 'bad')
+    status.show('Tapped a bad emotion: Fear', 'bad')
 
-    expect(status.element.textContent).toBe('Tapped a bad emotion: Fear (−1)')
+    expect(status.element.textContent).toBe('Tapped a bad emotion: Fear')
     expect(status.element.dataset.tone).toBe('bad')
-    expect(status.text).toBe('Tapped a bad emotion: Fear (−1)')
+    expect(status.text).toBe('Tapped a bad emotion: Fear')
   })
 
   it('keeps a message for 2 seconds of play, then hides it', () => {

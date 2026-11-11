@@ -145,55 +145,6 @@ describe('settings', () => {
   })
 })
 
-describe('adding up over time', () => {
-  const difficulty = difficultyWith([
-    [10_000, 25],
-    [20_000, 50],
-  ])
-
-  it('is the value times the time when nothing changes in between', () => {
-    // 100 per second for 3 s.
-    expect(difficulty.totalBetween('speed', 1_000, 4_000)).toBe(300)
-    // 125 per second for 2 s.
-    expect(difficulty.totalBetween('speed', 12_000, 14_000)).toBe(250)
-  })
-
-  it('follows every step in between', () => {
-    // 5 s at 100, 10 s at 125, 5 s at 150.
-    expect(difficulty.totalBetween('speed', 5_000, 25_000)).toBe(500 + 1_250 + 750)
-  })
-
-  it('counts a step reached exactly at the start or end correctly', () => {
-    expect(difficulty.totalBetween('speed', 10_000, 12_000)).toBe(250)
-    expect(difficulty.totalBetween('speed', 8_000, 10_000)).toBe(200)
-  })
-
-  it('is 0 over no time', () => {
-    expect(difficulty.totalBetween('speed', 15_000, 15_000)).toBe(0)
-  })
-
-  it('adds up what each moment is worth, in pieces or all at once', () => {
-    const inPieces = [0, 3_000, 9_999, 10_000, 17_500, 26_000, 60_000]
-    let sum = 0
-    for (let i = 1; i < inPieces.length; i++) {
-      sum += difficulty.totalBetween('speed', inPieces[i - 1], inPieces[i])
-    }
-
-    expect(sum).toBeCloseTo(difficulty.totalBetween('speed', 0, 60_000), 9)
-  })
-
-  it('adds up settings that are harder when lower too', () => {
-    // 1 000 for 10 s, then 800 for 2 s.
-    expect(difficulty.totalBetween('delayMs', 0, 12_000)).toBe(10_000 + 1_600)
-  })
-
-  it('does not go back in time', () => {
-    expect(() => difficulty.totalBetween('speed', 5_000, 4_000)).toThrow(
-      new RangeError('Cannot add up from 5000 ms back to 4000 ms'),
-    )
-  })
-})
-
 describe('checks', () => {
   it.each([-1, Number.NaN, Number.POSITIVE_INFINITY])('rejects a step at %s ms', (atMs) => {
     expect(() => difficultyWith([[atMs, 10]])).toThrow(

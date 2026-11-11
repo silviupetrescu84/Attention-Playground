@@ -10,6 +10,8 @@ describe('resolveRoute', () => {
   it.each([
     ['/games/emotions-rise', 'Emotions Rise'],
     ['/games/align-the-actions', 'Align the Actions'],
+    ['/games/shift-perspective', 'Shift Perspective'],
+    ['/games/focus-attention', 'Focus Attention'],
   ])('resolves %s to the %s game', (pathname, name) => {
     const route = resolveRoute(pathname)
 
@@ -31,7 +33,6 @@ describe('resolveRoute', () => {
     '/emotions-rise',
     '/games/emotions-rise/extra',
     '/GAMES/EMOTIONS-RISE',
-    '/games/emotions-flow',
   ])('falls back to the home page for %j', (pathname) => {
     expect(resolveRoute(pathname)).toEqual({ page: 'home' })
   })

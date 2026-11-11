@@ -11,18 +11,31 @@ import {
   EMOTION_TEXT_FIT,
   type BubbleLook,
 } from './draw'
-import { BUBBLE_HEIGHT, BUBBLE_WIDTH, type Bubble } from './emotions-rise'
+import {
+  BUBBLE_HEIGHT,
+  BUBBLE_HIT_HEIGHT,
+  BUBBLE_HIT_WIDTH,
+  BUBBLE_WIDTH,
+  type Bubble,
+} from './emotions-rise'
 
 const allEmotions = [...emotions.positive, ...emotions.negative]
 const bubbleImage = {} as CanvasImageSource
 /** Stand-ins for the font and colours read from the CSS. */
 const look: BubbleLook = {
   font: 'test font',
-  colors: { text: 'ink', cardFill: 'card fill', cardBorder: 'card border' },
+  colors: {
+    text: 'ink',
+    cardFill: 'card fill',
+    cardBorder: 'card border',
+    rightHue: 'green hue',
+    wrongHue: 'red hue',
+  },
 }
 
 function bubble(text: string, type: 'good' | 'bad', x = 200, y = 400): Bubble {
-  return { emotion: { text, type }, x, y, speed: 50, spawnedAtMs: 0 }
+  const sway = { centre: x, phase: 0 }
+  return { emotion: { text, type }, x, y, speed: 50, spawnedAtMs: 0, sway }
 }
 
 /** Everything about how a bubble is drawn, except where and which word. */
@@ -150,7 +163,7 @@ describe('drawing the scene', () => {
 
     drawScene(
       context.asContext(),
-      [bubble('Joy', 'good'), bubble('Fear', 'bad')],
+      { bubbles: [bubble('Joy', 'good'), bubble('Fear', 'bad')], tapped: [], timeMs: 0 },
       look,
       bubbleImage,
     )
@@ -167,56 +180,73 @@ describe('drawing the scene', () => {
   it('clears the drawing layer when there are no bubbles', () => {
     const context = createFakeContext()
 
-    drawScene(context.asContext(), [], look)
+    drawScene(context.asContext(), { bubbles: [], tapped: [], timeMs: 0 }, look)
 
     expect(context.calls.map((call) => call.name)).toEqual(['clearRect'])
+  })
+
+  it('draws a tapped bubble fading out where it was, green if good, red if bad', () => {
+    const fadingAt = (timeMs: number) => {
+      const context = createFakeContext()
+      const tapped = [
+        { item: bubble('Joy', 'good', 100, 300), right: true, atMs: 1_000 },
+        { item: bubble('Fear', 'bad', 300, 500), right: false, atMs: 1_050 },
+      ]
+      drawScene(context.asContext(), { bubbles: [], tapped, timeMs }, look, bubbleImage)
+      return context
+    }
+
+    const context = fadingAt(1_075)
+
+    // 75% and 25% of the 0.1 s fade to go.
+    const images = context.callsTo('drawImage')
+    expect(images.map((call) => [call.args[1], call.globalAlpha])).toEqual([
+      [100 - BUBBLE_WIDTH / 2, 0.25],
+      [300 - BUBBLE_WIDTH / 2, 0.75],
+    ])
+    const hues = context.callsTo('fill')
+    expect(hues.map((call) => [call.fillStyle, call.globalAlpha])).toEqual([
+      ['green hue', 0.25],
+      ['red hue', 0.75],
+    ])
+    expect(context.globalAlpha).toBe(1)
+  })
+
+  it('tints the visible oval under the word, not the whole picture', () => {
+    const context = createFakeContext()
+    const tapped = [{ item: bubble('Joy', 'good', 100, 300), right: true, atMs: 0 }]
+
+    drawScene(context.asContext(), { bubbles: [], tapped, timeMs: 0 }, look, bubbleImage)
+
+    expect(context.callsTo('ellipse')[0].args).toEqual([
+      100,
+      300,
+      BUBBLE_HIT_WIDTH / 2,
+      BUBBLE_HIT_HEIGHT / 2,
+      0,
+      0,
+      Math.PI * 2,
+    ])
+    const names = context.calls.map((call) => call.name)
+    expect(names.indexOf('drawImage')).toBeLessThan(names.indexOf('fill'))
+    expect(names.indexOf('fill')).toBeLessThan(names.indexOf('fillText'))
   })
 })
 
 describe('loading the bubble image', () => {
-  /** A fresh copy of the module, so no image loaded by another test is cached. */
-  async function freshLoadBubbleImage() {
-    vi.resetModules()
-    const { loadBubbleImage } = await import('./draw')
-    return loadBubbleImage
-  }
-
   afterEach(() => {
     vi.unstubAllGlobals()
   })
 
   it('loads the oval artwork', async () => {
+    // A fresh copy of the module, so no image loaded by another test is used.
+    vi.resetModules()
+    const { loadBubbleImage } = await import('./draw')
     const images = stubImages()
-    const loadBubbleImage = await freshLoadBubbleImage()
 
     const image = await loadBubbleImage()
 
     expect(images).toEqual([image])
     expect(image.src).toBe(ovalImageUrl)
-  })
-
-  it('downloads it only once, however often it is asked for', async () => {
-    const images = stubImages()
-    const loadBubbleImage = await freshLoadBubbleImage()
-
-    const [first, second] = await Promise.all([loadBubbleImage(), loadBubbleImage()])
-    const later = await loadBubbleImage()
-
-    expect(images).toHaveLength(1)
-    expect(second).toBe(first)
-    expect(later).toBe(first)
-  })
-
-  it('fails if the image cannot load, and tries again the next time', async () => {
-    const failing = stubImages('error')
-    const loadBubbleImage = await freshLoadBubbleImage()
-
-    await expect(loadBubbleImage()).rejects.toThrow(new Error('Could not load oval.png'))
-    expect(failing).toHaveLength(1)
-
-    const working = stubImages()
-    const image = await loadBubbleImage()
-
-    expect(working).toEqual([image])
   })
 })

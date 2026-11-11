@@ -23,7 +23,12 @@ import {
   isInBubble,
   minSidewaysGap,
   pickSpawnX,
+  positionAt,
   SPAWN_Y,
+  startSway,
+  SWAY_AMPLITUDE,
+  SWAY_WAVELENGTH,
+  swayX,
   type Bubble,
   type EmotionsRiseOptions,
 } from './emotions-rise'
@@ -58,9 +63,9 @@ function playAndRecord(game: ReturnType<typeof setup>['game'], untilMs: number) 
   return [...spawned].sort((a, b) => a.spawnedAtMs - b.spawnedAtMs)
 }
 
-/** Points a tap of this bubble set is worth: +1 per good, −1 per bad. */
+/** Points a tap of this bubble set is worth: +1 per good, nothing for bad ones. */
 function tapValue(bubbles: readonly Bubble[]) {
-  return bubbles.reduce((sum, b) => sum + (b.emotion.type === 'good' ? 1 : -1), 0)
+  return bubbles.filter((b) => b.emotion.type === 'good').length
 }
 
 describe('settings', () => {
@@ -71,6 +76,7 @@ describe('settings', () => {
     expect([MIN_SPAWN_DELAY_MS, MAX_SPAWN_DELAY_MS]).toEqual([700, 1_500])
     expect(MIN_SIDEWAYS_DISTANCE).toBe(25)
     expect(MIN_CENTRE_DISTANCE).toBe(50)
+    expect([SWAY_AMPLITUDE, SWAY_WAVELENGTH]).toEqual([5, 100])
     expect(DIFFICULTY_STEPS).toEqual([
       [20_000, 10],
       [40_000, 25],
@@ -178,6 +184,110 @@ describe('pickSpawnX', () => {
   })
 })
 
+describe('swaying', () => {
+  /** Where a bubble that appeared at `spawnX` is, sideways, after rising each of `heights` px. */
+  const xsAt = (spawnX: number, heights: readonly number[]) =>
+    heights.map((risen) => swayX(startSway(spawnX), risen))
+  /** Every spawn x the game can pick, every 0.5 px. */
+  const everySpawnX = Array.from({ length: 521 }, (_, i) => 70 + i / 2)
+  /** 0, 1, 2 … `to` px risen. */
+  const heightsTo = (to: number) => Array.from({ length: to + 1 }, (_, i) => i)
+
+  it('starts exactly where the bubble appears', () => {
+    for (const spawnX of everySpawnX) {
+      expect(swayX(startSway(spawnX), 0), `spawn ${spawnX}`).toBeCloseTo(spawnX, 9)
+    }
+  })
+
+  it('sways 5 px either side, once there and back for every 100 px risen, like a snake', () => {
+    // From the left half, it heads right first: a quarter wave (25 px) to the
+    // right-most point, back through its path, to the left-most, and back.
+    const xs = xsAt(150, [0, 12.5, 25, 50, 75, 100, 125, 150, 175, 200])
+    const expected = [150, 150 + 5 * Math.SQRT1_2, 155, 150, 145, 150, 155, 150, 145, 150]
+    xs.forEach((x, i) => expect(x).toBeCloseTo(expected[i], 9))
+  })
+
+  it('heads towards the middle first from the right half too', () => {
+    const xs = xsAt(250, [0, 25, 50, 75, 100])
+    ;[250, 245, 250, 255, 250].forEach((x, i) => expect(xs[i]).toBeCloseTo(x, 9))
+  })
+
+  it('turns only at its widest points, twice per 100 px, never drifting away', () => {
+    for (const spawnX of [70, 80, 150, 200, 260, 330]) {
+      const xs = xsAt(spawnX, heightsTo(1_000))
+      const turns = xs.filter(
+        (x, i) => i > 0 && i < xs.length - 1 && (x - xs[i - 1]) * (xs[i + 1] - x) < 0,
+      )
+      // 10 waves: 20 turns (the start at an edge is not counted as a turn).
+      expect(turns.length, `spawn ${spawnX}`).toBeGreaterThanOrEqual(19)
+      expect(turns.length, `spawn ${spawnX}`).toBeLessThanOrEqual(20)
+      // Sampled every 1 px, so the widest points may be missed by a hair.
+      const [min, max] = [Math.min(...xs), Math.max(...xs)]
+      expect(max - min, `spawn ${spawnX}`).toBeCloseTo(10, 1)
+    }
+  })
+
+  it('sways around where it appears when there is room', () => {
+    for (const spawnX of [75, 100, 199.5, 200, 200.5, 300, 325]) {
+      expect(startSway(spawnX).centre).toBe(spawnX)
+    }
+  })
+
+  it('goes right first from the left edge, staying fully inside the canvas', () => {
+    // Its path is moved in to 75, so it sways between 70 and 80.
+    expect(startSway(70).centre).toBe(75)
+    const xs = xsAt(70, [0, 10, 25, 50, 75, 100])
+    expect(xs[1]).toBeGreaterThan(70)
+    ;[70, 75 - 5 * Math.cos(Math.PI / 5), 75, 80, 75, 70].forEach((x, i) =>
+      expect(xs[i]).toBeCloseTo(x, 9),
+    )
+  })
+
+  it('goes left first from the right edge, staying fully inside the canvas', () => {
+    expect(startSway(330).centre).toBe(325)
+    const xs = xsAt(330, [0, 10, 25, 50, 75, 100])
+    expect(xs[1]).toBeLessThan(330)
+    ;[330, 325 + 5 * Math.cos(Math.PI / 5), 325, 320, 325, 330].forEach((x, i) =>
+      expect(xs[i]).toBeCloseTo(x, 9),
+    )
+  })
+
+  it('heads inwards first from close to a side, before reaching it', () => {
+    // 72 is 2 px from the left-most place (70): its path is moved in to 75.
+    expect(startSway(72).centre).toBe(75)
+    expect(swayX(startSway(72), 1)).toBeGreaterThan(72)
+    expect(startSway(328).centre).toBe(325)
+    expect(swayX(startSway(328), 1)).toBeLessThan(328)
+  })
+
+  it('keeps the bubble fully inside the canvas wherever it appears, all the way up', () => {
+    const heights = heightsTo(900)
+    for (const spawnX of everySpawnX) {
+      const xs = xsAt(spawnX, heights)
+      expect(Math.min(...xs) - BUBBLE_WIDTH / 2, `spawn ${spawnX}`).toBeGreaterThanOrEqual(-1e-9)
+      expect(Math.max(...xs) + BUBBLE_WIDTH / 2, `spawn ${spawnX}`).toBeLessThanOrEqual(400 + 1e-9)
+    }
+  })
+
+  it('places a bubble by the time: rising at its speed, swaying by how far it has risen', () => {
+    const bubble: Bubble = {
+      emotion: { text: 'Joy', type: 'good' },
+      x: 150,
+      y: SPAWN_Y,
+      speed: 50,
+      spawnedAtMs: 1_000,
+      sway: startSway(150),
+    }
+
+    // 0.5 s at 50 px/s: 25 px up, a quarter wave: at its right-most point.
+    expect(positionAt(bubble, 1_500)).toEqual({ x: 155, y: SPAWN_Y - 25 })
+    // 1 s: 50 px up, half a wave: back on its path.
+    const later = positionAt(bubble, 2_000)
+    expect(later.y).toBe(SPAWN_Y - 50)
+    expect(later.x).toBeCloseTo(150, 9)
+  })
+})
+
 describe('spawning', () => {
   it('has no bubbles before the round starts', () => {
     expect(setup().game.bubbles).toEqual([])
@@ -250,21 +360,23 @@ describe('spawning', () => {
     expect(spawned.length).toBeGreaterThan(40)
     for (let i = 1; i < spawned.length; i++) {
       const [before, bubble] = [spawned[i - 1], spawned[i]]
-      // Where the previous bubble was when this one appeared.
-      const heightGap = SPAWN_Y - heightAt(before, bubble.spawnedAtMs)
-      expect(Math.abs(bubble.x - before.x)).toBeGreaterThanOrEqual(25)
-      expect(Math.hypot(bubble.x - before.x, heightGap)).toBeGreaterThanOrEqual(50 - 1e-9)
+      // Where the previous bubble was (swayed) when this one appeared.
+      const then = positionAt(before, bubble.spawnedAtMs)
+      const spawnX = swayX(bubble.sway, 0)
+      expect(Math.abs(spawnX - then.x)).toBeGreaterThanOrEqual(25 - 1e-9)
+      expect(Math.hypot(spawnX - then.x, SPAWN_Y - then.y)).toBeGreaterThanOrEqual(50 - 1e-9)
     }
   })
 
   it('does not space the first bubble of a new round from the last round', () => {
     // Random 0 always picks the leftmost allowed place: 70 when nothing is in
-    // the way. The second bubble (0.7 s later, the first only 28 px higher)
-    // must be √(50² − 28²) ≈ 41.4 px to the side: 111.4.
+    // the way. 0.7 s later the first is only 28 px higher, and has swayed
+    // right to 75 − 5 cos(2π × 28 / 100) ≈ 75.9, so the second bubble must be
+    // √(50² − 28²) ≈ 41.4 px to the side of that: 117.4.
     const { game } = setup(constantRandom(0))
     game.start()
     game.update(700)
-    expect(game.bubbles.at(-1)!.x).toBeCloseTo(111.4, 1)
+    expect(game.bubbles.at(-1)!.x).toBeCloseTo(117.4, 1)
 
     game.start()
 
@@ -300,14 +412,16 @@ describe('spawning', () => {
     expect(game.bubbles).toHaveLength(1)
   })
 
-  it('removes everything on clear', () => {
+  it('removes everything on clear, tapped bubbles too', () => {
     const { game } = setup()
     game.start()
     game.update(2_000)
+    game.tap({ x: game.bubbles[0].x, y: game.bubbles[0].y })
+    expect(game.tapped).toHaveLength(1)
 
     game.clear()
 
-    expect(game.bubbles).toEqual([])
+    expect([game.bubbles, game.tapped, game.timeMs]).toEqual([[], [], 0])
   })
 })
 
@@ -477,6 +591,80 @@ describe('rising', () => {
   })
 })
 
+describe('swaying in the game', () => {
+  it('sways every bubble on its own path, by how far it has risen, every frame', () => {
+    const { game } = setup(seededRandom(16))
+    game.start()
+    let checked = 0
+
+    for (let t = 0; t <= 30_000; t += 50) {
+      game.update(t)
+      for (const bubble of game.bubbles) {
+        const risen = (bubble.speed * (t - bubble.spawnedAtMs)) / 1000
+        const { centre, phase } = bubble.sway
+        const expected = centre + 5 * Math.sin(phase + (2 * Math.PI * risen) / 100)
+        expect(bubble.x).toBeCloseTo(expected, 9)
+        checked++
+      }
+    }
+
+    expect(checked).toBeGreaterThan(1_000)
+  })
+
+  it('appears where it was placed, then sways from there', () => {
+    // Random 0 places the first bubble at the left-most place, 70.
+    const { game } = setup(constantRandom(0))
+    game.start()
+    const [first] = game.bubbles
+    expect(first.x).toBe(70)
+    expect(first.sway).toEqual(startSway(70))
+
+    game.update(0)
+    expect(first.x).toBeCloseTo(70, 9)
+    game.update(250)
+    // 10 px up: it has started to the right, towards the middle.
+    expect(first.x).toBeCloseTo(75 - 5 * Math.cos(Math.PI / 5), 9)
+  })
+
+  it('keeps every bubble fully inside the canvas sideways, all round long', () => {
+    for (const seed of [41, 42, 43]) {
+      const { game } = setup(seededRandom(seed))
+      game.start()
+      let leftMost = 400
+      let rightMost = 0
+
+      for (let t = 0; t <= WHOLE_RAMP_MS; t += 50) {
+        game.update(t)
+        for (const { x } of game.bubbles) {
+          leftMost = Math.min(leftMost, x - BUBBLE_WIDTH / 2)
+          rightMost = Math.max(rightMost, x + BUBBLE_WIDTH / 2)
+        }
+      }
+
+      expect(leftMost).toBeGreaterThanOrEqual(-1e-9)
+      expect(rightMost).toBeLessThanOrEqual(400 + 1e-9)
+      // It really got close to both sides.
+      expect(leftMost).toBeLessThan(1)
+      expect(rightMost).toBeGreaterThan(399)
+    }
+  })
+
+  it('hits a bubble where it is now, after swaying', () => {
+    // Random 0: the first bubble appears at 70, rising 40 px/s, and has swayed
+    // right to ≈ 75.9 after 0.699 s, just before the next one appears.
+    const { game } = setup(constantRandom(0))
+    game.start()
+    const [first] = game.bubbles
+    game.update(699)
+    expect(first.x).toBeCloseTo(75 - 5 * Math.cos((2 * Math.PI * 27.96) / 100), 9)
+
+    // Just inside its right edge.
+    game.tap({ x: first.x + BUBBLE_HIT_WIDTH / 2 - 0.5, y: first.y })
+
+    expect(game.bubbles).not.toContain(first)
+  })
+})
+
 describe('the oval', () => {
   const bubble = { x: 200, y: 400 }
   const side = BUBBLE_HIT_WIDTH / 2
@@ -524,7 +712,7 @@ describe('tapping', () => {
     return { x: point.x, y: point.y, bubble: point.under[0] }
   }
 
-  it('gives +1 for a good emotion and −1 for a bad one, and removes it', () => {
+  it('gives +1 for a good emotion and nothing for a bad one, and removes it', () => {
     const { game, score } = playedFor(6, 10_000)
 
     const good = pointOnlyOn(game.bubbles, 'good')
@@ -534,8 +722,53 @@ describe('tapping', () => {
 
     const bad = pointOnlyOn(game.bubbles, 'bad')
     game.tap(bad)
-    expect(score.value).toBe(0)
+    expect(score.value).toBe(1)
+    expect(game.stats.badTapped).toBe(1)
     expect(game.bubbles).not.toContain(bad.bubble)
+  })
+
+  it('stops a tapped bubble where it is and fades it out: right if good, wrong if bad', () => {
+    const { game } = playedFor(6, 10_000)
+    const good = pointOnlyOn(game.bubbles, 'good')
+    const { x, y } = good.bubble
+    game.tap(good)
+    const bad = pointOnlyOn(game.bubbles, 'bad')
+    game.tap(bad)
+
+    expect(game.tapped).toEqual([
+      { item: good.bubble, right: true, atMs: 10_000 },
+      { item: bad.bubble, right: false, atMs: 10_000 },
+    ])
+
+    game.update(10_099)
+    expect(game.tapped.map((tapped) => tapped.item)).toEqual([good.bubble, bad.bubble])
+    // Tapped, it stays where it was: it neither rises nor sways.
+    expect([good.bubble.x, good.bubble.y]).toEqual([x, y])
+
+    game.update(10_100)
+    expect(game.tapped).toEqual([])
+  })
+
+  it('can tap a bubble only once, and a tapped one never escapes', () => {
+    const missed: Emotion[] = []
+    const { game, score } = setup(seededRandom(6), {
+      onMistake: (mistake, emotion) => {
+        if (mistake === 'goodMissed') missed.push(emotion)
+      },
+    })
+    game.start()
+    game.update(10_000)
+    const good = pointOnlyOn(game.bubbles, 'good')
+
+    game.tap(good)
+    game.tap(good)
+    expect(score.value).toBe(1)
+    expect(game.stats.goodTapped).toBe(1)
+
+    // Long after it would have risen out of the top.
+    for (let t = 10_000; t <= 40_000; t += 100) game.update(t)
+    expect(missed.length).toBeGreaterThan(0)
+    expect(missed).not.toContain(good.bubble.emotion)
   })
 
   it('counts every bubble under the tap', () => {
@@ -589,10 +822,9 @@ describe('tapping', () => {
 
 describe('mistakes', () => {
   function setupWithMistakes(seed: number) {
-    const mistakes: { mistake: string; emotion: Emotion; scoreThen: number }[] = []
+    const mistakes: { mistake: string; emotion: Emotion }[] = []
     const played = setup(seededRandom(seed), {
-      onMistake: (mistake, emotion) =>
-        mistakes.push({ mistake, emotion, scoreThen: played.score.value }),
+      onMistake: (mistake, emotion) => mistakes.push({ mistake, emotion }),
     })
     return { ...played, mistakes }
   }
@@ -620,16 +852,35 @@ describe('mistakes', () => {
     }
   })
 
-  it('reports a mistake after its point has been taken', () => {
-    const { game, score, mistakes } = setupWithMistakes(22)
+  it('reports the good emotion that escaped', () => {
+    const { game, mistakes } = setupWithMistakes(22)
     game.start()
+    const escaping = new Set<Bubble>()
 
     for (let t = 0; t <= 60_000 && mistakes.length === 0; t += 100) {
+      game.bubbles.forEach((bubble) => escaping.add(bubble))
       game.update(t)
     }
 
-    expect(mistakes[0].mistake).toBe('goodMissed')
-    expect(mistakes[0].scoreThen).toBe(score.value)
+    const escaped = [...escaping].filter(
+      (b) => b.emotion.type === 'good' && !game.bubbles.includes(b),
+    )
+    expect(escaped.length).toBeGreaterThan(0)
+    expect(mistakes).toEqual(escaped.map((b) => ({ mistake: 'goodMissed', emotion: b.emotion })))
+  })
+
+  it('reports the bad emotion tapped', () => {
+    const { game, mistakes } = setupWithMistakes(6)
+    game.start()
+    game.update(10_000)
+    const bad = findPoint(
+      game.bubbles,
+      (under) => under.length === 1 && under[0].emotion.type === 'bad',
+    )!
+
+    game.tap(bad)
+
+    expect(mistakes).toEqual([{ mistake: 'badTapped', emotion: bad.under[0].emotion }])
   })
 
   it('works without anyone listening', () => {
@@ -654,7 +905,7 @@ describe('stopping', () => {
   }
 
   it('counts only the first of two bad bubbles under a tap if its mistake stops the round', () => {
-    const { game, score } = stoppingAtFirstMistake(seededRandom(8))
+    const { game } = stoppingAtFirstMistake(seededRandom(8))
     let point: ReturnType<typeof findPoint<Bubble>>
     for (let t = 0; t <= 120_000 && !point; t += 250) {
       game.update(t)
@@ -665,12 +916,10 @@ describe('stopping', () => {
       )
     }
     const [first, ...rest] = point!.under
-    const scoreBefore = score.value
 
     game.tap(point!)
 
     expect(game.stats.badTapped).toBe(1)
-    expect(score.value).toBe(scoreBefore - 1)
     expect(game.bubbles).not.toContain(first)
     for (const bubble of rest) expect(game.bubbles).toContain(bubble)
   })
@@ -682,7 +931,7 @@ describe('stopping', () => {
     game.update(60_000)
 
     expect(game.stats.goodMissed).toBe(1)
-    expect(score.value).toBe(game.stats.badLetGo - 1)
+    expect(score.value).toBe(game.stats.badLetGo)
   })
 
   it('moves nothing and brings nothing new once stopped', () => {
@@ -742,7 +991,7 @@ describe('round record', () => {
     expect(game.stats).toMatchObject(expected)
   })
 
-  it('always matches the score: tapped good − tapped bad − missed good + let-go bad', () => {
+  it('always matches the score: tapped good + let-go bad', () => {
     for (const seed of [1, 2, 3, 4, 5]) {
       const random = seededRandom(seed)
       const { game, score } = setup(seededRandom(seed + 100))
@@ -754,8 +1003,11 @@ describe('round record', () => {
       }
 
       const { goodTapped, badTapped, goodMissed, badLetGo } = game.stats
-      expect(goodTapped + badTapped + goodMissed + badLetGo).toBeGreaterThan(20)
-      expect(score.value).toBe(goodTapped - badTapped - goodMissed + badLetGo)
+      expect(goodTapped + badLetGo).toBeGreaterThan(10)
+      // Mistakes were made too: a round with all four outcomes.
+      expect(badTapped).toBeGreaterThan(0)
+      expect(goodMissed).toBeGreaterThan(0)
+      expect(score.value).toBe(goodTapped + badLetGo)
     }
   })
 
@@ -776,7 +1028,7 @@ describe('round record', () => {
 })
 
 describe('escaping', () => {
-  it('costs a point for each good emotion that escapes and gives one for each bad one', () => {
+  it('gives a point for each bad emotion that escapes, and none for good ones', () => {
     const { game, score } = setup(seededRandom(12))
     game.start()
     const yAt = (b: Bubble, t: number) => SPAWN_Y - (b.speed * (t - b.spawnedAtMs)) / 1000
@@ -798,7 +1050,7 @@ describe('escaping', () => {
 
     expect(goodEscaped).toBeGreaterThan(5)
     expect(badEscaped).toBeGreaterThan(5)
-    expect(score.value).toBe(badEscaped - goodEscaped)
+    expect(score.value).toBe(badEscaped)
     expect(game.stats).toEqual({
       goodTapped: 0,
       badTapped: 0,

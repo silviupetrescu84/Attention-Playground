@@ -2,10 +2,12 @@ import { describe, expect, it, vi } from 'vitest'
 import { gamePath, games, preloadGames, TOTAL_GAMES, type CatalogGame } from './catalog'
 
 describe('games catalog', () => {
-  it('lists Emotions Rise and Align the Actions, in that order', () => {
+  it('lists the four games in their order on the home screen', () => {
     expect(games.map((game) => [game.id, game.name])).toEqual([
       ['emotions-rise', 'Emotions Rise'],
       ['align-the-actions', 'Align the Actions'],
+      ['shift-perspective', 'Shift Perspective'],
+      ['focus-attention', 'Focus Attention'],
     ])
   })
 
@@ -19,7 +21,12 @@ describe('games catalog', () => {
   })
 
   it('builds each game path from its id', () => {
-    expect(games.map(gamePath)).toEqual(['/games/emotions-rise', '/games/align-the-actions'])
+    expect(games.map(gamePath)).toEqual([
+      '/games/emotions-rise',
+      '/games/align-the-actions',
+      '/games/shift-perspective',
+      '/games/focus-attention',
+    ])
   })
 
   it('gives every game an icon and a way to create it', () => {

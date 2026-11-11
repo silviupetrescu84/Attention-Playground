@@ -12,7 +12,7 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-function setup() {
+function setup(extra: Pick<GameHandlers, 'instructions'> = {}) {
   const container = document.createElement('main')
   document.body.replaceChildren(container)
   const screen = new AbortController()
@@ -23,6 +23,7 @@ function setup() {
     frame: vi.fn(),
     tap: vi.fn(),
     summary: undefined as GameHandlers['summary'],
+    ...extra,
   } satisfies GameHandlers
   let session!: GameSession
   const game = vi.fn((given: GameSession) => {
@@ -347,6 +348,25 @@ describe('status bar', () => {
     session.lifecycle.resume()
 
     expect(session.status.text).toBe('Oops')
+  })
+})
+
+describe('instructions', () => {
+  it("shows the game's instructions with the Start button", () => {
+    const { container } = setup({ instructions: ['Read this.', 'Then start.'] })
+
+    const card = container.querySelector<HTMLElement>('.game-hud__instructions')!
+    expect(card.hidden).toBe(false)
+    expect([...card.querySelectorAll('p')].map((p) => p.textContent)).toEqual([
+      'Read this.',
+      'Then start.',
+    ])
+  })
+
+  it('shows no instructions for games without any', () => {
+    const { container } = setup()
+
+    expect(container.querySelector<HTMLElement>('.game-hud__instructions')!.hidden).toBe(true)
   })
 })
 

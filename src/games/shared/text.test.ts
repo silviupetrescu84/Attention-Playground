@@ -4,8 +4,11 @@ import { cssVariables, useCssVariables } from '../../test/css-variables'
 import { createFakeContext, fontSizeOf } from '../../test/fake-canvas-context'
 import {
   CANVAS_FONT,
+  drawTextBlock,
   fitFontSize,
+  fitInCircle,
   fontAt,
+  LINE_HEIGHT,
   loadCanvasFont,
   wrapText,
   type CanvasFont,
@@ -162,6 +165,55 @@ describe('fitFontSize', () => {
     expect(fonts.length).toBeGreaterThan(0)
     for (const measuredIn of fonts) {
       expect(measuredIn).toBe(fontAt(font, fontSizeOf(measuredIn)))
+    }
+  })
+})
+
+describe('drawTextBlock', () => {
+  it('centres one line on the point, in the font and colour given', () => {
+    const context = createFakeContext()
+
+    drawTextBlock(context.asContext(), { fontSize: 14, lines: ['Rest'] }, 150, 300, font, 'ink')
+
+    const texts = context.callsTo('fillText')
+    expect(texts.map(({ args, font: drawn, fillStyle }) => [args, drawn, fillStyle])).toEqual([
+      [['Rest', 150, 300], fontAt(font, 14), 'ink'],
+    ])
+    expect([context.textAlign, context.textBaseline]).toEqual(['center', 'middle'])
+  })
+
+  it('centres several lines on the point, 1.2 × the size apart', () => {
+    const context = createFakeContext()
+    const twoLines = { fontSize: 10, lines: ['Drift', 'through'] }
+
+    drawTextBlock(context.asContext(), twoLines, 150, 300, font, 'ink')
+
+    expect(LINE_HEIGHT).toBe(1.2)
+    expect(context.callsTo('fillText').map((call) => call.args)).toEqual([
+      ['Drift', 150, 294],
+      ['through', 150, 306],
+    ])
+  })
+})
+
+describe('fitInCircle', () => {
+  it('makes lines as wide as the circle at the top and bottom of the text, less a margin', () => {
+    const fit = fitInCircle(50, 4, { maxLines: 2, minSize: 8, maxSize: 15 })
+
+    // 2 lines of 15 px: 36 px high. 18 px from the centre, the circle is 2 × 46.6 wide.
+    expect(fit).toEqual({ maxWidth: 85, maxLines: 2, minSize: 8, maxSize: 15 })
+  })
+
+  it('keeps every corner of the tallest text inside the circle', () => {
+    for (const [radius, maxLines, maxSize] of [
+      [50, 1, 20],
+      [62, 3, 20],
+      [56, 3, 16],
+    ]) {
+      const { maxWidth } = fitInCircle(radius, 4, { maxLines, minSize: 8, maxSize })
+      const halfHeight = (maxLines * maxSize * LINE_HEIGHT) / 2
+
+      expect(Math.hypot(maxWidth / 2 + 4, halfHeight)).toBeLessThanOrEqual(radius)
     }
   })
 })

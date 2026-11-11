@@ -56,6 +56,8 @@ export interface GameHandlers {
   end?(): void
   /** Extra lines for the finished screen, below the score. */
   summary?(): readonly SummaryItem[]
+  /** How to play, one paragraph each: shown with the Start button whenever it is shown. */
+  readonly instructions?: readonly string[]
 }
 
 /** A minigame: given the shared session, returns its rules. */
@@ -93,6 +95,7 @@ export function mountGame(
   const session: GameSession = { lifecycle, loop, score, mistakes, canvas, hud, status }
   const rules = game(session)
   handlers = rules
+  hud.showInstructions(rules.instructions ?? [])
 
   lifecycle.subscribe(({ state, action }) => {
     // A new round or a restart: old messages no longer apply. (At the end,

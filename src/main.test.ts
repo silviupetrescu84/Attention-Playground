@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import goalsData from './games/align-the-actions/data/align_the_actions_goals.json'
 import { goalsFrom } from './games/align-the-actions/goals'
 import emotions from './games/emotions-rise/data/emotions.json'
+import focusData from './games/focus-attention/data/focus-attention.json'
 import { cssCanvasFont, useCssVariables } from './test/css-variables'
 import { useFakeCanvasContexts, type FakeContext } from './test/fake-canvas-context'
 import { stubImages } from './test/fake-image'
@@ -126,6 +127,8 @@ describe('app start', () => {
   it.each([
     ['/games/emotions-rise', 'Emotions Rise'],
     ['/games/align-the-actions', 'Align the Actions'],
+    ['/games/shift-perspective', 'Shift Perspective'],
+    ['/games/focus-attention', 'Focus Attention'],
   ])('opens %s directly on the %s screen', async (pathname, gameName) => {
     await startApp(pathname)
 
@@ -283,7 +286,12 @@ describe('game canvas', () => {
 })
 
 describe('games', () => {
-  it.each(['/games/emotions-rise', '/games/align-the-actions'])(
+  it.each([
+    '/games/emotions-rise',
+    '/games/align-the-actions',
+    '/games/shift-perspective',
+    '/games/focus-attention',
+  ])(
     '%s first shows a Start button',
     async (pathname) => {
       const { app } = await startApp(pathname)
@@ -322,6 +330,39 @@ describe('games', () => {
     const drawn = contexts.at(-1)!.callsTo('fillText').map((call) => call.args[0])
     expect(drawn).toHaveLength(1)
     expect([...emotions.positive, ...emotions.negative]).toContain(drawn[0])
+  })
+
+  it('plays Shift Perspective on its screen', async () => {
+    const { app } = await startApp('/games/shift-perspective')
+    const start = app.querySelector<HTMLButtonElement>('.game-hud__start')!
+    // jsdom cannot load fonts, so the game soon gives up and uses a fallback.
+    await vi.waitFor(() => expect(start.disabled).toBe(false))
+    const before = contexts.at(-1)!.calls.length
+
+    start.click()
+
+    // The round is on, and the canvas is cleared for the first thought to
+    // fade in. (Its frames are not timed in jsdom: the game's own tests
+    // play it frame by frame.)
+    expect(app.querySelector<HTMLElement>('.game-hud__pause')!.hidden).toBe(false)
+    expect(contexts.at(-1)!.calls.slice(before).map((call) => call.name)).toEqual(['clearRect'])
+  })
+
+  it('plays Focus Attention on its screen', async () => {
+    const { app } = await startApp('/games/focus-attention')
+    const start = app.querySelector<HTMLButtonElement>('.game-hud__start')!
+    // jsdom cannot load fonts, so the game soon gives up and uses a fallback.
+    await vi.waitFor(() => expect(start.disabled).toBe(false))
+
+    start.click()
+
+    // The first word comes straight away, and the two buttons are at the bottom.
+    const drawn = contexts.at(-1)!.lastDrawing()
+    const texts = drawn.filter((call) => call.name === 'fillText').map((call) => call.args[0])
+    expect(texts).toHaveLength(3)
+    expect([...focusData.values, ...focusData.antiValues]).toContain(texts[0])
+    expect(texts.slice(1)).toEqual(['Focus', 'Change attention'])
+    expect(app.querySelector<HTMLElement>('.game-hud__pause')!.hidden).toBe(false)
   })
 })
 

@@ -4,14 +4,13 @@ import { createListeners } from './listeners'
 
 /**
  * The score shared by every minigame. Each game decides how many points to
- * add or subtract and when. The score goes back to 0 whenever a round starts
- * (and on restart), and can go below 0.
+ * add and when; mistakes are counted separately (see the shared mistakes).
+ * The score goes back to 0 whenever a round starts (and on restart).
  */
 
 export interface ScoreChange {
-  readonly previous: number
   /** `reset` is the automatic return to 0 when a round starts or restarts. */
-  readonly reason: 'add' | 'subtract' | 'reset'
+  readonly reason: 'add' | 'reset'
 }
 
 export type ScoreListener = (score: number, change: ScoreChange) => void
@@ -19,7 +18,6 @@ export type ScoreListener = (score: number, change: ScoreChange) => void
 export interface Score {
   readonly value: number
   add(points: number): void
-  subtract(points: number): void
   /** Calls `listener` with the new value (and why it changed) after every change. */
   subscribe(listener: ScoreListener): () => void
 }
@@ -37,9 +35,8 @@ export function createScore({ lifecycle }: ScoreOptions): Score {
       return
     }
 
-    const change: ScoreChange = { previous: value, reason }
     value = next
-    listeners.notify(value, change)
+    listeners.notify(value, { reason })
   }
 
   lifecycle.subscribe((change) => {
@@ -55,10 +52,6 @@ export function createScore({ lifecycle }: ScoreOptions): Score {
     add(points) {
       checkNotNegative(points, 'Points')
       set(value + points, 'add')
-    },
-    subtract(points) {
-      checkNotNegative(points, 'Points')
-      set(value - points, 'subtract')
     },
     subscribe: listeners.add,
   }

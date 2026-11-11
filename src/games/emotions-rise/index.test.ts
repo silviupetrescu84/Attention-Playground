@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { bubblesAt, findPoint } from '../../test/emotions-rise/bubbles'
-import { cssCanvasFont, useCssVariables } from '../../test/css-variables'
+import { cssCanvasFont, cssVariables, useCssVariables } from '../../test/css-variables'
 import { useFakeCanvasContexts, type FakeContext } from '../../test/fake-canvas-context'
 import { FakeFrames } from '../../test/fake-frames'
 import { stubImages } from '../../test/fake-image'
@@ -132,6 +132,25 @@ describe('loading', () => {
 })
 
 describe('Emotions Rise', () => {
+  it('explains how to play with the Start button, before every round', async () => {
+    const { container, click } = await setup()
+    const card = container.querySelector<HTMLElement>('.game-hud__instructions')!
+    const paragraphs = () => [...card.querySelectorAll('p')].map((p) => p.textContent)
+
+    expect(card.closest('[hidden]')).toBeNull()
+    expect(paragraphs()).toEqual([
+      'Emotions rise but sometimes they are good, sometimes they are bad but all the same',
+      'Choose the good ones, let the bad ones fade away',
+      'Don’t let good emotions fade away',
+    ])
+
+    click('.game-hud__start')
+    expect(card.closest('[hidden]')).not.toBeNull()
+    click('.game-hud__pause')
+    click('.game-hud__overlay--paused .game-hud__restart')
+    expect(card.closest('[hidden]')).toBeNull()
+  })
+
   it('shows only the background behind the Start button', async () => {
     await setup()
 
@@ -161,21 +180,62 @@ describe('Emotions Rise', () => {
     expect(bubbles[0].y).toBeLessThan(SPAWN_Y - 30)
   })
 
-  it('changes the shown score when emotions are tapped', async () => {
-    const { click, frames, tapAt, text } = await setup(3)
+  it('draws the emotions swaying from side to side as they rise, inside the canvas', async () => {
+    const { click, frames } = await setup()
     click('.game-hud__start')
-    frames.frames(200, 50)
-    const bubbles = lastDrawnBubbles()
+    // The oldest bubble is drawn first; follow it for 5 s (at least 200 px up).
+    const xs: number[] = []
+    for (let i = 0; i < 100; i++) {
+      frames.frame(50)
+      xs.push(lastDrawnBubbles()[0].x)
+    }
 
-    // A visible point covered by exactly one bubble.
-    const target = findPoint(bubbles, (under) => under.length === 1, { maxY: 795 })!
-    const [tapped] = target.under
-    tapAt(target.x, target.y)
-
-    expect(text('.game-hud__score')).toBe(`Score: ${isGood(tapped.word) ? 1 : -1}`)
-    expect(lastDrawnBubbles()).toHaveLength(bubbles.length - 1)
-    expect(lastDrawnBubbles()).not.toContainEqual(tapped)
+    expect(SPAWN_Y - lastDrawnBubbles()[0].y).toBeGreaterThanOrEqual(200)
+    const sideways = xs.slice(1).map((x, i) => x - xs[i])
+    expect(sideways.some((dx) => dx > 0.2)).toBe(true)
+    expect(sideways.some((dx) => dx < -0.2)).toBe(true)
+    expect(Math.max(...xs) - Math.min(...xs)).toBeLessThanOrEqual(10 + 1e-9)
+    expect(Math.min(...xs)).toBeGreaterThanOrEqual(70 - 1e-9)
+    expect(Math.max(...xs)).toBeLessThanOrEqual(330 + 1e-9)
   })
+
+  it.each([
+    ['good', 'Score: 1', '--canvas-right-hue'],
+    ['bad', 'Score: 0', '--canvas-wrong-hue'],
+  ] as const)(
+    'shows the score after tapping a %s emotion: %s, and fades it out with a hue',
+    async (type, score, hue) => {
+      const { click, frames, tapAt, text } = await setup(3)
+      click('.game-hud__start')
+      frames.frames(200, 50)
+      const bubbles = lastDrawnBubbles()
+
+      // A visible point covered by exactly one bubble, of that type.
+      const target = findPoint(
+        bubbles,
+        (under) => under.length === 1 && isGood(under[0].word) === (type === 'good'),
+        { maxY: 795 },
+      )!
+      const [tapped] = target.under
+      tapAt(target.x, target.y)
+
+      expect(text('.game-hud__score')).toBe(score)
+      // Still there, where it was tapped, with its hue over it…
+      expect(lastDrawnBubbles()).toContainEqual(tapped)
+      const hues = context()
+        .lastDrawing()
+        .filter((call) => call.name === 'fill')
+        .map((call) => call.fillStyle)
+      expect(hues).toEqual([cssVariables.get(hue)])
+
+      // …then, 0.1 s later, gone, while the others went on rising.
+      frames.frame(50)
+      expect(lastDrawnBubbles()).toContainEqual(tapped)
+      frames.frame(50)
+      expect(lastDrawnBubbles().map((b) => b.word)).not.toContain(tapped.word)
+      expect(lastDrawnBubbles()).toHaveLength(bubbles.length - 1)
+    },
+  )
 
   it('freezes while paused: no movement, no taps', async () => {
     const { click, frames, tapAt, text } = await setup()
@@ -207,10 +267,10 @@ describe('Emotions Rise', () => {
 
   it('explains mistakes in the status bar below the canvas', () => {
     expect(mistakeMessage('badTapped', { text: 'Fear', type: 'bad' })).toBe(
-      'Tapped a bad emotion: Fear (−1)',
+      'Tapped a bad emotion: Fear',
     )
     expect(mistakeMessage('goodMissed', { text: 'Joy', type: 'good' })).toBe(
-      'Missed a good emotion: Joy (−1)',
+      'Missed a good emotion: Joy',
     )
   })
 
@@ -232,7 +292,7 @@ describe('Emotions Rise', () => {
         expect(message).toBe('')
         seen.push('good')
       } else {
-        expect(message).toBe(`Tapped a bad emotion: ${alone.word} (−1)`)
+        expect(message).toBe(`Tapped a bad emotion: ${alone.word}`)
         expect(session.status.element.dataset.tone).toBe('bad')
         seen.push('bad')
       }
@@ -256,8 +316,8 @@ describe('Emotions Rise', () => {
 
     expect(messages.size).toBeGreaterThan(5)
     for (const message of messages) {
-      expect(message).toMatch(/^Missed a good emotion: (.+) \(−1\)$/)
-      expect(emotions.positive).toContain(message.match(/: (.+) \(/)![1])
+      const missed = message.match(/^Missed a good emotion: (.+)$/)
+      expect(emotions.positive, message).toContain(missed?.[1])
     }
   })
 
@@ -272,7 +332,7 @@ describe('Emotions Rise', () => {
     expect(values[1]).toBe(10)
     expect(text('.game-hud__mistakes')).toBe('Mistakes: 10')
     expect(text('.game-hud__final-score')).toBe(`Score: ${session.score.value}`)
-    expect(session.status.text).toMatch(/^Missed a good emotion: .+ \(−1\)$/)
+    expect(session.status.text).toMatch(/^Missed a good emotion: .+$/)
   })
 
   it('ends with the first mistake on Extreme', async () => {
@@ -306,13 +366,10 @@ describe('Emotions Rise', () => {
         )
       }
       const before = session.mistakes.count
-      const scoreBefore = session.score.value
 
       tapAt(target!.x, target!.y)
 
       expect(session.mistakes.count - before).toBe(mistakes)
-      // Nothing after the mistake that ends the round counts, points included.
-      expect(session.score.value).toBe(scoreBefore - mistakes)
       expect(text('.game-hud__mistakes')).toBe(`Mistakes: ${session.mistakes.count}`)
       expect(session.lifecycle.state).toBe(state)
       if (state === 'finished') expect(summaryValues()[2]).toBe(1)
@@ -346,7 +403,7 @@ describe('Emotions Rise', () => {
     expect(badTapped).toBeGreaterThan(0)
     expect(goodMissed).toBeGreaterThan(0)
     expect(badLetGo).toBeGreaterThan(0)
-    expect(session.score.value).toBe(goodTapped - goodMissed - badTapped + badLetGo)
+    expect(session.score.value).toBe(goodTapped + badLetGo)
   })
 
   it('starts the record from zero on the next round', async () => {

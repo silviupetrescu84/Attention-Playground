@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { cssVariables } from '../../test/css-variables'
 import { createFakeContext, type DrawCall } from '../../test/fake-canvas-context'
-import { fontAt, type CanvasFont } from '../shared/text'
+import { fontAt, type CanvasFont, type TextBlock } from '../shared/text'
 import {
   ACTION_SIZE,
   CHECK_Y,
@@ -21,13 +21,10 @@ import {
   drawLanes,
   drawRow,
   drawScene,
-  drawTextBlock,
   GOAL_TEXT_FIT,
   layOutActions,
-  LINE_HEIGHT,
   type AlignColors,
   type SceneLook,
-  type TextBlock,
 } from './draw'
 import type { ActionKind, Goal } from './goals'
 
@@ -48,6 +45,7 @@ function row({
     goal,
     actions: texts.map((text, lane) => ({ text, kind: kinds[lane], goal })),
     spawnedAtMs: 0,
+    speed: 60,
     y,
     chosenLane,
   }
@@ -161,33 +159,6 @@ describe('remembering how rows are written', () => {
 
     expect(short[0].fontSize).toBe(16)
     expect(long[0].fontSize).toBe(10.5)
-  })
-})
-
-describe('writing a text', () => {
-  it('centres one line on the point, in the ink colour', () => {
-    const context = createFakeContext()
-
-    drawTextBlock(context.asContext(), oneLine('Rest', 14), 150, 300, textLook)
-
-    const texts = context.callsTo('fillText')
-    expect(texts.map(({ args, font, fillStyle }) => [args, font, fillStyle])).toEqual([
-      [['Rest', 150, 300], fontAt(font, 14), 'ink'],
-    ])
-    expect([context.textAlign, context.textBaseline]).toEqual(['center', 'middle'])
-  })
-
-  it('centres several lines on the point, 1.2 × the size apart', () => {
-    const context = createFakeContext()
-    const twoLines = { fontSize: 10, lines: ['Drift', 'through'] }
-
-    drawTextBlock(context.asContext(), twoLines, 150, 300, textLook)
-
-    expect(LINE_HEIGHT).toBe(1.2)
-    expect(context.callsTo('fillText').map((call) => call.args)).toEqual([
-      ['Drift', 150, 294],
-      ['through', 150, 306],
-    ])
   })
 })
 

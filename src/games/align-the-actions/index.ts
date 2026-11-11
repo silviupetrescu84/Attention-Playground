@@ -1,9 +1,10 @@
 import { readCssVariables } from '../shared/canvas-style'
+import { clearGameCanvas } from '../shared/game-canvas'
 import type { GameDefinition } from '../shared/game-shell'
 import type { FontLoader } from '../shared/load-font'
 import type { Random } from '../shared/random'
 import { CANVAS_FONT, fitFontSize, loadCanvasFont } from '../shared/text'
-import { createAlignTheActions, POINTS, type Mistake } from './align-the-actions'
+import { createAlignTheActions, type Mistake } from './align-the-actions'
 import data from './data/align_the_actions_goals.json'
 import { ALIGN_COLORS, createActionText, drawScene, GOAL_TEXT_FIT } from './draw'
 import { goalsFrom, type Action, type Goal } from './goals'
@@ -17,9 +18,9 @@ const goalTitles = goals.map((goal) => goal.title)
  */
 const mistakeMessages: Record<Mistake, (action: Action, goal: Goal) => string> = {
   against: (action, goal) =>
-    `Works against “${goal.title}”: ${action.text} (−${POINTS.notAligned})`,
+    `Works against “${goal.title}”: ${action.text}`,
   otherGoal: (action) =>
-    `Belongs to “${action.goal.title}”: ${action.text} (−${POINTS.notAligned})`,
+    `Belongs to “${action.goal.title}”: ${action.text}`,
 }
 
 export function mistakeMessage(mistake: Mistake, action: Action, goal: Goal): string {
@@ -40,6 +41,12 @@ export interface AlignTheActionsGameOptions {
 export function preloadAlignTheActions(fonts?: FontLoader): Promise<boolean> {
   return loadCanvasFont({ fonts })
 }
+
+/** How to play, shown with the Start button. */
+export const INSTRUCTIONS: readonly string[] = [
+  'Big goals or ways of living are defined by the actions we do',
+  'Choose the action that aligns with the stated goal. Stay the course until it’s fulfilled',
+]
 
 export function alignTheActionsGame({
   random = Math.random,
@@ -62,12 +69,14 @@ export function alignTheActionsGame({
     const draw = () => drawScene(canvas.context, game, { goalFontSize, textOf, colors, font })
 
     return {
+      instructions: INSTRUCTIONS,
       async load() {
         await preloadAlignTheActions(fonts)
       },
       reset() {
         game.clear()
-        draw()
+        // Nothing of the game shows with the Start button: it appears when the round starts.
+        clearGameCanvas(canvas.context)
       },
       start() {
         // Measured now, with the font that actually loaded.

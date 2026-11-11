@@ -1,6 +1,14 @@
 import { CARD_COLORS, type CssValues, type CssVariables } from '../shared/canvas-style'
 import { clearGameCanvas, GAME_HEIGHT, GAME_WIDTH } from '../shared/game-canvas'
-import { fitFontSize, fontAt, wrapText, type CanvasFont, type TextFit } from '../shared/text'
+import {
+  drawTextBlock,
+  fitFontSize,
+  fontAt,
+  wrapText,
+  type CanvasFont,
+  type TextBlock,
+  type TextFit,
+} from '../shared/text'
 import {
   ACTION_SIZE,
   CHECK_Y,
@@ -40,8 +48,6 @@ export type AlignColors = CssValues<keyof typeof ALIGN_COLORS>
 export const LANE_LINE_WIDTH = 1
 export const CARD_BORDER_WIDTH = 1.5
 export const CORNER_RADIUS = 12
-/** Space between the lines of a text, as a share of its size. */
-export const LINE_HEIGHT = 1.2
 
 /** Space around the goal's card, and inside it around the text. */
 const GOAL_MARGIN = 12
@@ -64,12 +70,6 @@ export const ACTION_TEXT_FIT: TextFit = {
   maxLines: 2,
   minSize: 8,
   maxSize: 16,
-}
-
-/** A text broken into lines, and the size to write it at. */
-export interface TextBlock {
-  readonly fontSize: number
-  readonly lines: readonly string[]
 }
 
 /** What the drawing shows: the game's current state. */
@@ -130,24 +130,6 @@ export function createActionText(
   }
 }
 
-/** Writes `block` centred on (x, y), in the look's font and text colour. */
-export function drawTextBlock(
-  context: CanvasRenderingContext2D,
-  { fontSize, lines }: TextBlock,
-  x: number,
-  y: number,
-  { font, colors }: Pick<SceneLook, 'font' | 'colors'>,
-) {
-  const lineHeight = fontSize * LINE_HEIGHT
-  const firstY = y - ((lines.length - 1) * lineHeight) / 2
-
-  context.font = fontAt(font, fontSize)
-  context.fillStyle = colors.text
-  context.textAlign = 'center'
-  context.textBaseline = 'middle'
-  lines.forEach((line, i) => context.fillText(line, x, firstY + i * lineHeight))
-}
-
 function drawCard(
   context: CanvasRenderingContext2D,
   x: number,
@@ -205,7 +187,7 @@ export function drawRow(
       fillOf(row, lane, colors),
       colors.cardBorder,
     )
-    drawTextBlock(context, text[lane], x, row.y, look)
+    drawTextBlock(context, text[lane], x, row.y, look.font, colors.text)
   })
 }
 
@@ -224,7 +206,8 @@ export function drawGoal(context: CanvasRenderingContext2D, goal: Goal, look: Sc
 
   context.font = fontAt(font, fontSize)
   const lines = wrapText(context, goal.title, GOAL_TEXT_FIT.maxWidth)
-  drawTextBlock(context, { fontSize, lines }, GAME_WIDTH / 2, GOAL_TOP + GOAL_HEIGHT / 2, look)
+  const centre = GOAL_TOP + GOAL_HEIGHT / 2
+  drawTextBlock(context, { fontSize, lines }, GAME_WIDTH / 2, centre, font, colors.text)
 }
 
 export function drawScene(

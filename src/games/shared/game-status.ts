@@ -2,7 +2,7 @@ import type { GameLoop } from './game-loop'
 
 /**
  * The status bar below the canvas, shared by every game. A game shows short
- * messages in it (e.g. "Tapped a bad emotion: Fear (−1)"); each one stays for
+ * messages in it (e.g. "Tapped a bad emotion: Fear"); each one stays for
  * STATUS_DURATION_MS of play (the time stands still while paused) unless a
  * newer message replaces it. Screen readers announce each message.
  */

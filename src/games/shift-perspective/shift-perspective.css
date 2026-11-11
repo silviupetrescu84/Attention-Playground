@@ -1,0 +1,5 @@
+/* Colours Shift Perspective draws on the canvas with (read by draw.ts). */
+:root {
+  /* The ring around the thought that shows the time left: a deep purple, like the bubbles. */
+  --shift-ring: #7e57c2;
+}

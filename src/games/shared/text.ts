@@ -102,3 +102,46 @@ export function fitFontSize(
 
   return minSize
 }
+
+/** Space between the lines of a text, as a share of its size. */
+export const LINE_HEIGHT = 1.2
+
+/** A text broken into lines, and the size to write it at. */
+export interface TextBlock {
+  readonly fontSize: number
+  readonly lines: readonly string[]
+}
+
+/** Writes `block` centred on (x, y), in `font` and `color`. */
+export function drawTextBlock(
+  context: CanvasRenderingContext2D,
+  { fontSize, lines }: TextBlock,
+  x: number,
+  y: number,
+  font: CanvasFont,
+  color: string,
+) {
+  const lineHeight = fontSize * LINE_HEIGHT
+  const firstY = y - ((lines.length - 1) * lineHeight) / 2
+
+  context.font = fontAt(font, fontSize)
+  context.fillStyle = color
+  context.textAlign = 'center'
+  context.textBaseline = 'middle'
+  lines.forEach((line, i) => context.fillText(line, x, firstY + i * lineHeight))
+}
+
+/**
+ * How to fit texts of up to `maxLines` lines inside a circle of `radius`: as
+ * wide as the circle is at the top and bottom of the tallest block of text
+ * (at `maxSize`), less `margin` on each side.
+ */
+export function fitInCircle(
+  radius: number,
+  margin: number,
+  { maxLines, minSize, maxSize }: Required<Omit<TextFit, 'maxWidth'>>,
+): TextFit {
+  const halfHeight = (maxLines * maxSize * LINE_HEIGHT) / 2
+  const maxWidth = 2 * Math.sqrt(radius ** 2 - halfHeight ** 2) - 2 * margin
+  return { maxWidth: Math.floor(maxWidth), maxLines, minSize, maxSize }
+}

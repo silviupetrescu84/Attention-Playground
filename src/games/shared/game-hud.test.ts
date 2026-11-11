@@ -37,6 +37,8 @@ function setup() {
     pausedRestart: get<HTMLButtonElement>('.game-hud__overlay--paused .game-hud__restart'),
     finishedRestart: get<HTMLButtonElement>('.game-hud__overlay--finished .game-hud__restart'),
     finalScore: get('.game-hud__final-score'),
+    instructions: get('.game-hud__instructions'),
+    summary: get('.game-hud__summary'),
   }
 
   /** Which of the big pieces are visible. */
@@ -280,26 +282,29 @@ describe('game HUD', () => {
     score.add(3)
     expect(ui.score.textContent).toBe('Score: 3')
 
-    score.subtract(5)
-    expect(ui.score.textContent).toBe('Score: -2')
+    score.add(2)
+    expect(ui.score.textContent).toBe('Score: 5')
   })
 
-  it('flashes the top score green when points are won and red when lost', () => {
+  it('flashes the top score green every time points are won', () => {
     const { score, ui } = setup()
     ui.start.click()
     const classes = () =>
       [...ui.score.classList].filter((name) => name.startsWith('game-hud__score--'))
+    expect(classes()).toEqual([])
 
     score.add(1)
     expect(classes()).toEqual(['game-hud__score--up'])
 
-    score.subtract(2)
-    expect(classes()).toEqual(['game-hud__score--down'])
-
-    score.subtract(1)
-    expect(classes()).toEqual(['game-hud__score--down'])
-
+    // Taken off and put back, so the flash plays again.
+    const removed: string[] = []
+    const remove = ui.score.classList.remove.bind(ui.score.classList)
+    ui.score.classList.remove = (...names: string[]) => {
+      removed.push(...names)
+      remove(...names)
+    }
     score.add(5)
+    expect(removed).toEqual(['game-hud__score--up'])
     expect(classes()).toEqual(['game-hud__score--up'])
   })
 
@@ -318,7 +323,7 @@ describe('game HUD', () => {
     const { lifecycle, score, ui } = setup()
     ui.start.click()
     score.add(1)
-    score.subtract(3)
+    score.add(3)
 
     lifecycle.finish()
 
@@ -334,6 +339,81 @@ describe('game HUD', () => {
 
     expect(ui.finalScore.textContent).toBe('Score: 7')
     expect(ui.finishedOverlay.textContent).toContain('Game over')
+  })
+
+  it('shows the instructions on a card under the difficulty, whenever Start is shown', () => {
+    const { lifecycle, hud, ui } = setup()
+    const paragraphs = () => [...ui.instructions.querySelectorAll('p')].map((p) => p.textContent)
+    const seen = () => !ui.instructions.closest('[hidden]')
+
+    hud.showInstructions(['Choose the good ones.', 'Let the bad ones go.'])
+
+    expect(seen()).toBe(true)
+    expect(paragraphs()).toEqual(['Choose the good ones.', 'Let the bad ones go.'])
+    // Start, the difficulty and what it fails on, then the instructions.
+    expect([...ui.startOverlay.children]).toEqual([
+      ui.start,
+      ui.difficulty,
+      ui.failOn,
+      ui.instructions,
+    ])
+
+    ui.start.click()
+    expect(seen()).toBe(false)
+    lifecycle.pause()
+    expect(seen()).toBe(false)
+    lifecycle.restart()
+    expect(seen()).toBe(true)
+    ui.start.click()
+    lifecycle.finish()
+    expect(seen()).toBe(false)
+    ui.finishedRestart.click()
+    expect(seen()).toBe(true)
+    expect(paragraphs()).toEqual(['Choose the good ones.', 'Let the bad ones go.'])
+  })
+
+  it('hides the instructions card when there are none, and replaces old ones', () => {
+    const { hud, ui } = setup()
+    expect(ui.instructions.hidden).toBe(true)
+
+    hud.showInstructions(['A'])
+    hud.showInstructions(['B', 'C'])
+    expect(ui.instructions.textContent).toBe('BC')
+
+    hud.showInstructions([])
+    expect(ui.instructions.hidden).toBe(true)
+    expect(ui.instructions.children).toHaveLength(0)
+  })
+
+  it('shows instructions as plain text', () => {
+    const { hud, ui } = setup()
+
+    hud.showInstructions(['<img src=x onerror=alert(1)>'])
+
+    expect(ui.instructions.querySelector('img')).toBeNull()
+    expect(ui.instructions.textContent).toBe('<img src=x onerror=alert(1)>')
+  })
+
+  it('puts the Start button a third of the way down, and the rest under it', () => {
+    const rule = /\.game-hud__overlay--start\s*\{([^}]*)\}/.exec(gameCss)![1]
+
+    expect(rule).toMatch(/justify-content: flex-start;/)
+    expect(rule).toMatch(/padding-top: calc\(var\(--game-height\) \* 0\.33\);/)
+  })
+
+  it('writes the instructions on the same white card, in the same font, as the summary', () => {
+    const { ui } = setup()
+    const ruleFor = (selector: string) =>
+      new RegExp(`(^|\n)${selector.replace(/\./g, '\\.')}\\s*\\{([^}]*)\\}`).exec(gameCss)![2]
+
+    expect(ui.instructions.classList).toContain('game-hud__card')
+    expect(ui.summary.classList).toContain('game-hud__card')
+    const card = ruleFor('.game-hud__card')
+    expect(card).toMatch(/background: rgb\(255 255 255 \/ 92%\);/)
+    expect(card).toMatch(/color: var\(--color-ink\);/)
+    expect(card).toMatch(/font-size: 18px;/)
+    // The instructions in the weight of the summary's labels.
+    expect(ruleFor('.game-hud__summary dt,\n.game-hud__instructions')).toMatch(/font-weight: 600;/)
   })
 
   it('shows a game summary on the finished screen', () => {

@@ -1,0 +1,12 @@
+/* Colours Focus Attention draws on the canvas with (read by draw.ts). */
+:root {
+  /* The projector's yellow orb (measured from focus-projector.png)… */
+  --focus-projector: #fecc1e;
+  /* …and its beam: the same yellow, half see-through. */
+  --focus-beam: color-mix(in srgb, var(--focus-projector) 50%, transparent);
+  /* Buttons like the app's own (Start, Restart): ink blue with white text, lighter when pressed. */
+  --focus-button-fill: var(--color-ink);
+  --focus-button-text: #fff;
+  --focus-button-pressed: color-mix(in srgb, var(--color-ink) 80%, white);
+  --focus-button-shadow: color-mix(in srgb, var(--color-ink) 25%, transparent);
+}

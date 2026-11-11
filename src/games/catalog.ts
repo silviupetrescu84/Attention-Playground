@@ -1,7 +1,11 @@
 import alignTheActionsIcon from '../assets/game-icons/align-the-actions.png'
 import emotionsRiseIcon from '../assets/game-icons/emotions-rise.png'
+import focusAttentionIcon from '../assets/game-icons/focus-attention.png'
+import shiftPerspectiveIcon from '../assets/game-icons/shift-perspective.png'
 import { alignTheActionsGame, preloadAlignTheActions } from './align-the-actions'
 import { emotionsRiseGame, preloadEmotionsRise } from './emotions-rise'
+import { focusAttentionGame, preloadFocusAttention } from './focus-attention'
+import { preloadShiftPerspective, shiftPerspectiveGame } from './shift-perspective'
 import type { GameDefinition } from './shared/game-shell'
 
 /**
@@ -38,6 +42,20 @@ export const games: readonly CatalogGame[] = [
     icon: alignTheActionsIcon,
     create: () => alignTheActionsGame(),
     preload: () => preloadAlignTheActions(),
+  },
+  {
+    id: 'shift-perspective',
+    name: 'Shift Perspective',
+    icon: shiftPerspectiveIcon,
+    create: () => shiftPerspectiveGame(),
+    preload: () => preloadShiftPerspective(),
+  },
+  {
+    id: 'focus-attention',
+    name: 'Focus Attention',
+    icon: focusAttentionIcon,
+    create: () => focusAttentionGame(),
+    preload: () => preloadFocusAttention(),
   },
 ]
 

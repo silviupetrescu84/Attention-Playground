@@ -16,6 +16,10 @@ games connected to Practice of Happiness.
   they escape and leave the bad ones alone.
 - **Align the Actions**: actions move down four lanes under a goal; move the
   circle to catch the one that serves the goal.
+- **Shift Perspective**: a thought appears in a bubble; tap the helpful way to
+  see it before time runs out.
+- **Focus Attention**: values and anti-values drift towards a projector; focus
+  on the values and change attention from the anti-values before they reach it.
 
 ## Prerequisites
 

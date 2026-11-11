@@ -1,17 +1,31 @@
 import ovalImageUrl from '../../assets/emotions-rise/oval.png'
-import type { CARD_COLORS, CssValues } from '../shared/canvas-style'
+import { CARD_COLORS, type CssValues, type CssVariables } from '../shared/canvas-style'
+import { fadedOutAt, FEEDBACK_COLORS, type Chosen } from '../shared/feedback'
 import { clearGameCanvas } from '../shared/game-canvas'
+import { createImageLoader } from '../shared/load-image'
 import type { TextFit } from '../shared/text'
-import { BUBBLE_HEIGHT, BUBBLE_WIDTH, type Bubble } from './emotions-rise'
+import {
+  BUBBLE_HEIGHT,
+  BUBBLE_HIT_HEIGHT,
+  BUBBLE_HIT_WIDTH,
+  BUBBLE_WIDTH,
+  type Bubble,
+} from './emotions-rise'
 
 /**
  * Drawing for Emotions Rise. Every emotion looks the same (text colour and
  * size, bubble), so players must read the word to know whether it is good or
- * bad. The word is drawn over the bubble.
+ * bad. The word is drawn over the bubble. A tapped bubble fades out with a
+ * green or red hue over it (see the shared feedback).
  */
 
-/** The colours a bubble is drawn with: a card's (see CARD_COLORS). */
-export type BubbleColors = CssValues<keyof typeof CARD_COLORS>
+/** The colours bubbles are drawn with: a card's, and the feedback hues. */
+export const EMOTION_COLORS = {
+  ...CARD_COLORS,
+  ...FEEDBACK_COLORS,
+} as const satisfies CssVariables
+
+export type BubbleColors = CssValues<keyof typeof EMOTION_COLORS>
 
 /** How every bubble looks: its text's font (one size for all) and its colours. */
 export interface BubbleLook {
@@ -32,32 +46,16 @@ export const EMOTION_TEXT_FIT: TextFit = {
   maxSize: 22,
 }
 
-let bubbleImagePromise: Promise<HTMLImageElement> | undefined
+/** Loads (once) the oval artwork used by every bubble. */
+export const loadBubbleImage = createImageLoader(ovalImageUrl, 'oval.png')
 
-/** Loads and caches the oval artwork used by every bubble. */
-export function loadBubbleImage(): Promise<HTMLImageElement> {
-  if (!bubbleImagePromise) {
-    bubbleImagePromise = new Promise<HTMLImageElement>((resolve, reject) => {
-      const image = new Image()
-      image.addEventListener('load', () => resolve(image), { once: true })
-      image.addEventListener('error', () => reject(new Error('Could not load oval.png')), {
-        once: true,
-      })
-      image.src = ovalImageUrl
-    }).catch((error: unknown) => {
-      bubbleImagePromise = undefined
-      throw error
-    })
-  }
-
-  return bubbleImagePromise
-}
-
+/** A bubble with its word; `hue` (if any) tints the oval itself, under the word. */
 export function drawBubble(
   context: CanvasRenderingContext2D,
   bubble: Bubble,
   { font, colors }: BubbleLook,
   bubbleImage?: CanvasImageSource,
+  hue?: string,
 ) {
   const { x, y, emotion } = bubble
 
@@ -80,6 +78,13 @@ export function drawBubble(
     context.stroke()
   }
 
+  if (hue) {
+    context.beginPath()
+    context.ellipse(x, y, BUBBLE_HIT_WIDTH / 2, BUBBLE_HIT_HEIGHT / 2, 0, 0, Math.PI * 2)
+    context.fillStyle = hue
+    context.fill()
+  }
+
   context.font = font
   context.fillStyle = colors.text
   context.textAlign = 'center'
@@ -87,9 +92,16 @@ export function drawBubble(
   context.fillText(emotion.text, x, y)
 }
 
+/** What the drawing shows: the game's current state. */
+export interface EmotionsRiseScene {
+  readonly bubbles: readonly Bubble[]
+  readonly tapped: readonly Chosen<Bubble>[]
+  readonly timeMs: number
+}
+
 export function drawScene(
   context: CanvasRenderingContext2D,
-  bubbles: readonly Bubble[],
+  { bubbles, tapped, timeMs }: EmotionsRiseScene,
   look: BubbleLook,
   bubbleImage?: CanvasImageSource,
 ) {
@@ -98,4 +110,12 @@ export function drawScene(
   for (const bubble of bubbles) {
     drawBubble(context, bubble, look, bubbleImage)
   }
+
+  for (const { item, right, atMs } of tapped) {
+    context.globalAlpha = fadedOutAt(atMs, timeMs)
+    const hue = right ? look.colors.rightHue : look.colors.wrongHue
+    drawBubble(context, item, look, bubbleImage, hue)
+  }
+
+  context.globalAlpha = 1
 }

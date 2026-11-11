@@ -22,6 +22,9 @@
   /* See-through tints for something the player got right or wrong. */
   --canvas-good-tint: color-mix(in srgb, var(--color-good) 35%, transparent);
   --canvas-bad-tint: color-mix(in srgb, var(--color-bad) 35%, transparent);
+  /* Lighter hues for something chosen, as it fades out (see feedback.ts). */
+  --canvas-right-hue: color-mix(in srgb, var(--color-good) 20%, transparent);
+  --canvas-wrong-hue: color-mix(in srgb, var(--color-bad) 20%, transparent);
 }
 
 /* Centred in the space kept free below the canvas (set by game-canvas.ts). */
@@ -117,26 +120,15 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Green when points are won, red when lost, fading back to normal. */
+/* Green when points are won, fading back to normal. */
 .game-hud__score--up {
   animation: game-score-up 1s ease-out;
-}
-
-.game-hud__score--down {
-  animation: game-score-down 1s ease-out;
 }
 
 @keyframes game-score-up {
   0%,
   40% {
     color: var(--color-good);
-  }
-}
-
-@keyframes game-score-down {
-  0%,
-  40% {
-    color: var(--color-bad);
   }
 }
 
@@ -163,6 +155,12 @@
   /* Keeps wide content, like a long summary, off the edges of the canvas. */
   padding: 0 24px;
   pointer-events: auto;
+}
+
+/* The Start button a third of the way down the canvas, the rest under it. */
+.game-hud__overlay--start {
+  justify-content: flex-start;
+  padding-top: calc(var(--game-height) * 0.33);
 }
 
 /*
@@ -203,11 +201,8 @@
   font-weight: 700;
 }
 
-.game-hud__summary {
-  display: grid;
-  min-width: 300px;
-  grid-template-columns: 1fr auto;
-  gap: 8px 24px;
+/* A white card for text over the game: the instructions and the end-of-round summary. */
+.game-hud__card {
   margin: 0 0 16px;
   padding: 16px 20px;
   border-radius: 16px;
@@ -216,8 +211,29 @@
   font-size: 18px;
 }
 
-.game-hud__summary dt {
+.game-hud__summary {
+  display: grid;
+  min-width: 300px;
+  grid-template-columns: 1fr auto;
+  gap: 8px 24px;
+}
+
+/* Written like the summary's labels. */
+.game-hud__summary dt,
+.game-hud__instructions {
   font-weight: 600;
+}
+
+.game-hud__instructions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.game-hud__instructions p {
+  margin: 0;
 }
 
 .game-hud__summary dd {

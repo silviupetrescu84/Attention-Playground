@@ -1,7 +1,8 @@
 import { checkNotNegative } from './checks'
 
 /**
- * Difficulty that rises during a round, shared by every minigame.
+ * Difficulty that rises with the round's time, for games that get harder
+ * as the round goes on.
  *
  * Each game declares its own settings: what they are called, their value at
  * the start of a round, and whether a higher or a lower value is harder. For
@@ -60,12 +61,6 @@ export interface DifficultyOptions<Name extends string> {
 export interface Difficulty<Name extends string> {
   /** Every setting's value at the round's time `elapsedMs`. */
   valuesAt(elapsedMs: number): DifficultyValues<Name>
-  /**
-   * A setting's value added up, per second, over the round's time from
-   * `fromMs` to `toMs`, following each step as it comes. For a speed in px/s:
-   * how far something moving at that speed has gone.
-   */
-  totalBetween(name: Name, fromMs: number, toMs: number): number
 }
 
 export function createDifficulty<Name extends string>({
@@ -113,24 +108,6 @@ export function createDifficulty<Name extends string>({
       const values = Object.fromEntries(names.map((name) => [name, valueAt(name, elapsedMs)]))
       // Every name in `settings` is in `values`, each with a number.
       return values as DifficultyValues<Name>
-    },
-    totalBetween(name, fromMs, toMs) {
-      if (toMs < fromMs) {
-        throw new RangeError(`Cannot add up from ${fromMs} ms back to ${toMs} ms`)
-      }
-
-      // The value is constant between steps: add up each stretch in turn.
-      let total = 0
-      let from = fromMs
-      for (const { atMs } of multipliers) {
-        if (atMs > from && atMs < toMs) {
-          total += valueAt(name, from) * (atMs - from)
-          from = atMs
-        }
-      }
-      total += valueAt(name, from) * (toMs - from)
-
-      return total / 1000
     },
   }
 }

@@ -7,17 +7,19 @@ import type { Score, ScoreChange } from './score'
 /**
  * Everything shown over the canvas that is the same in every game:
  *
- * - ready:    the Start button ("Loading…" and disabled while the game
- *             loads), the difficulty button under it ("Difficulty: Easy"; each
- *             press picks the next difficulty) and, under that, the mistake
- *             it fails on ("Fail on 10 mistakes").
- * - playing:  "Score: x" top left (flashing green when points are won, red
- *             when lost); "Mistakes: x" in the middle; the time in seconds and
- *             a Pause button top right.
+ * - ready:    the Start button, a third of the way down ("Loading…" and
+ *             disabled while the game loads), the difficulty button under it
+ *             ("Difficulty: Easy"; each press picks the next difficulty),
+ *             under that the mistake it fails on ("Fail on 10 mistakes"),
+ *             and under that the game's instructions (if any) on a white card.
+ * - playing:  "Score: x" top left (flashing green when points are won);
+ *             "Mistakes: x" in the middle; the time in seconds and a Pause
+ *             button top right.
  * - paused:   the same bar, with Resume instead of Pause, over a dimmed game
  *             with a Restart button (back to the Start button).
- * - finished: "Game over", the final score, the game's own summary (if any)
- *             and a Restart button.
+ * - finished: "Game over", the final score, the game's own summary (if any,
+ *             on the same white card as the instructions) and a Restart
+ *             button.
  *
  * The score, mistakes and time are always shown.
  */
@@ -34,6 +36,8 @@ export interface GameHud {
   updateTime(): void
   /** Sets the summary shown on the finished screen (hidden when empty). */
   showSummary(items: readonly SummaryItem[]): void
+  /** Sets the instructions shown with the Start button, one paragraph each (hidden when empty). */
+  showInstructions(paragraphs: readonly string[]): void
   /** Enables the Start button, or shows "Loading…" while the game loads. */
   setStartReady(ready: boolean): void
 }
@@ -77,6 +81,7 @@ export function createGameHud(
       <button class="game-hud__button game-hud__start" type="button">Start</button>
       <button class="game-hud__button game-hud__difficulty" type="button"></button>
       <p class="game-hud__fail-on"></p>
+      <div class="game-hud__card game-hud__instructions" hidden></div>
     </div>
     <div class="game-hud__overlay game-hud__overlay--paused">
       <button class="game-hud__button game-hud__restart" type="button">Restart</button>
@@ -84,7 +89,7 @@ export function createGameHud(
     <div class="game-hud__overlay game-hud__overlay--finished">
       <p class="game-hud__title">Game over</p>
       <p class="game-hud__final-score"></p>
-      <dl class="game-hud__summary" hidden></dl>
+      <dl class="game-hud__card game-hud__summary" hidden></dl>
       <button class="game-hud__button game-hud__restart" type="button">Restart</button>
     </div>
   `
@@ -106,6 +111,7 @@ export function createGameHud(
   const startButton = find<HTMLButtonElement>('.game-hud__start')
   const finalScoreText = find('.game-hud__final-score')
   const summaryList = find('.game-hud__summary')
+  const instructionsCard = find('.game-hud__instructions')
 
   function showSummary(items: readonly SummaryItem[]) {
     summaryList.replaceChildren(
@@ -120,21 +126,32 @@ export function createGameHud(
     summaryList.hidden = items.length === 0
   }
 
+  function showInstructions(paragraphs: readonly string[]) {
+    instructionsCard.replaceChildren(
+      ...paragraphs.map((text) => {
+        const paragraph = document.createElement('p')
+        paragraph.textContent = text
+        return paragraph
+      }),
+    )
+    instructionsCard.hidden = paragraphs.length === 0
+  }
+
   function showScore(value: number) {
     scoreText.textContent = `Score: ${value}`
     finalScoreText.textContent = `Score: ${value}`
   }
 
-  function flashScore(value: number, { previous, reason }: ScoreChange) {
-    scoreText.classList.remove('game-hud__score--up', 'game-hud__score--down')
+  function flashScore({ reason }: ScoreChange) {
+    scoreText.classList.remove('game-hud__score--up')
 
     if (reason === 'reset') {
       return
     }
 
-    // Reading the layout restarts the animation if the same class comes back.
+    // Reading the layout restarts the animation when the class comes back.
     void scoreText.offsetWidth
-    scoreText.classList.add(value > previous ? 'game-hud__score--up' : 'game-hud__score--down')
+    scoreText.classList.add('game-hud__score--up')
   }
 
   function updateTime() {
@@ -205,7 +222,7 @@ export function createGameHud(
   lifecycle.subscribe(({ state }) => showState(state))
   score.subscribe((value, change) => {
     showScore(value)
-    flashScore(value, change)
+    flashScore(change)
   })
   mistakes.subscribe(showMistakes)
   showScore(score.value)
@@ -213,5 +230,5 @@ export function createGameHud(
   showDifficulty()
   showState(lifecycle.state)
 
-  return { element, updateTime, showSummary, setStartReady }
+  return { element, updateTime, showSummary, showInstructions, setStartReady }
 }
