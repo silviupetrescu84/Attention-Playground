@@ -1,0 +1,1988 @@
+{
+  "game": "Break It Down",
+  "version": 1,
+  "goals": [
+    {
+      "id": "goal-001",
+      "title": "Be healthier",
+      "actions": [
+        {
+          "id": "g001-a01",
+          "text": "Drink a glass of water"
+        },
+        {
+          "id": "g001-a02",
+          "text": "Take a brisk five-minute walk"
+        },
+        {
+          "id": "g001-a03",
+          "text": "Stretch your shoulders"
+        },
+        {
+          "id": "g001-a04",
+          "text": "Stand up and move"
+        },
+        {
+          "id": "g001-a05",
+          "text": "Choose a piece of fruit"
+        },
+        {
+          "id": "g001-a06",
+          "text": "Add vegetables to a meal"
+        },
+        {
+          "id": "g001-a07",
+          "text": "Take the stairs"
+        },
+        {
+          "id": "g001-a08",
+          "text": "Do ten gentle squats"
+        },
+        {
+          "id": "g001-a09",
+          "text": "Prepare a healthy snack"
+        },
+        {
+          "id": "g001-a10",
+          "text": "Put on walking shoes"
+        }
+      ]
+    },
+    {
+      "id": "goal-002",
+      "title": "Write a book",
+      "actions": [
+        {
+          "id": "g002-a01",
+          "text": "Write one opening sentence"
+        },
+        {
+          "id": "g002-a02",
+          "text": "Outline a chapter title"
+        },
+        {
+          "id": "g002-a03",
+          "text": "Name your main character"
+        },
+        {
+          "id": "g002-a04",
+          "text": "Write one line of dialogue"
+        },
+        {
+          "id": "g002-a05",
+          "text": "Describe a setting"
+        },
+        {
+          "id": "g002-a06",
+          "text": "Jot down a plot idea"
+        },
+        {
+          "id": "g002-a07",
+          "text": "Draft a short paragraph"
+        },
+        {
+          "id": "g002-a08",
+          "text": "List three chapter ideas"
+        },
+        {
+          "id": "g002-a09",
+          "text": "Rewrite one rough sentence"
+        },
+        {
+          "id": "g002-a10",
+          "text": "Open your manuscript"
+        }
+      ]
+    },
+    {
+      "id": "goal-003",
+      "title": "Run a marathon",
+      "actions": [
+        {
+          "id": "g003-a01",
+          "text": "Walk briskly for five minutes"
+        },
+        {
+          "id": "g003-a02",
+          "text": "Jog gently for two minutes"
+        },
+        {
+          "id": "g003-a03",
+          "text": "Lace up your running shoes"
+        },
+        {
+          "id": "g003-a04",
+          "text": "Stretch your calves"
+        },
+        {
+          "id": "g003-a05",
+          "text": "Check your running posture"
+        },
+        {
+          "id": "g003-a06",
+          "text": "Do ten calf raises"
+        },
+        {
+          "id": "g003-a07",
+          "text": "Plan your next short run"
+        },
+        {
+          "id": "g003-a08",
+          "text": "Fill your running bottle"
+        },
+        {
+          "id": "g003-a09",
+          "text": "Warm up your ankles"
+        },
+        {
+          "id": "g003-a10",
+          "text": "Log your last run"
+        }
+      ]
+    },
+    {
+      "id": "goal-004",
+      "title": "Learn a language",
+      "actions": [
+        {
+          "id": "g004-a01",
+          "text": "Learn one new word"
+        },
+        {
+          "id": "g004-a02",
+          "text": "Say a sentence aloud"
+        },
+        {
+          "id": "g004-a03",
+          "text": "Practice a greeting"
+        },
+        {
+          "id": "g004-a04",
+          "text": "Review five flashcards"
+        },
+        {
+          "id": "g004-a05",
+          "text": "Listen to a short phrase"
+        },
+        {
+          "id": "g004-a06",
+          "text": "Write a simple sentence"
+        },
+        {
+          "id": "g004-a07",
+          "text": "Name five nearby objects"
+        },
+        {
+          "id": "g004-a08",
+          "text": "Repeat a tricky sound"
+        },
+        {
+          "id": "g004-a09",
+          "text": "Translate one sign"
+        },
+        {
+          "id": "g004-a10",
+          "text": "Practice one verb"
+        }
+      ]
+    },
+    {
+      "id": "goal-005",
+      "title": "Save more money",
+      "actions": [
+        {
+          "id": "g005-a01",
+          "text": "Move one euro to savings"
+        },
+        {
+          "id": "g005-a02",
+          "text": "Review one recent purchase"
+        },
+        {
+          "id": "g005-a03",
+          "text": "Cancel an unused trial"
+        },
+        {
+          "id": "g005-a04",
+          "text": "Check your account balance"
+        },
+        {
+          "id": "g005-a05",
+          "text": "Set a small savings target"
+        },
+        {
+          "id": "g005-a06",
+          "text": "List one avoidable expense"
+        },
+        {
+          "id": "g005-a07",
+          "text": "Compare two grocery prices"
+        },
+        {
+          "id": "g005-a08",
+          "text": "Record todays spending"
+        },
+        {
+          "id": "g005-a09",
+          "text": "Turn off a shopping alert"
+        },
+        {
+          "id": "g005-a10",
+          "text": "Prepare a spending note"
+        }
+      ]
+    },
+    {
+      "id": "goal-006",
+      "title": "Get stronger",
+      "actions": [
+        {
+          "id": "g006-a01",
+          "text": "Do five push-ups"
+        },
+        {
+          "id": "g006-a02",
+          "text": "Hold a short plank"
+        },
+        {
+          "id": "g006-a03",
+          "text": "Do ten bodyweight squats"
+        },
+        {
+          "id": "g006-a04",
+          "text": "Practice five lunges"
+        },
+        {
+          "id": "g006-a05",
+          "text": "Do ten calf raises"
+        },
+        {
+          "id": "g006-a06",
+          "text": "Stretch your hips"
+        },
+        {
+          "id": "g006-a07",
+          "text": "Set out workout clothes"
+        },
+        {
+          "id": "g006-a08",
+          "text": "Do five wall push-ups"
+        },
+        {
+          "id": "g006-a09",
+          "text": "Practice a hip hinge"
+        },
+        {
+          "id": "g006-a10",
+          "text": "Record one strength set"
+        }
+      ]
+    },
+    {
+      "id": "goal-007",
+      "title": "Sleep better",
+      "actions": [
+        {
+          "id": "g007-a01",
+          "text": "Set a bedtime alarm"
+        },
+        {
+          "id": "g007-a02",
+          "text": "Dim the bedroom lights"
+        },
+        {
+          "id": "g007-a03",
+          "text": "Put your phone aside"
+        },
+        {
+          "id": "g007-a04",
+          "text": "Prepare your pillow"
+        },
+        {
+          "id": "g007-a05",
+          "text": "Close the curtains"
+        },
+        {
+          "id": "g007-a06",
+          "text": "Set an evening reminder"
+        },
+        {
+          "id": "g007-a07",
+          "text": "Turn down bright screens"
+        },
+        {
+          "id": "g007-a08",
+          "text": "Lay out tomorrow’s clothes"
+        },
+        {
+          "id": "g007-a09",
+          "text": "Do five slow breaths"
+        },
+        {
+          "id": "g007-a10",
+          "text": "Make the room quieter"
+        }
+      ]
+    },
+    {
+      "id": "goal-008",
+      "title": "Eat more mindfully",
+      "actions": [
+        {
+          "id": "g008-a01",
+          "text": "Put your fork down once"
+        },
+        {
+          "id": "g008-a02",
+          "text": "Take one slower bite"
+        },
+        {
+          "id": "g008-a03",
+          "text": "Notice the food texture"
+        },
+        {
+          "id": "g008-a04",
+          "text": "Sit down to eat"
+        },
+        {
+          "id": "g008-a05",
+          "text": "Serve a smaller first portion"
+        },
+        {
+          "id": "g008-a06",
+          "text": "Take a sip of water"
+        },
+        {
+          "id": "g008-a07",
+          "text": "Notice when you feel full"
+        },
+        {
+          "id": "g008-a08",
+          "text": "Pause before a second bite"
+        },
+        {
+          "id": "g008-a09",
+          "text": "Smell your food first"
+        },
+        {
+          "id": "g008-a10",
+          "text": "Eat one bite without screens"
+        }
+      ]
+    },
+    {
+      "id": "goal-009",
+      "title": "Read more books",
+      "actions": [
+        {
+          "id": "g009-a01",
+          "text": "Read one page"
+        },
+        {
+          "id": "g009-a02",
+          "text": "Open your current book"
+        },
+        {
+          "id": "g009-a03",
+          "text": "Mark your reading place"
+        },
+        {
+          "id": "g009-a04",
+          "text": "Read one paragraph aloud"
+        },
+        {
+          "id": "g009-a05",
+          "text": "Look up one new word"
+        },
+        {
+          "id": "g009-a06",
+          "text": "Write a one-line book note"
+        },
+        {
+          "id": "g009-a07",
+          "text": "Choose your next chapter"
+        },
+        {
+          "id": "g009-a08",
+          "text": "Put a book by your bed"
+        },
+        {
+          "id": "g009-a09",
+          "text": "Read for three minutes"
+        },
+        {
+          "id": "g009-a10",
+          "text": "Summarize a page"
+        }
+      ]
+    },
+    {
+      "id": "goal-010",
+      "title": "Make new friends",
+      "actions": [
+        {
+          "id": "g010-a01",
+          "text": "Send a friendly hello"
+        },
+        {
+          "id": "g010-a02",
+          "text": "Invite someone for coffee"
+        },
+        {
+          "id": "g010-a03",
+          "text": "Ask someone about a hobby"
+        },
+        {
+          "id": "g010-a04",
+          "text": "Introduce yourself to someone"
+        },
+        {
+          "id": "g010-a05",
+          "text": "Reply to a new acquaintance"
+        },
+        {
+          "id": "g010-a06",
+          "text": "Ask a thoughtful question"
+        },
+        {
+          "id": "g010-a07",
+          "text": "Share an upcoming event"
+        },
+        {
+          "id": "g010-a08",
+          "text": "Thank someone for a chat"
+        },
+        {
+          "id": "g010-a09",
+          "text": "Suggest a short walk"
+        },
+        {
+          "id": "g010-a10",
+          "text": "Reconnect with a classmate"
+        }
+      ]
+    },
+    {
+      "id": "goal-011",
+      "title": "Strengthen my relationship",
+      "actions": [
+        {
+          "id": "g011-a01",
+          "text": "Send an affectionate message"
+        },
+        {
+          "id": "g011-a02",
+          "text": "Ask how their day is going"
+        },
+        {
+          "id": "g011-a03",
+          "text": "Offer a sincere compliment"
+        },
+        {
+          "id": "g011-a04",
+          "text": "Thank them for one thing"
+        },
+        {
+          "id": "g011-a05",
+          "text": "Plan ten minutes together"
+        },
+        {
+          "id": "g011-a06",
+          "text": "Ask what they need today"
+        },
+        {
+          "id": "g011-a07",
+          "text": "Listen without interrupting"
+        },
+        {
+          "id": "g011-a08",
+          "text": "Share a favorite memory"
+        },
+        {
+          "id": "g011-a09",
+          "text": "Suggest a small date idea"
+        },
+        {
+          "id": "g011-a10",
+          "text": "Give a warm hug if welcome"
+        }
+      ]
+    },
+    {
+      "id": "goal-012",
+      "title": "Be more confident",
+      "actions": [
+        {
+          "id": "g012-a01",
+          "text": "Name one strength"
+        },
+        {
+          "id": "g012-a02",
+          "text": "Practice introducing yourself"
+        },
+        {
+          "id": "g012-a03",
+          "text": "Speak one sentence clearly"
+        },
+        {
+          "id": "g012-a04",
+          "text": "Write down a small win"
+        },
+        {
+          "id": "g012-a05",
+          "text": "Make one small request"
+        },
+        {
+          "id": "g012-a06",
+          "text": "Stand with relaxed posture"
+        },
+        {
+          "id": "g012-a07",
+          "text": "Say an honest preference"
+        },
+        {
+          "id": "g012-a08",
+          "text": "Try one unfamiliar task"
+        },
+        {
+          "id": "g012-a09",
+          "text": "Rehearse an opening line"
+        },
+        {
+          "id": "g012-a10",
+          "text": "Recognize one brave choice"
+        }
+      ]
+    },
+    {
+      "id": "goal-013",
+      "title": "Manage stress",
+      "actions": [
+        {
+          "id": "g013-a01",
+          "text": "Take five slow breaths"
+        },
+        {
+          "id": "g013-a02",
+          "text": "Relax your shoulders"
+        },
+        {
+          "id": "g013-a03",
+          "text": "Unclench your jaw"
+        },
+        {
+          "id": "g013-a04",
+          "text": "Step away for one minute"
+        },
+        {
+          "id": "g013-a05",
+          "text": "Write down one worry"
+        },
+        {
+          "id": "g013-a06",
+          "text": "Name what you can control"
+        },
+        {
+          "id": "g013-a07",
+          "text": "Look out a window"
+        },
+        {
+          "id": "g013-a08",
+          "text": "Stretch your neck gently"
+        },
+        {
+          "id": "g013-a09",
+          "text": "Put one task aside"
+        },
+        {
+          "id": "g013-a10",
+          "text": "Take a brief quiet pause"
+        }
+      ]
+    },
+    {
+      "id": "goal-014",
+      "title": "Start a business",
+      "actions": [
+        {
+          "id": "g014-a01",
+          "text": "Write one customer problem"
+        },
+        {
+          "id": "g014-a02",
+          "text": "Name a possible customer"
+        },
+        {
+          "id": "g014-a03",
+          "text": "Draft a one-line pitch"
+        },
+        {
+          "id": "g014-a04",
+          "text": "List a product benefit"
+        },
+        {
+          "id": "g014-a05",
+          "text": "Write one interview question"
+        },
+        {
+          "id": "g014-a06",
+          "text": "Sketch a simple offer"
+        },
+        {
+          "id": "g014-a07",
+          "text": "Check a business name"
+        },
+        {
+          "id": "g014-a08",
+          "text": "Note one competitor"
+        },
+        {
+          "id": "g014-a09",
+          "text": "Estimate one startup cost"
+        },
+        {
+          "id": "g014-a10",
+          "text": "Write one landing-page headline"
+        }
+      ]
+    },
+    {
+      "id": "goal-015",
+      "title": "Build a better career",
+      "actions": [
+        {
+          "id": "g015-a01",
+          "text": "Update one CV bullet"
+        },
+        {
+          "id": "g015-a02",
+          "text": "List a work achievement"
+        },
+        {
+          "id": "g015-a03",
+          "text": "Read one relevant job post"
+        },
+        {
+          "id": "g015-a04",
+          "text": "Send a networking message"
+        },
+        {
+          "id": "g015-a05",
+          "text": "Write a skill to develop"
+        },
+        {
+          "id": "g015-a06",
+          "text": "Practice one interview answer"
+        },
+        {
+          "id": "g015-a07",
+          "text": "Review a portfolio project"
+        },
+        {
+          "id": "g015-a08",
+          "text": "Save a useful job listing"
+        },
+        {
+          "id": "g015-a09",
+          "text": "Ask for specific feedback"
+        },
+        {
+          "id": "g015-a10",
+          "text": "Draft a short introduction"
+        }
+      ]
+    },
+    {
+      "id": "goal-016",
+      "title": "Learn to code",
+      "actions": [
+        {
+          "id": "g016-a01",
+          "text": "Write a small function"
+        },
+        {
+          "id": "g016-a02",
+          "text": "Run a code example"
+        },
+        {
+          "id": "g016-a03",
+          "text": "Read one documentation page"
+        },
+        {
+          "id": "g016-a04",
+          "text": "Fix one syntax error"
+        },
+        {
+          "id": "g016-a05",
+          "text": "Rename a confusing variable"
+        },
+        {
+          "id": "g016-a06",
+          "text": "Test one input"
+        },
+        {
+          "id": "g016-a07",
+          "text": "Commit one small change"
+        },
+        {
+          "id": "g016-a08",
+          "text": "Explain one function aloud"
+        },
+        {
+          "id": "g016-a09",
+          "text": "Refactor five lines"
+        },
+        {
+          "id": "g016-a10",
+          "text": "Solve a tiny coding puzzle"
+        }
+      ]
+    },
+    {
+      "id": "goal-017",
+      "title": "Practice creativity",
+      "actions": [
+        {
+          "id": "g017-a01",
+          "text": "Sketch a quick shape"
+        },
+        {
+          "id": "g017-a02",
+          "text": "Write one unusual idea"
+        },
+        {
+          "id": "g017-a03",
+          "text": "Combine two random words"
+        },
+        {
+          "id": "g017-a04",
+          "text": "Take an interesting photo"
+        },
+        {
+          "id": "g017-a05",
+          "text": "Doodle for two minutes"
+        },
+        {
+          "id": "g017-a06",
+          "text": "Choose a color palette"
+        },
+        {
+          "id": "g017-a07",
+          "text": "Make a simple paper pattern"
+        },
+        {
+          "id": "g017-a08",
+          "text": "Write a playful headline"
+        },
+        {
+          "id": "g017-a09",
+          "text": "Try a new brush stroke"
+        },
+        {
+          "id": "g017-a10",
+          "text": "List three creative prompts"
+        }
+      ]
+    },
+    {
+      "id": "goal-018",
+      "title": "Declutter my home",
+      "actions": [
+        {
+          "id": "g018-a01",
+          "text": "Put one item away"
+        },
+        {
+          "id": "g018-a02",
+          "text": "Recycle one old receipt"
+        },
+        {
+          "id": "g018-a03",
+          "text": "Clear a small surface"
+        },
+        {
+          "id": "g018-a04",
+          "text": "Sort five loose papers"
+        },
+        {
+          "id": "g018-a05",
+          "text": "Return one borrowed item"
+        },
+        {
+          "id": "g018-a06",
+          "text": "Fold one piece of clothing"
+        },
+        {
+          "id": "g018-a07",
+          "text": "Empty one small drawer corner"
+        },
+        {
+          "id": "g018-a08",
+          "text": "Throw away one wrapper"
+        },
+        {
+          "id": "g018-a09",
+          "text": "Put one book on its shelf"
+        },
+        {
+          "id": "g018-a10",
+          "text": "Wipe a tabletop"
+        }
+      ]
+    },
+    {
+      "id": "goal-019",
+      "title": "Spend more time outside",
+      "actions": [
+        {
+          "id": "g019-a01",
+          "text": "Step outside for two minutes"
+        },
+        {
+          "id": "g019-a02",
+          "text": "Walk around the block"
+        },
+        {
+          "id": "g019-a03",
+          "text": "Notice one nearby tree"
+        },
+        {
+          "id": "g019-a04",
+          "text": "Take a short garden walk"
+        },
+        {
+          "id": "g019-a05",
+          "text": "Look at the sky"
+        },
+        {
+          "id": "g019-a06",
+          "text": "Walk to the end of the street"
+        },
+        {
+          "id": "g019-a07",
+          "text": "Stand in daylight briefly"
+        },
+        {
+          "id": "g019-a08",
+          "text": "Find a nearby green space"
+        },
+        {
+          "id": "g019-a09",
+          "text": "Put on outdoor shoes"
+        },
+        {
+          "id": "g019-a10",
+          "text": "Listen to outdoor sounds"
+        }
+      ]
+    },
+    {
+      "id": "goal-020",
+      "title": "Be more organized",
+      "actions": [
+        {
+          "id": "g020-a01",
+          "text": "Write the next task"
+        },
+        {
+          "id": "g020-a02",
+          "text": "Clear one calendar conflict"
+        },
+        {
+          "id": "g020-a03",
+          "text": "Put one file in its folder"
+        },
+        {
+          "id": "g020-a04",
+          "text": "Set one useful reminder"
+        },
+        {
+          "id": "g020-a05",
+          "text": "Rename a confusing document"
+        },
+        {
+          "id": "g020-a06",
+          "text": "Sort three loose notes"
+        },
+        {
+          "id": "g020-a07",
+          "text": "Choose tomorrow’s priority"
+        },
+        {
+          "id": "g020-a08",
+          "text": "File one receipt"
+        },
+        {
+          "id": "g020-a09",
+          "text": "Make a two-item checklist"
+        },
+        {
+          "id": "g020-a10",
+          "text": "Close an unused browser tab"
+        }
+      ]
+    },
+    {
+      "id": "goal-021",
+      "title": "Play an instrument",
+      "actions": [
+        {
+          "id": "g021-a01",
+          "text": "Practice one scale"
+        },
+        {
+          "id": "g021-a02",
+          "text": "Play four slow notes"
+        },
+        {
+          "id": "g021-a03",
+          "text": "Tune one string"
+        },
+        {
+          "id": "g021-a04",
+          "text": "Repeat a difficult bar"
+        },
+        {
+          "id": "g021-a05",
+          "text": "Practice one chord change"
+        },
+        {
+          "id": "g021-a06",
+          "text": "Tap a rhythm"
+        },
+        {
+          "id": "g021-a07",
+          "text": "Read one line of music"
+        },
+        {
+          "id": "g021-a08",
+          "text": "Play for three minutes"
+        },
+        {
+          "id": "g021-a09",
+          "text": "Check your hand position"
+        },
+        {
+          "id": "g021-a10",
+          "text": "Record a short practice clip"
+        }
+      ]
+    },
+    {
+      "id": "goal-022",
+      "title": "Draw and paint",
+      "actions": [
+        {
+          "id": "g022-a01",
+          "text": "Sketch one object"
+        },
+        {
+          "id": "g022-a02",
+          "text": "Draw five circles"
+        },
+        {
+          "id": "g022-a03",
+          "text": "Try one shading technique"
+        },
+        {
+          "id": "g022-a04",
+          "text": "Mix two paint colors"
+        },
+        {
+          "id": "g022-a05",
+          "text": "Draw a quick portrait outline"
+        },
+        {
+          "id": "g022-a06",
+          "text": "Practice one straight line"
+        },
+        {
+          "id": "g022-a07",
+          "text": "Choose a reference object"
+        },
+        {
+          "id": "g022-a08",
+          "text": "Paint a small color swatch"
+        },
+        {
+          "id": "g022-a09",
+          "text": "Draw a leaf"
+        },
+        {
+          "id": "g022-a10",
+          "text": "Clean and prepare a brush"
+        }
+      ]
+    },
+    {
+      "id": "goal-023",
+      "title": "Travel more",
+      "actions": [
+        {
+          "id": "g023-a01",
+          "text": "Save one destination idea"
+        },
+        {
+          "id": "g023-a02",
+          "text": "Look up a train route"
+        },
+        {
+          "id": "g023-a03",
+          "text": "Write a travel wish"
+        },
+        {
+          "id": "g023-a04",
+          "text": "Check a passport expiry"
+        },
+        {
+          "id": "g023-a05",
+          "text": "Compare two travel dates"
+        },
+        {
+          "id": "g023-a06",
+          "text": "Mark a place on a map"
+        },
+        {
+          "id": "g023-a07",
+          "text": "Estimate a trip budget"
+        },
+        {
+          "id": "g023-a08",
+          "text": "Read a local travel tip"
+        },
+        {
+          "id": "g023-a09",
+          "text": "List one place to explore"
+        },
+        {
+          "id": "g023-a10",
+          "text": "Save one walking route"
+        }
+      ]
+    },
+    {
+      "id": "goal-024",
+      "title": "Be a better parent",
+      "actions": [
+        {
+          "id": "g024-a01",
+          "text": "Ask your child a question"
+        },
+        {
+          "id": "g024-a02",
+          "text": "Listen to their answer"
+        },
+        {
+          "id": "g024-a03",
+          "text": "Read one page together"
+        },
+        {
+          "id": "g024-a04",
+          "text": "Offer specific encouragement"
+        },
+        {
+          "id": "g024-a05",
+          "text": "Plan a short game"
+        },
+        {
+          "id": "g024-a06",
+          "text": "Notice one effort they made"
+        },
+        {
+          "id": "g024-a07",
+          "text": "Give them full attention"
+        },
+        {
+          "id": "g024-a08",
+          "text": "Ask about their favorite part"
+        },
+        {
+          "id": "g024-a09",
+          "text": "Share a small laugh"
+        },
+        {
+          "id": "g024-a10",
+          "text": "Offer a choice kindly"
+        }
+      ]
+    },
+    {
+      "id": "goal-025",
+      "title": "Volunteer more",
+      "actions": [
+        {
+          "id": "g025-a01",
+          "text": "Find a local cause"
+        },
+        {
+          "id": "g025-a02",
+          "text": "Read one volunteer role"
+        },
+        {
+          "id": "g025-a03",
+          "text": "Draft a volunteer enquiry"
+        },
+        {
+          "id": "g025-a04",
+          "text": "Share a charity event"
+        },
+        {
+          "id": "g025-a05",
+          "text": "Choose one cause to support"
+        },
+        {
+          "id": "g025-a06",
+          "text": "Save a volunteer contact"
+        },
+        {
+          "id": "g025-a07",
+          "text": "Write down your available time"
+        },
+        {
+          "id": "g025-a08",
+          "text": "Ask about a local cleanup"
+        },
+        {
+          "id": "g025-a09",
+          "text": "Read a community notice"
+        },
+        {
+          "id": "g025-a10",
+          "text": "Send one volunteer message"
+        }
+      ]
+    },
+    {
+      "id": "goal-026",
+      "title": "Improve my focus",
+      "actions": [
+        {
+          "id": "g026-a01",
+          "text": "Silence one notification"
+        },
+        {
+          "id": "g026-a02",
+          "text": "Close an unrelated tab"
+        },
+        {
+          "id": "g026-a03",
+          "text": "Choose one priority"
+        },
+        {
+          "id": "g026-a04",
+          "text": "Set a five-minute timer"
+        },
+        {
+          "id": "g026-a05",
+          "text": "Put your phone face down"
+        },
+        {
+          "id": "g026-a06",
+          "text": "Clear one desk distraction"
+        },
+        {
+          "id": "g026-a07",
+          "text": "Write a next action"
+        },
+        {
+          "id": "g026-a08",
+          "text": "Work on one task for 2 min"
+        },
+        {
+          "id": "g026-a09",
+          "text": "Move an app off your home screen"
+        },
+        {
+          "id": "g026-a10",
+          "text": "Take one mindful breath"
+        }
+      ]
+    },
+    {
+      "id": "goal-027",
+      "title": "Move more every day",
+      "actions": [
+        {
+          "id": "g027-a01",
+          "text": "Take a two-minute walk"
+        },
+        {
+          "id": "g027-a02",
+          "text": "Stand and stretch"
+        },
+        {
+          "id": "g027-a03",
+          "text": "Climb one flight of stairs"
+        },
+        {
+          "id": "g027-a04",
+          "text": "March in place briefly"
+        },
+        {
+          "id": "g027-a05",
+          "text": "Do ten shoulder rolls"
+        },
+        {
+          "id": "g027-a06",
+          "text": "Walk while making a call"
+        },
+        {
+          "id": "g027-a07",
+          "text": "Do five gentle lunges"
+        },
+        {
+          "id": "g027-a08",
+          "text": "Dance for one minute"
+        },
+        {
+          "id": "g027-a09",
+          "text": "Do ten seated leg lifts"
+        },
+        {
+          "id": "g027-a10",
+          "text": "Get up for a water refill"
+        }
+      ]
+    },
+    {
+      "id": "goal-028",
+      "title": "Practice gratitude",
+      "actions": [
+        {
+          "id": "g028-a01",
+          "text": "Write one thing you appreciate"
+        },
+        {
+          "id": "g028-a02",
+          "text": "Thank someone sincerely"
+        },
+        {
+          "id": "g028-a03",
+          "text": "Notice a small comfort"
+        },
+        {
+          "id": "g028-a04",
+          "text": "Recall a kind gesture"
+        },
+        {
+          "id": "g028-a05",
+          "text": "Name a good moment"
+        },
+        {
+          "id": "g028-a06",
+          "text": "Appreciate a useful object"
+        },
+        {
+          "id": "g028-a07",
+          "text": "Write one gratitude sentence"
+        },
+        {
+          "id": "g028-a08",
+          "text": "Remember someone who helped"
+        },
+        {
+          "id": "g028-a09",
+          "text": "Notice something pleasant"
+        },
+        {
+          "id": "g028-a10",
+          "text": "Share one thank-you message"
+        }
+      ]
+    },
+    {
+      "id": "goal-029",
+      "title": "Be more patient",
+      "actions": [
+        {
+          "id": "g029-a01",
+          "text": "Take one slow breath"
+        },
+        {
+          "id": "g029-a02",
+          "text": "Wait before replying"
+        },
+        {
+          "id": "g029-a03",
+          "text": "Let someone finish speaking"
+        },
+        {
+          "id": "g029-a04",
+          "text": "Notice your urge to rush"
+        },
+        {
+          "id": "g029-a05",
+          "text": "Count silently to five"
+        },
+        {
+          "id": "g029-a06",
+          "text": "Choose a calmer tone"
+        },
+        {
+          "id": "g029-a07",
+          "text": "Pause before interrupting"
+        },
+        {
+          "id": "g029-a08",
+          "text": "Give someone extra time"
+        },
+        {
+          "id": "g029-a09",
+          "text": "Listen to a different opinion"
+        },
+        {
+          "id": "g029-a10",
+          "text": "Let a small delay pass"
+        }
+      ]
+    },
+    {
+      "id": "goal-030",
+      "title": "Build self-discipline",
+      "actions": [
+        {
+          "id": "g030-a01",
+          "text": "Start a two-minute task"
+        },
+        {
+          "id": "g030-a02",
+          "text": "Set a small timer"
+        },
+        {
+          "id": "g030-a03",
+          "text": "Put one distraction away"
+        },
+        {
+          "id": "g030-a04",
+          "text": "Complete a tiny planned step"
+        },
+        {
+          "id": "g030-a05",
+          "text": "Check off one action"
+        },
+        {
+          "id": "g030-a06",
+          "text": "Prepare your work area"
+        },
+        {
+          "id": "g030-a07",
+          "text": "Choose a clear starting point"
+        },
+        {
+          "id": "g030-a08",
+          "text": "Repeat yesterday’s small habit"
+        },
+        {
+          "id": "g030-a09",
+          "text": "Write an if-then plan"
+        },
+        {
+          "id": "g030-a10",
+          "text": "Finish one unfinished sentence"
+        }
+      ]
+    }
+  ],
+  "distractions": [
+    {
+      "id": "d001",
+      "text": "Scroll Instagram"
+    },
+    {
+      "id": "d002",
+      "text": "Refresh TikTok"
+    },
+    {
+      "id": "d003",
+      "text": "Watch random reels"
+    },
+    {
+      "id": "d004",
+      "text": "Browse celebrity gossip"
+    },
+    {
+      "id": "d005",
+      "text": "Read comment arguments"
+    },
+    {
+      "id": "d006",
+      "text": "Refresh social feeds"
+    },
+    {
+      "id": "d007",
+      "text": "Open random memes"
+    },
+    {
+      "id": "d008",
+      "text": "Check trending hashtags"
+    },
+    {
+      "id": "d009",
+      "text": "Browse viral challenges"
+    },
+    {
+      "id": "d010",
+      "text": "Watch prank compilations"
+    },
+    {
+      "id": "d011",
+      "text": "Watch gaming streams"
+    },
+    {
+      "id": "d012",
+      "text": "Start a random game"
+    },
+    {
+      "id": "d013",
+      "text": "Browse game trailers"
+    },
+    {
+      "id": "d014",
+      "text": "Check game leaderboards"
+    },
+    {
+      "id": "d015",
+      "text": "Look at game skins"
+    },
+    {
+      "id": "d016",
+      "text": "Watch speedrun videos"
+    },
+    {
+      "id": "d017",
+      "text": "Read gaming forum drama"
+    },
+    {
+      "id": "d018",
+      "text": "Browse game achievements"
+    },
+    {
+      "id": "d019",
+      "text": "Compare console wallpapers"
+    },
+    {
+      "id": "d020",
+      "text": "Watch old game highlights"
+    },
+    {
+      "id": "d021",
+      "text": "Refresh shopping deals"
+    },
+    {
+      "id": "d022",
+      "text": "Browse flash sales"
+    },
+    {
+      "id": "d023",
+      "text": "Open a shopping wishlist"
+    },
+    {
+      "id": "d024",
+      "text": "Compare phone cases"
+    },
+    {
+      "id": "d025",
+      "text": "Browse novelty gadgets"
+    },
+    {
+      "id": "d026",
+      "text": "Check sneaker releases"
+    },
+    {
+      "id": "d027",
+      "text": "Browse jewelry ads"
+    },
+    {
+      "id": "d028",
+      "text": "Inspect sale banners"
+    },
+    {
+      "id": "d029",
+      "text": "Read product reviews at random"
+    },
+    {
+      "id": "d030",
+      "text": "Fill an imaginary cart"
+    },
+    {
+      "id": "d031",
+      "text": "Check phone wallpapers"
+    },
+    {
+      "id": "d032",
+      "text": "Rearrange home screen icons"
+    },
+    {
+      "id": "d033",
+      "text": "Change your ringtone"
+    },
+    {
+      "id": "d034",
+      "text": "Browse emoji packs"
+    },
+    {
+      "id": "d035",
+      "text": "Choose a new avatar"
+    },
+    {
+      "id": "d036",
+      "text": "Try different app themes"
+    },
+    {
+      "id": "d037",
+      "text": "Rename random folders"
+    },
+    {
+      "id": "d038",
+      "text": "Inspect screen settings"
+    },
+    {
+      "id": "d039",
+      "text": "Browse sticker packs"
+    },
+    {
+      "id": "d040",
+      "text": "Swap keyboard themes"
+    },
+    {
+      "id": "d041",
+      "text": "Watch sitcom clips"
+    },
+    {
+      "id": "d042",
+      "text": "Replay a movie scene"
+    },
+    {
+      "id": "d043",
+      "text": "Browse streaming catalogs"
+    },
+    {
+      "id": "d044",
+      "text": "Read TV fan theories"
+    },
+    {
+      "id": "d045",
+      "text": "Watch show recaps"
+    },
+    {
+      "id": "d046",
+      "text": "Check celebrity interviews"
+    },
+    {
+      "id": "d047",
+      "text": "Browse movie posters"
+    },
+    {
+      "id": "d048",
+      "text": "Read plot spoilers"
+    },
+    {
+      "id": "d049",
+      "text": "Watch blooper reels"
+    },
+    {
+      "id": "d050",
+      "text": "Compare TV rankings"
+    },
+    {
+      "id": "d051",
+      "text": "Refresh sports headlines"
+    },
+    {
+      "id": "d052",
+      "text": "Watch old match highlights"
+    },
+    {
+      "id": "d053",
+      "text": "Read transfer rumors"
+    },
+    {
+      "id": "d054",
+      "text": "Check fantasy sports scores"
+    },
+    {
+      "id": "d055",
+      "text": "Browse jersey designs"
+    },
+    {
+      "id": "d056",
+      "text": "Look at player memes"
+    },
+    {
+      "id": "d057",
+      "text": "Review trivia rankings"
+    },
+    {
+      "id": "d058",
+      "text": "Watch mascot clips"
+    },
+    {
+      "id": "d059",
+      "text": "Scroll sports debates"
+    },
+    {
+      "id": "d060",
+      "text": "Compare historical lineups"
+    },
+    {
+      "id": "d061",
+      "text": "Open random quizzes"
+    },
+    {
+      "id": "d062",
+      "text": "Take a personality quiz"
+    },
+    {
+      "id": "d063",
+      "text": "Browse trivia questions"
+    },
+    {
+      "id": "d064",
+      "text": "Read horoscope predictions"
+    },
+    {
+      "id": "d065",
+      "text": "Check viral polls"
+    },
+    {
+      "id": "d066",
+      "text": "Look up random records"
+    },
+    {
+      "id": "d067",
+      "text": "Browse optical illusions"
+    },
+    {
+      "id": "d068",
+      "text": "Try an online fortune quiz"
+    },
+    {
+      "id": "d069",
+      "text": "Read internet mysteries"
+    },
+    {
+      "id": "d070",
+      "text": "Browse odd fact lists"
+    },
+    {
+      "id": "d071",
+      "text": "Check weather in faraway cities"
+    },
+    {
+      "id": "d072",
+      "text": "Explore random street views"
+    },
+    {
+      "id": "d073",
+      "text": "Browse luxury hotel photos"
+    },
+    {
+      "id": "d074",
+      "text": "Read airport lounge reviews"
+    },
+    {
+      "id": "d075",
+      "text": "Look at cruise ship interiors"
+    },
+    {
+      "id": "d076",
+      "text": "Compare theme park rides"
+    },
+    {
+      "id": "d077",
+      "text": "Browse famous landmarks"
+    },
+    {
+      "id": "d078",
+      "text": "Watch train journey videos"
+    },
+    {
+      "id": "d079",
+      "text": "Look at remote webcams"
+    },
+    {
+      "id": "d080",
+      "text": "Explore fictional maps"
+    },
+    {
+      "id": "d081",
+      "text": "Browse pet memes"
+    },
+    {
+      "id": "d082",
+      "text": "Watch cat compilations"
+    },
+    {
+      "id": "d083",
+      "text": "Look at puppy photos"
+    },
+    {
+      "id": "d084",
+      "text": "Watch animal bloopers"
+    },
+    {
+      "id": "d085",
+      "text": "Browse cute animal gifs"
+    },
+    {
+      "id": "d086",
+      "text": "Read funny pet captions"
+    },
+    {
+      "id": "d087",
+      "text": "Watch talking bird clips"
+    },
+    {
+      "id": "d088",
+      "text": "Check wildlife livestreams"
+    },
+    {
+      "id": "d089",
+      "text": "Browse pet costume photos"
+    },
+    {
+      "id": "d090",
+      "text": "Look at aquarium videos"
+    },
+    {
+      "id": "d091",
+      "text": "Refresh your inbox again"
+    },
+    {
+      "id": "d092",
+      "text": "Check spam for no reason"
+    },
+    {
+      "id": "d093",
+      "text": "Sort old promotional emails"
+    },
+    {
+      "id": "d094",
+      "text": "Reopen already read messages"
+    },
+    {
+      "id": "d095",
+      "text": "Check group-chat reactions"
+    },
+    {
+      "id": "d096",
+      "text": "Read unrelated chat history"
+    },
+    {
+      "id": "d097",
+      "text": "Browse old message stickers"
+    },
+    {
+      "id": "d098",
+      "text": "Refresh notifications repeatedly"
+    },
+    {
+      "id": "d099",
+      "text": "Check archived group chats"
+    },
+    {
+      "id": "d100",
+      "text": "Change a chat wallpaper"
+    },
+    {
+      "id": "d101",
+      "text": "Browse viral recipes"
+    },
+    {
+      "id": "d102",
+      "text": "Watch cooking fails"
+    },
+    {
+      "id": "d103",
+      "text": "Read restaurant ranking debates"
+    },
+    {
+      "id": "d104",
+      "text": "Look at dessert photos"
+    },
+    {
+      "id": "d105",
+      "text": "Compare novelty snacks"
+    },
+    {
+      "id": "d106",
+      "text": "Watch food challenge videos"
+    },
+    {
+      "id": "d107",
+      "text": "Browse fancy menu photos"
+    },
+    {
+      "id": "d108",
+      "text": "Read fast-food rumors"
+    },
+    {
+      "id": "d109",
+      "text": "Watch cake decorating clips"
+    },
+    {
+      "id": "d110",
+      "text": "Look at unusual food trends"
+    },
+    {
+      "id": "d111",
+      "text": "Check random stock tickers"
+    },
+    {
+      "id": "d112",
+      "text": "Read luxury car reviews"
+    },
+    {
+      "id": "d113",
+      "text": "Browse expensive watch photos"
+    },
+    {
+      "id": "d114",
+      "text": "Compare yacht interiors"
+    },
+    {
+      "id": "d115",
+      "text": "Look at dream mansion listings"
+    },
+    {
+      "id": "d116",
+      "text": "Read billionaire rankings"
+    },
+    {
+      "id": "d117",
+      "text": "Browse auction highlights"
+    },
+    {
+      "id": "d118",
+      "text": "Compare private jet cabins"
+    },
+    {
+      "id": "d119",
+      "text": "Inspect designer bag collections"
+    },
+    {
+      "id": "d120",
+      "text": "Watch supercar compilations"
+    },
+    {
+      "id": "d121",
+      "text": "Scroll nostalgia photos"
+    },
+    {
+      "id": "d122",
+      "text": "Browse old school memes"
+    },
+    {
+      "id": "d123",
+      "text": "Rewatch childhood adverts"
+    },
+    {
+      "id": "d124",
+      "text": "Look at vintage toy catalogs"
+    },
+    {
+      "id": "d125",
+      "text": "Read retro cartoon trivia"
+    },
+    {
+      "id": "d126",
+      "text": "Browse old music charts"
+    },
+    {
+      "id": "d127",
+      "text": "Watch decade compilations"
+    },
+    {
+      "id": "d128",
+      "text": "Read retro fashion rankings"
+    },
+    {
+      "id": "d129",
+      "text": "Explore old web screenshots"
+    },
+    {
+      "id": "d130",
+      "text": "Look at discontinued snacks"
+    },
+    {
+      "id": "d131",
+      "text": "Watch magic trick clips"
+    },
+    {
+      "id": "d132",
+      "text": "Browse optical toy videos"
+    },
+    {
+      "id": "d133",
+      "text": "Read internet conspiracy threads"
+    },
+    {
+      "id": "d134",
+      "text": "Watch satisfying loops"
+    },
+    {
+      "id": "d135",
+      "text": "Scroll oddly specific memes"
+    },
+    {
+      "id": "d136",
+      "text": "Browse reaction GIFs"
+    },
+    {
+      "id": "d137",
+      "text": "Watch random dance clips"
+    },
+    {
+      "id": "d138",
+      "text": "Browse cosplay galleries"
+    },
+    {
+      "id": "d139",
+      "text": "Check trending jokes"
+    },
+    {
+      "id": "d140",
+      "text": "Read forum flame wars"
+    },
+    {
+      "id": "d141",
+      "text": "Change profile bio again"
+    },
+    {
+      "id": "d142",
+      "text": "Refresh follower counts"
+    },
+    {
+      "id": "d143",
+      "text": "Check who viewed a story"
+    },
+    {
+      "id": "d144",
+      "text": "Browse unrelated hashtags"
+    },
+    {
+      "id": "d145",
+      "text": "Read random public profiles"
+    },
+    {
+      "id": "d146",
+      "text": "Inspect old tagged photos"
+    },
+    {
+      "id": "d147",
+      "text": "Recheck social notifications"
+    },
+    {
+      "id": "d148",
+      "text": "Scroll suggested accounts"
+    },
+    {
+      "id": "d149",
+      "text": "Compare influencer outfits"
+    },
+    {
+      "id": "d150",
+      "text": "Browse trending filters"
+    }
+  ]
+}

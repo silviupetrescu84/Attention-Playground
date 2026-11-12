@@ -1,0 +1,2412 @@
+{
+  "game": "Pause Before Reacting",
+  "version": 1,
+  "instructions": {
+    "tap": "Helpful opportunities worth responding to",
+    "pass": "Unhelpful impulses or reactions to let pass"
+  },
+  "goodSituations": [
+    {
+      "id": "good-001",
+      "text": "A friend needs a hand"
+    },
+    {
+      "id": "good-002",
+      "text": "Someone asks for help"
+    },
+    {
+      "id": "good-003",
+      "text": "A friend wants to talk"
+    },
+    {
+      "id": "good-004",
+      "text": "A neighbor needs help"
+    },
+    {
+      "id": "good-005",
+      "text": "Someone feels left out"
+    },
+    {
+      "id": "good-006",
+      "text": "A friend shares good news"
+    },
+    {
+      "id": "good-007",
+      "text": "A colleague needs support"
+    },
+    {
+      "id": "good-008",
+      "text": "Someone says thank you"
+    },
+    {
+      "id": "good-009",
+      "text": "A friend feels nervous"
+    },
+    {
+      "id": "good-010",
+      "text": "Someone needs directions"
+    },
+    {
+      "id": "good-011",
+      "text": "A friend asks to meet"
+    },
+    {
+      "id": "good-012",
+      "text": "A neighbor says hello"
+    },
+    {
+      "id": "good-013",
+      "text": "Someone offers kindness"
+    },
+    {
+      "id": "good-014",
+      "text": "A friend celebrates a win"
+    },
+    {
+      "id": "good-015",
+      "text": "A teammate needs backup"
+    },
+    {
+      "id": "good-016",
+      "text": "Someone asks your opinion"
+    },
+    {
+      "id": "good-017",
+      "text": "A friend wants advice"
+    },
+    {
+      "id": "good-018",
+      "text": "Someone gives feedback"
+    },
+    {
+      "id": "good-019",
+      "text": "A child asks a question"
+    },
+    {
+      "id": "good-020",
+      "text": "An elder needs a seat"
+    },
+    {
+      "id": "good-021",
+      "text": "A stranger drops a bag"
+    },
+    {
+      "id": "good-022",
+      "text": "A friend feels lonely"
+    },
+    {
+      "id": "good-023",
+      "text": "Someone admits a mistake"
+    },
+    {
+      "id": "good-024",
+      "text": "A teammate says sorry"
+    },
+    {
+      "id": "good-025",
+      "text": "A friend shares a worry"
+    },
+    {
+      "id": "good-026",
+      "text": "Someone asks you to listen"
+    },
+    {
+      "id": "good-027",
+      "text": "A neighbor needs a lift"
+    },
+    {
+      "id": "good-028",
+      "text": "A colleague feels stuck"
+    },
+    {
+      "id": "good-029",
+      "text": "Someone asks for patience"
+    },
+    {
+      "id": "good-030",
+      "text": "A friend offers to help"
+    },
+    {
+      "id": "good-031",
+      "text": "A friend calls to check in"
+    },
+    {
+      "id": "good-032",
+      "text": "Someone invites you out"
+    },
+    {
+      "id": "good-033",
+      "text": "A neighbor invites you in"
+    },
+    {
+      "id": "good-034",
+      "text": "Someone needs a kind word"
+    },
+    {
+      "id": "good-035",
+      "text": "A friend starts a project"
+    },
+    {
+      "id": "good-036",
+      "text": "A colleague asks to learn"
+    },
+    {
+      "id": "good-037",
+      "text": "Someone praises your work"
+    },
+    {
+      "id": "good-038",
+      "text": "A friend makes an effort"
+    },
+    {
+      "id": "good-039",
+      "text": "A teammate asks for input"
+    },
+    {
+      "id": "good-040",
+      "text": "Someone shares a story"
+    },
+    {
+      "id": "good-041",
+      "text": "Your body needs water"
+    },
+    {
+      "id": "good-042",
+      "text": "You notice you're tired"
+    },
+    {
+      "id": "good-043",
+      "text": "You have a moment to rest"
+    },
+    {
+      "id": "good-044",
+      "text": "You feel ready for a walk"
+    },
+    {
+      "id": "good-045",
+      "text": "You notice your breathing"
+    },
+    {
+      "id": "good-046",
+      "text": "You have time to stretch"
+    },
+    {
+      "id": "good-047",
+      "text": "You spot a quiet moment"
+    },
+    {
+      "id": "good-048",
+      "text": "You can step outside"
+    },
+    {
+      "id": "good-049",
+      "text": "You feel tension rising"
+    },
+    {
+      "id": "good-050",
+      "text": "You notice your hunger"
+    },
+    {
+      "id": "good-051",
+      "text": "You have time for a break"
+    },
+    {
+      "id": "good-052",
+      "text": "You need a glass of water"
+    },
+    {
+      "id": "good-053",
+      "text": "You notice your posture"
+    },
+    {
+      "id": "good-054",
+      "text": "You have a chance to sleep"
+    },
+    {
+      "id": "good-055",
+      "text": "You can take a deep breath"
+    },
+    {
+      "id": "good-056",
+      "text": "You notice the sunshine"
+    },
+    {
+      "id": "good-057",
+      "text": "You spot a lovely flower"
+    },
+    {
+      "id": "good-058",
+      "text": "You hear birds singing"
+    },
+    {
+      "id": "good-059",
+      "text": "You see a beautiful view"
+    },
+    {
+      "id": "good-060",
+      "text": "You enjoy a warm drink"
+    },
+    {
+      "id": "good-061",
+      "text": "You have a moment of calm"
+    },
+    {
+      "id": "good-062",
+      "text": "You notice a small win"
+    },
+    {
+      "id": "good-063",
+      "text": "You finish a hard task"
+    },
+    {
+      "id": "good-064",
+      "text": "You make useful progress"
+    },
+    {
+      "id": "good-065",
+      "text": "You learn something new"
+    },
+    {
+      "id": "good-066",
+      "text": "You keep a promise"
+    },
+    {
+      "id": "good-067",
+      "text": "You remember a good moment"
+    },
+    {
+      "id": "good-068",
+      "text": "You see someone smile"
+    },
+    {
+      "id": "good-069",
+      "text": "You notice a kind gesture"
+    },
+    {
+      "id": "good-070",
+      "text": "You get a helpful message"
+    },
+    {
+      "id": "good-071",
+      "text": "You hear a sincere compliment"
+    },
+    {
+      "id": "good-072",
+      "text": "You have an idea to try"
+    },
+    {
+      "id": "good-073",
+      "text": "You can write one sentence"
+    },
+    {
+      "id": "good-074",
+      "text": "You have five free minutes"
+    },
+    {
+      "id": "good-075",
+      "text": "You can tidy one item"
+    },
+    {
+      "id": "good-076",
+      "text": "You can read one page"
+    },
+    {
+      "id": "good-077",
+      "text": "You can start a small task"
+    },
+    {
+      "id": "good-078",
+      "text": "You have a chance to learn"
+    },
+    {
+      "id": "good-079",
+      "text": "You can practice a skill"
+    },
+    {
+      "id": "good-080",
+      "text": "You can ask for guidance"
+    },
+    {
+      "id": "good-081",
+      "text": "You can make a small plan"
+    },
+    {
+      "id": "good-082",
+      "text": "You can try once more"
+    },
+    {
+      "id": "good-083",
+      "text": "You can correct a mistake"
+    },
+    {
+      "id": "good-084",
+      "text": "You can celebrate effort"
+    },
+    {
+      "id": "good-085",
+      "text": "You can say what you need"
+    },
+    {
+      "id": "good-086",
+      "text": "You can set a boundary"
+    },
+    {
+      "id": "good-087",
+      "text": "You can offer an apology"
+    },
+    {
+      "id": "good-088",
+      "text": "You can thank someone"
+    },
+    {
+      "id": "good-089",
+      "text": "You can send a kind note"
+    },
+    {
+      "id": "good-090",
+      "text": "You can invite a friend"
+    },
+    {
+      "id": "good-091",
+      "text": "You can make time to listen"
+    },
+    {
+      "id": "good-092",
+      "text": "You can ask how they are"
+    },
+    {
+      "id": "good-093",
+      "text": "You can offer encouragement"
+    },
+    {
+      "id": "good-094",
+      "text": "You can show appreciation"
+    },
+    {
+      "id": "good-095",
+      "text": "You can help a teammate"
+    },
+    {
+      "id": "good-096",
+      "text": "You can welcome someone"
+    },
+    {
+      "id": "good-097",
+      "text": "You can share useful advice"
+    },
+    {
+      "id": "good-098",
+      "text": "You can check on a friend"
+    },
+    {
+      "id": "good-099",
+      "text": "You can include someone"
+    },
+    {
+      "id": "good-100",
+      "text": "You can choose to be honest"
+    }
+  ],
+  "badSituations": [
+    {
+      "id": "bad-001",
+      "text": "Replay an awkward moment",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-002",
+      "text": "Rehash an old argument",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-003",
+      "text": "Relive yesterday's error",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-004",
+      "text": "Dwell on one rude remark",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-005",
+      "text": "Assume the worst outcome",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-006",
+      "text": "Imagine everyone judging",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-007",
+      "text": "Predict you'll always fail",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-008",
+      "text": "Guess what others think",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-009",
+      "text": "Read anger into silence",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-010",
+      "text": "Treat doubt as a fact",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-011",
+      "text": "Turn a slip into doom",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-012",
+      "text": "Revisit an old insult",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-013",
+      "text": "Search for hidden motives",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-014",
+      "text": "Assume you're a burden",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-015",
+      "text": "Expect every plan to fail",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-016",
+      "text": "Predict a friend's anger",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-017",
+      "text": "Rewrite a past mistake",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-018",
+      "text": "Obsess over one typo",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-019",
+      "text": "Imagine a total disaster",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-020",
+      "text": "Turn a delay into rejection",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-021",
+      "text": "Keep score of old slights",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-022",
+      "text": "Expect a bad first impression",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-023",
+      "text": "Decide no one understands",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-024",
+      "text": "Assume one loss defines you",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-025",
+      "text": "Replay a missed chance",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-026",
+      "text": "Compare every past choice",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-027",
+      "text": "Dwell on a harsh comment",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-028",
+      "text": "Predict nobody will care",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-029",
+      "text": "Assume silence means anger",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-030",
+      "text": "Expect the worst reply",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-031",
+      "text": "Read rejection into a look",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-032",
+      "text": "Turn a pause into panic",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-033",
+      "text": "Imagine hidden criticism",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-034",
+      "text": "Assume a friend is upset",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-035",
+      "text": "Replay an embarrassing joke",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-036",
+      "text": "Treat one setback as fate",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-037",
+      "text": "Assume every risk is doomed",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-038",
+      "text": "Keep reliving a bad day",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-039",
+      "text": "Expect people to leave",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-040",
+      "text": "Decide you ruined it all",
+      "category": "Rumination"
+    },
+    {
+      "id": "bad-041",
+      "text": "Call yourself useless",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-042",
+      "text": "Say you're never enough",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-043",
+      "text": "Label yourself a failure",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-044",
+      "text": "Insult your appearance",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-045",
+      "text": "Mock your own mistakes",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-046",
+      "text": "Dismiss your progress",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-047",
+      "text": "Ignore your small wins",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-048",
+      "text": "Compare yourself harshly",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-049",
+      "text": "Blame yourself for all",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-050",
+      "text": "Say you can't improve",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-051",
+      "text": "Demand perfection now",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-052",
+      "text": "Shame yourself for resting",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-053",
+      "text": "Punish yourself for errors",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-054",
+      "text": "Call your effort worthless",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-055",
+      "text": "Say you're too far behind",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-056",
+      "text": "Judge every little flaw",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-057",
+      "text": "Tell yourself to give up",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-058",
+      "text": "Doubt every good decision",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-059",
+      "text": "Dismiss every compliment",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-060",
+      "text": "Say you always mess up",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-061",
+      "text": "Mock your first attempt",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-062",
+      "text": "Treat rest as laziness",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-063",
+      "text": "Criticize your own needs",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-064",
+      "text": "Tell yourself you don't fit",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-065",
+      "text": "Assume you lack talent",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-066",
+      "text": "Focus only on your flaws",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-067",
+      "text": "Write off your hard work",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-068",
+      "text": "Insult yourself for crying",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-069",
+      "text": "Shame yourself for asking",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-070",
+      "text": "Belittle your ambitions",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-071",
+      "text": "Expect instant mastery",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-072",
+      "text": "Say you don't deserve joy",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-073",
+      "text": "Call a setback proof",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-074",
+      "text": "Tell yourself not to try",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-075",
+      "text": "Dismiss your courage",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-076",
+      "text": "Assume you never learn",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-077",
+      "text": "Mock your slow progress",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-078",
+      "text": "Demand flawless results",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-079",
+      "text": "Compare your worst to best",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-080",
+      "text": "Refuse to forgive yourself",
+      "category": "Self-criticism"
+    },
+    {
+      "id": "bad-081",
+      "text": "Interrupt to win a point",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-082",
+      "text": "Roll your eyes at a friend",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-083",
+      "text": "Mock someone's mistake",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-084",
+      "text": "Spread an unkind rumor",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-085",
+      "text": "Talk over a quiet person",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-086",
+      "text": "Ignore a sincere apology",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-087",
+      "text": "Send a sarcastic reply",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-088",
+      "text": "Make a joke at their cost",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-089",
+      "text": "Share a private secret",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-090",
+      "text": "Gossip about a teammate",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-091",
+      "text": "Dismiss someone else's joy",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-092",
+      "text": "Turn a chat into a contest",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-093",
+      "text": "One-up a friend's story",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-094",
+      "text": "Ignore someone speaking",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-095",
+      "text": "Make fun of their accent",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-096",
+      "text": "Judge someone on sight",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-097",
+      "text": "Assume bad intentions",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-098",
+      "text": "Snap at a helpful person",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-099",
+      "text": "Reply before listening",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-100",
+      "text": "Use silence as punishment",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-101",
+      "text": "Brag to make them feel bad",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-102",
+      "text": "Point out every little flaw",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-103",
+      "text": "Publicly shame a colleague",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-104",
+      "text": "Interrupt someone's grief",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-105",
+      "text": "Criticize without context",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-106",
+      "text": "Exclude the new person",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-107",
+      "text": "Laugh at an honest error",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-108",
+      "text": "Dismiss a friend's worry",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-109",
+      "text": "Complain behind their back",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-110",
+      "text": "Take credit for their work",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-111",
+      "text": "Make a cruel comparison",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-112",
+      "text": "Mock someone's question",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-113",
+      "text": "Insist on the last word",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-114",
+      "text": "Assume they meant harm",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-115",
+      "text": "Twist a harmless comment",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-116",
+      "text": "Send a message in anger",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-117",
+      "text": "Belittle their achievement",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-118",
+      "text": "Force an unwanted opinion",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-119",
+      "text": "Dismiss their boundaries",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-120",
+      "text": "Keep arguing to feel right",
+      "category": "Social impulses"
+    },
+    {
+      "id": "bad-121",
+      "text": "Scroll Instagram again",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-122",
+      "text": "Open TikTok on impulse",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-123",
+      "text": "Refresh the news feed",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-124",
+      "text": "Check likes every minute",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-125",
+      "text": "Read another comment war",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-126",
+      "text": "Refresh your inbox again",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-127",
+      "text": "Open five new tabs",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-128",
+      "text": "Watch endless short videos",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-129",
+      "text": "Check a pointless alert",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-130",
+      "text": "Reply to every notification",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-131",
+      "text": "Refresh follower counts",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-132",
+      "text": "Scroll past bedtime",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-133",
+      "text": "Keep checking the time",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-134",
+      "text": "Browse random shopping",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-135",
+      "text": "Open a game mid-task",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-136",
+      "text": "Watch autoplay videos",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-137",
+      "text": "Jump between three apps",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-138",
+      "text": "Check an old argument",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-139",
+      "text": "Refresh a group chat",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-140",
+      "text": "Hunt for online drama",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-141",
+      "text": "Scroll without purpose",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-142",
+      "text": "Read negative comments",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-143",
+      "text": "Compare lives online",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-144",
+      "text": "Check an ex's profile",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-145",
+      "text": "Keep refreshing a post",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-146",
+      "text": "Open another meme page",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-147",
+      "text": "Watch one more random clip",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-148",
+      "text": "Refresh a live counter",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-149",
+      "text": "Check your phone on reflex",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-150",
+      "text": "Tap a clickbait headline",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-151",
+      "text": "Join a pointless debate",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-152",
+      "text": "Search for new gossip",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-153",
+      "text": "Browse items you won't buy",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-154",
+      "text": "Keep scrolling in bed",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-155",
+      "text": "Read angry reply threads",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-156",
+      "text": "Open apps out of habit",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-157",
+      "text": "Check a message twice",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-158",
+      "text": "Refresh an empty inbox",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-159",
+      "text": "Watch videos to avoid work",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-160",
+      "text": "Scroll through old photos",
+      "category": "Digital distractions"
+    },
+    {
+      "id": "bad-161",
+      "text": "Put off one small task",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-162",
+      "text": "Avoid a needed apology",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-163",
+      "text": "Ignore your own limits",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-164",
+      "text": "Delay a simple decision",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-165",
+      "text": "Postpone a kind reply",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-166",
+      "text": "Hide a manageable error",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-167",
+      "text": "Avoid asking for help",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-168",
+      "text": "Wait for perfect timing",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-169",
+      "text": "Ignore a useful reminder",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-170",
+      "text": "Skip an important check",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-171",
+      "text": "Avoid a calm conversation",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-172",
+      "text": "Leave a task half-started",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-173",
+      "text": "Pretend a problem is gone",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-174",
+      "text": "Ignore a clear deadline",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-175",
+      "text": "Delay sending the email",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-176",
+      "text": "Avoid saying what you need",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-177",
+      "text": "Postpone a short walk",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-178",
+      "text": "Keep waiting for motivation",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-179",
+      "text": "Avoid trying something new",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-180",
+      "text": "Ignore a broken promise",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-181",
+      "text": "Delay a simple repair",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-182",
+      "text": "Put off reading one page",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-183",
+      "text": "Avoid a fair compromise",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-184",
+      "text": "Keep dodging feedback",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-185",
+      "text": "Postpone a short call",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-186",
+      "text": "Delay a useful question",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-187",
+      "text": "Avoid a small first step",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-188",
+      "text": "Skip a planned practice",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-189",
+      "text": "Hide from a simple choice",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-190",
+      "text": "Ignore an overdue chore",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-191",
+      "text": "Avoid a needed boundary",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-192",
+      "text": "Delay a gentle check-in",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-193",
+      "text": "Put off writing one line",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-194",
+      "text": "Avoid admitting confusion",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-195",
+      "text": "Keep waiting to feel ready",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-196",
+      "text": "Postpone a simple errand",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-197",
+      "text": "Avoid making a small plan",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-198",
+      "text": "Let fear decide for you",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-199",
+      "text": "Ignore a helpful invitation",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-200",
+      "text": "Delay an honest response",
+      "category": "Avoidance"
+    },
+    {
+      "id": "bad-201",
+      "text": "Shout over a small delay",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-202",
+      "text": "Slam the door in anger",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-203",
+      "text": "Snap at a minor error",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-204",
+      "text": "React before you listen",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-205",
+      "text": "Raise your voice to win",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-206",
+      "text": "Send a heated message",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-207",
+      "text": "Blame the nearest person",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-208",
+      "text": "Demand an instant answer",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-209",
+      "text": "Assume an insult was meant",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-210",
+      "text": "Make a threat in frustration",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-211",
+      "text": "Treat a queue as an attack",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-212",
+      "text": "Turn a mistake into blame",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-213",
+      "text": "Argue over a small typo",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-214",
+      "text": "Lash out at a reminder",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-215",
+      "text": "Interrupt a hard talk",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-216",
+      "text": "Respond while still furious",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-217",
+      "text": "Make a rash accusation",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-218",
+      "text": "Take a joke as a threat",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-219",
+      "text": "Insult someone for waiting",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-220",
+      "text": "Blame a friend for traffic",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-221",
+      "text": "Storm away mid-sentence",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-222",
+      "text": "Refuse to hear context",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-223",
+      "text": "Fire off an angry email",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-224",
+      "text": "Pick a fight over nothing",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-225",
+      "text": "Answer sarcasm with rage",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-226",
+      "text": "Treat feedback as an attack",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-227",
+      "text": "Push for an instant yes",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-228",
+      "text": "Turn a pause into conflict",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-229",
+      "text": "Call names during a debate",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-230",
+      "text": "Demand someone agree now",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-231",
+      "text": "Raise your voice at home",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-232",
+      "text": "Retaliate over a slight",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-233",
+      "text": "Make a scene over a delay",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-234",
+      "text": "React to a rumor as fact",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-235",
+      "text": "Punish someone for a no",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-236",
+      "text": "Jump to blame immediately",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-237",
+      "text": "Keep escalating the fight",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-238",
+      "text": "Snap because you're tired",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-239",
+      "text": "Answer without reading",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-240",
+      "text": "Take frustration out on all",
+      "category": "Unhelpful reactions"
+    },
+    {
+      "id": "bad-241",
+      "text": "Count everyone else's wins",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-242",
+      "text": "Resent a friend's success",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-243",
+      "text": "Compare your salary daily",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-244",
+      "text": "Judge your life by likes",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-245",
+      "text": "Envy someone else's trip",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-246",
+      "text": "Dismiss your own milestone",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-247",
+      "text": "Keep checking their scores",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-248",
+      "text": "Resent a colleague's praise",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-249",
+      "text": "Compete over small favors",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-250",
+      "text": "Compare bodies online",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-251",
+      "text": "Assume others have it easy",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-252",
+      "text": "Feel owed their success",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-253",
+      "text": "Measure worth by followers",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-254",
+      "text": "Make a friend's win yours",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-255",
+      "text": "Mock someone doing better",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-256",
+      "text": "Keep ranking your friends",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-257",
+      "text": "Compare every new purchase",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-258",
+      "text": "Treat success as a race",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-259",
+      "text": "Resent a stranger's luck",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-260",
+      "text": "Wish for another's failure",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-261",
+      "text": "Count their compliments",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-262",
+      "text": "Compare your worst moments",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-263",
+      "text": "Belittle another's effort",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-264",
+      "text": "Take their win personally",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-265",
+      "text": "Covet every new gadget",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-266",
+      "text": "Judge your pace by theirs",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-267",
+      "text": "Obsess over a rival's post",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-268",
+      "text": "Compete in every chat",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-269",
+      "text": "Dismiss a shared success",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-270",
+      "text": "Keep score of attention",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-271",
+      "text": "Envy somebody's hobbies",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-272",
+      "text": "Measure joy by their life",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-273",
+      "text": "Turn their praise into envy",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-274",
+      "text": "Compare every achievement",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-275",
+      "text": "Ignore your own strengths",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-276",
+      "text": "Assume you're falling behind",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-277",
+      "text": "Dismiss your unique path",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-278",
+      "text": "Track another's promotions",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-279",
+      "text": "Judge your work by theirs",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-280",
+      "text": "Look for proof they're worse",
+      "category": "Comparison and envy"
+    },
+    {
+      "id": "bad-281",
+      "text": "Check the door ten times",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-282",
+      "text": "Recheck a sent message",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-283",
+      "text": "Refresh for bad news",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-284",
+      "text": "Imagine every minor risk",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-285",
+      "text": "Turn a delay into danger",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-286",
+      "text": "Predict a terrible meeting",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-287",
+      "text": "Fear an ordinary pause",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-288",
+      "text": "Assume a call means trouble",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-289",
+      "text": "Check a harmless symptom",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-290",
+      "text": "Plan for every disaster",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-291",
+      "text": "Search for certainty again",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-292",
+      "text": "Rehearse every possible no",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-293",
+      "text": "Assume a typo ruins all",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-294",
+      "text": "Replay what you should say",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-295",
+      "text": "Look for signs of failure",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-296",
+      "text": "Imagine a meeting collapse",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-297",
+      "text": "Expect an awful surprise",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-298",
+      "text": "Check a reply every minute",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-299",
+      "text": "Fear every unfamiliar task",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-300",
+      "text": "Recount every small error",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-301",
+      "text": "Keep asking for reassurance",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-302",
+      "text": "Try to control every detail",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-303",
+      "text": "Predict the worst commute",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-304",
+      "text": "Imagine all plans canceled",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-305",
+      "text": "Treat a glance as a warning",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-306",
+      "text": "Look for flaws in every plan",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-307",
+      "text": "Assume a late text is bad",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-308",
+      "text": "Monitor every notification",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-309",
+      "text": "Recheck a minor decision",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-310",
+      "text": "Imagine everyone upset",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-311",
+      "text": "Fear saying one wrong word",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-312",
+      "text": "Plan for impossible risks",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-313",
+      "text": "Assume good news won't last",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-314",
+      "text": "Look for a catch in praise",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-315",
+      "text": "Keep checking your calendar",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-316",
+      "text": "Overthink a simple greeting",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-317",
+      "text": "Predict embarrassment ahead",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-318",
+      "text": "Assume each silence is bad",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-319",
+      "text": "Expect a setback tomorrow",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-320",
+      "text": "Rethink a harmless choice",
+      "category": "Worry spirals"
+    },
+    {
+      "id": "bad-321",
+      "text": "Buy something on impulse",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-322",
+      "text": "Eat while barely noticing",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-323",
+      "text": "Grab a snack out of boredom",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-324",
+      "text": "Make a promise too quickly",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-325",
+      "text": "Say yes to avoid discomfort",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-326",
+      "text": "Cancel plans out of spite",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-327",
+      "text": "Send without proofreading",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-328",
+      "text": "Click buy to feel better",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-329",
+      "text": "Start five tasks at once",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-330",
+      "text": "Switch goals every minute",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-331",
+      "text": "Sign up without reading",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-332",
+      "text": "Spend to impress others",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-333",
+      "text": "Agree before you think",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-334",
+      "text": "Quit after one rough try",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-335",
+      "text": "Make plans you can't keep",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-336",
+      "text": "Share news without checking",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-337",
+      "text": "Post a complaint in anger",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-338",
+      "text": "Answer just to end silence",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-339",
+      "text": "Change plans out of envy",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-340",
+      "text": "Act to get instant praise",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-341",
+      "text": "Grab your phone mid-talk",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-342",
+      "text": "Scroll instead of sleeping",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-343",
+      "text": "Overcommit your weekend",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-344",
+      "text": "Choose speed over safety",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-345",
+      "text": "Copy a stranger's advice",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-346",
+      "text": "Reply to every provocation",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-347",
+      "text": "Make a bet out of boredom",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-348",
+      "text": "Rush a meaningful choice",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-349",
+      "text": "Interrupt to share a thought",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-350",
+      "text": "Start drama for excitement",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-351",
+      "text": "Spend money to fit in",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-352",
+      "text": "Say something just to hurt",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-353",
+      "text": "Make a snap judgment",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-354",
+      "text": "Join a pile-on online",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-355",
+      "text": "Share a photo without asking",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-356",
+      "text": "Dismiss a careful warning",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-357",
+      "text": "Take on more than you can",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-358",
+      "text": "Decide while half-listening",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-359",
+      "text": "React to a clickbait post",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-360",
+      "text": "Chase every new trend",
+      "category": "Impulsive choices"
+    },
+    {
+      "id": "bad-361",
+      "text": "Ignore a friend's check-in",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-362",
+      "text": "Dismiss a loved one's need",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-363",
+      "text": "Rush through every meal",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-364",
+      "text": "Skip rest to prove worth",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-365",
+      "text": "Cancel a needed break",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-366",
+      "text": "Ignore a kind invitation",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-367",
+      "text": "Forget to drink water",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-368",
+      "text": "Keep working through lunch",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-369",
+      "text": "Brush off your own hunger",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-370",
+      "text": "Skip sleep for more scrolling",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-371",
+      "text": "Refuse a offered hand",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-372",
+      "text": "Avoid making eye contact",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-373",
+      "text": "Ignore someone saying hi",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-374",
+      "text": "Keep your phone at dinner",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-375",
+      "text": "Dismiss a partner's story",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-376",
+      "text": "Ignore a gentle reminder",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-377",
+      "text": "Talk while someone shares",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-378",
+      "text": "Skip a promised call",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-379",
+      "text": "Withdraw without saying why",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-380",
+      "text": "Leave a friend on read",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-381",
+      "text": "Ignore a chance to thank",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-382",
+      "text": "Brush off sincere praise",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-383",
+      "text": "Avoid time outdoors again",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-384",
+      "text": "Treat every pause as waste",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-385",
+      "text": "Ignore a tense shoulder",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-386",
+      "text": "Keep pushing when exhausted",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-387",
+      "text": "Ignore a meaningful moment",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-388",
+      "text": "Miss a friend's milestone",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-389",
+      "text": "Forget a shared commitment",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-390",
+      "text": "Refuse to ask how they are",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-391",
+      "text": "Dismiss a child's question",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-392",
+      "text": "Skip a small act of care",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-393",
+      "text": "Avoid an honest check-in",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-394",
+      "text": "Keep multitasking in talks",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-395",
+      "text": "Ignore an easy kindness",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-396",
+      "text": "Rush past a lovely view",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-397",
+      "text": "Treat your body as a tool",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-398",
+      "text": "Dismiss signs you need rest",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-399",
+      "text": "Ignore your own boundaries",
+      "category": "Neglect and disconnection"
+    },
+    {
+      "id": "bad-400",
+      "text": "Forget to notice progress",
+      "category": "Neglect and disconnection"
+    }
+  ]
+}
