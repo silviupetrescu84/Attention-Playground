@@ -1,0 +1,811 @@
+{
+  "game": "Gratitude Lens",
+  "gameNumber": 8,
+  "mechanic": "Reveal the Good",
+  "version": 1,
+  "maxCharacters": 25,
+  "gratefulFor": [
+    {
+      "id": "good-001",
+      "text": "A warm hug"
+    },
+    {
+      "id": "good-002",
+      "text": "A kind message"
+    },
+    {
+      "id": "good-003",
+      "text": "A sunny morning"
+    },
+    {
+      "id": "good-004",
+      "text": "A good night's sleep"
+    },
+    {
+      "id": "good-005",
+      "text": "Fresh clean sheets"
+    },
+    {
+      "id": "good-006",
+      "text": "A friend checking in"
+    },
+    {
+      "id": "good-007",
+      "text": "A shared laugh"
+    },
+    {
+      "id": "good-008",
+      "text": "A home-cooked meal"
+    },
+    {
+      "id": "good-009",
+      "text": "A quiet moment"
+    },
+    {
+      "id": "good-010",
+      "text": "A gentle breeze"
+    },
+    {
+      "id": "good-011",
+      "text": "A helpful stranger"
+    },
+    {
+      "id": "good-012",
+      "text": "A sincere compliment"
+    },
+    {
+      "id": "good-013",
+      "text": "A favorite song"
+    },
+    {
+      "id": "good-014",
+      "text": "A warm shower"
+    },
+    {
+      "id": "good-015",
+      "text": "A cozy blanket"
+    },
+    {
+      "id": "good-016",
+      "text": "A peaceful walk"
+    },
+    {
+      "id": "good-017",
+      "text": "A good conversation"
+    },
+    {
+      "id": "good-018",
+      "text": "A pet greeting you"
+    },
+    {
+      "id": "good-019",
+      "text": "A beautiful sunset"
+    },
+    {
+      "id": "good-020",
+      "text": "A cup of tea"
+    },
+    {
+      "id": "good-021",
+      "text": "A delicious breakfast"
+    },
+    {
+      "id": "good-022",
+      "text": "A friendly smile"
+    },
+    {
+      "id": "good-023",
+      "text": "An unexpected call"
+    },
+    {
+      "id": "good-024",
+      "text": "A second chance"
+    },
+    {
+      "id": "good-025",
+      "text": "A day without pain"
+    },
+    {
+      "id": "good-026",
+      "text": "A moment of courage"
+    },
+    {
+      "id": "good-027",
+      "text": "A small victory"
+    },
+    {
+      "id": "good-028",
+      "text": "A new opportunity"
+    },
+    {
+      "id": "good-029",
+      "text": "A safe place to rest"
+    },
+    {
+      "id": "good-030",
+      "text": "A thoughtful gift"
+    },
+    {
+      "id": "good-031",
+      "text": "A kind teacher"
+    },
+    {
+      "id": "good-032",
+      "text": "A supportive friend"
+    },
+    {
+      "id": "good-033",
+      "text": "A reassuring word"
+    },
+    {
+      "id": "good-034",
+      "text": "A roof overhead"
+    },
+    {
+      "id": "good-035",
+      "text": "Clean drinking water"
+    },
+    {
+      "id": "good-036",
+      "text": "A healthy meal"
+    },
+    {
+      "id": "good-037",
+      "text": "A fresh start"
+    },
+    {
+      "id": "good-038",
+      "text": "A blooming flower"
+    },
+    {
+      "id": "good-039",
+      "text": "A clear night sky"
+    },
+    {
+      "id": "good-040",
+      "text": "A quiet library"
+    },
+    {
+      "id": "good-041",
+      "text": "A good book"
+    },
+    {
+      "id": "good-042",
+      "text": "A handwritten note"
+    },
+    {
+      "id": "good-043",
+      "text": "A family gathering"
+    },
+    {
+      "id": "good-044",
+      "text": "A moment of calm"
+    },
+    {
+      "id": "good-045",
+      "text": "A sincere apology"
+    },
+    {
+      "id": "good-046",
+      "text": "A forgiving friend"
+    },
+    {
+      "id": "good-047",
+      "text": "A helpful colleague"
+    },
+    {
+      "id": "good-048",
+      "text": "A finished task"
+    },
+    {
+      "id": "good-049",
+      "text": "A skill learned"
+    },
+    {
+      "id": "good-050",
+      "text": "A solved problem"
+    },
+    {
+      "id": "good-051",
+      "text": "A creative idea"
+    },
+    {
+      "id": "good-052",
+      "text": "A good cup of coffee"
+    },
+    {
+      "id": "good-053",
+      "text": "A walk in nature"
+    },
+    {
+      "id": "good-054",
+      "text": "A favorite memory"
+    },
+    {
+      "id": "good-055",
+      "text": "An honest answer"
+    },
+    {
+      "id": "good-056",
+      "text": "A warm welcome"
+    },
+    {
+      "id": "good-057",
+      "text": "A door held open"
+    },
+    {
+      "id": "good-058",
+      "text": "A seat offered"
+    },
+    {
+      "id": "good-059",
+      "text": "A friendly neighbor"
+    },
+    {
+      "id": "good-060",
+      "text": "A safe journey"
+    },
+    {
+      "id": "good-061",
+      "text": "A restful weekend"
+    },
+    {
+      "id": "good-062",
+      "text": "A picnic outside"
+    },
+    {
+      "id": "good-063",
+      "text": "A clear blue sky"
+    },
+    {
+      "id": "good-064",
+      "text": "A lovely photograph"
+    },
+    {
+      "id": "good-065",
+      "text": "A playful puppy"
+    },
+    {
+      "id": "good-066",
+      "text": "A cat purring"
+    },
+    {
+      "id": "good-067",
+      "text": "A child's laughter"
+    },
+    {
+      "id": "good-068",
+      "text": "A surprise visit"
+    },
+    {
+      "id": "good-069",
+      "text": "A tasty piece of fruit"
+    },
+    {
+      "id": "good-070",
+      "text": "A cool drink"
+    },
+    {
+      "id": "good-071",
+      "text": "A soft pillow"
+    },
+    {
+      "id": "good-072",
+      "text": "A comfortable chair"
+    },
+    {
+      "id": "good-073",
+      "text": "A deep breath"
+    },
+    {
+      "id": "good-074",
+      "text": "A moment of wonder"
+    },
+    {
+      "id": "good-075",
+      "text": "A peaceful garden"
+    },
+    {
+      "id": "good-076",
+      "text": "A bird singing"
+    },
+    {
+      "id": "good-077",
+      "text": "A beautiful tree"
+    },
+    {
+      "id": "good-078",
+      "text": "A family recipe"
+    },
+    {
+      "id": "good-079",
+      "text": "A trusted mentor"
+    },
+    {
+      "id": "good-080",
+      "text": "A caring partner"
+    },
+    {
+      "id": "good-081",
+      "text": "A good listener"
+    },
+    {
+      "id": "good-082",
+      "text": "A lesson from failure"
+    },
+    {
+      "id": "good-083",
+      "text": "A chance to try again"
+    },
+    {
+      "id": "good-084",
+      "text": "A helpful reminder"
+    },
+    {
+      "id": "good-085",
+      "text": "A repaired friendship"
+    },
+    {
+      "id": "good-086",
+      "text": "A good medical result"
+    },
+    {
+      "id": "good-087",
+      "text": "A clean kitchen"
+    },
+    {
+      "id": "good-088",
+      "text": "A tidy desk"
+    },
+    {
+      "id": "good-089",
+      "text": "A comfortable bed"
+    },
+    {
+      "id": "good-090",
+      "text": "A shared celebration"
+    },
+    {
+      "id": "good-091",
+      "text": "A skill improving"
+    },
+    {
+      "id": "good-092",
+      "text": "A meaningful goal"
+    },
+    {
+      "id": "good-093",
+      "text": "An inspiring story"
+    },
+    {
+      "id": "good-094",
+      "text": "A local park"
+    },
+    {
+      "id": "good-095",
+      "text": "A rain-free walk"
+    },
+    {
+      "id": "good-096",
+      "text": "A moment of kindness"
+    },
+    {
+      "id": "good-097",
+      "text": "A peaceful evening"
+    },
+    {
+      "id": "good-098",
+      "text": "A welcoming community"
+    },
+    {
+      "id": "good-099",
+      "text": "A supportive team"
+    },
+    {
+      "id": "good-100",
+      "text": "A moment to reflect"
+    }
+  ],
+  "distractors": [
+    {
+      "id": "bad-001",
+      "text": "Being insulted"
+    },
+    {
+      "id": "bad-002",
+      "text": "Being bullied"
+    },
+    {
+      "id": "bad-003",
+      "text": "Being threatened"
+    },
+    {
+      "id": "bad-004",
+      "text": "A broken promise"
+    },
+    {
+      "id": "bad-005",
+      "text": "A stolen wallet"
+    },
+    {
+      "id": "bad-006",
+      "text": "An unfair accusation"
+    },
+    {
+      "id": "bad-007",
+      "text": "A hurtful rumor"
+    },
+    {
+      "id": "bad-008",
+      "text": "A cruel joke"
+    },
+    {
+      "id": "bad-009",
+      "text": "A hateful message"
+    },
+    {
+      "id": "bad-010",
+      "text": "A privacy breach"
+    },
+    {
+      "id": "bad-011",
+      "text": "A broken window"
+    },
+    {
+      "id": "bad-012",
+      "text": "A lost passport"
+    },
+    {
+      "id": "bad-013",
+      "text": "A dishonest scam"
+    },
+    {
+      "id": "bad-014",
+      "text": "A stolen bicycle"
+    },
+    {
+      "id": "bad-015",
+      "text": "A rude interruption"
+    },
+    {
+      "id": "bad-016",
+      "text": "Being shouted at"
+    },
+    {
+      "id": "bad-017",
+      "text": "Being excluded"
+    },
+    {
+      "id": "bad-018",
+      "text": "A deliberate lie"
+    },
+    {
+      "id": "bad-019",
+      "text": "A damaged keepsake"
+    },
+    {
+      "id": "bad-020",
+      "text": "A cancelled appointment"
+    },
+    {
+      "id": "bad-021",
+      "text": "A missed connection"
+    },
+    {
+      "id": "bad-022",
+      "text": "A broken appliance"
+    },
+    {
+      "id": "bad-023",
+      "text": "A burst water pipe"
+    },
+    {
+      "id": "bad-024",
+      "text": "A leaking roof"
+    },
+    {
+      "id": "bad-025",
+      "text": "A flooded room"
+    },
+    {
+      "id": "bad-026",
+      "text": "A power outage"
+    },
+    {
+      "id": "bad-027",
+      "text": "A car breakdown"
+    },
+    {
+      "id": "bad-028",
+      "text": "A flat tire"
+    },
+    {
+      "id": "bad-029",
+      "text": "A lost house key"
+    },
+    {
+      "id": "bad-030",
+      "text": "A smashed phone"
+    },
+    {
+      "id": "bad-031",
+      "text": "A blocked driveway"
+    },
+    {
+      "id": "bad-032",
+      "text": "A stolen package"
+    },
+    {
+      "id": "bad-033",
+      "text": "A fake invoice"
+    },
+    {
+      "id": "bad-034",
+      "text": "A phishing email"
+    },
+    {
+      "id": "bad-035",
+      "text": "A hacked account"
+    },
+    {
+      "id": "bad-036",
+      "text": "An unwanted charge"
+    },
+    {
+      "id": "bad-037",
+      "text": "An unpaid wage"
+    },
+    {
+      "id": "bad-038",
+      "text": "A false complaint"
+    },
+    {
+      "id": "bad-039",
+      "text": "A broken agreement"
+    },
+    {
+      "id": "bad-040",
+      "text": "A threatening call"
+    },
+    {
+      "id": "bad-041",
+      "text": "A hateful comment"
+    },
+    {
+      "id": "bad-042",
+      "text": "A malicious prank"
+    },
+    {
+      "id": "bad-043",
+      "text": "A ruined meal"
+    },
+    {
+      "id": "bad-044",
+      "text": "Food poisoning"
+    },
+    {
+      "id": "bad-045",
+      "text": "A painful injury"
+    },
+    {
+      "id": "bad-046",
+      "text": "A twisted ankle"
+    },
+    {
+      "id": "bad-047",
+      "text": "A severe headache"
+    },
+    {
+      "id": "bad-048",
+      "text": "A sleepless night"
+    },
+    {
+      "id": "bad-049",
+      "text": "A sudden fever"
+    },
+    {
+      "id": "bad-050",
+      "text": "A painful toothache"
+    },
+    {
+      "id": "bad-051",
+      "text": "A scraped knee"
+    },
+    {
+      "id": "bad-052",
+      "text": "A burned hand"
+    },
+    {
+      "id": "bad-053",
+      "text": "A sprained wrist"
+    },
+    {
+      "id": "bad-054",
+      "text": "A lost pet"
+    },
+    {
+      "id": "bad-055",
+      "text": "A broken friendship"
+    },
+    {
+      "id": "bad-056",
+      "text": "A betrayal of trust"
+    },
+    {
+      "id": "bad-057",
+      "text": "An ignored boundary"
+    },
+    {
+      "id": "bad-058",
+      "text": "A public humiliation"
+    },
+    {
+      "id": "bad-059",
+      "text": "A cruel rejection"
+    },
+    {
+      "id": "bad-060",
+      "text": "A hostile argument"
+    },
+    {
+      "id": "bad-061",
+      "text": "An abusive remark"
+    },
+    {
+      "id": "bad-062",
+      "text": "A broken confidence"
+    },
+    {
+      "id": "bad-063",
+      "text": "A false rumor"
+    },
+    {
+      "id": "bad-064",
+      "text": "A discriminatory slur"
+    },
+    {
+      "id": "bad-065",
+      "text": "A forced apology"
+    },
+    {
+      "id": "bad-066",
+      "text": "A deliberate snub"
+    },
+    {
+      "id": "bad-067",
+      "text": "A threatening gesture"
+    },
+    {
+      "id": "bad-068",
+      "text": "A damaged garden"
+    },
+    {
+      "id": "bad-069",
+      "text": "A stolen plant"
+    },
+    {
+      "id": "bad-070",
+      "text": "A broken fence"
+    },
+    {
+      "id": "bad-071",
+      "text": "A vandalized wall"
+    },
+    {
+      "id": "bad-072",
+      "text": "A smashed mailbox"
+    },
+    {
+      "id": "bad-073",
+      "text": "A ruined painting"
+    },
+    {
+      "id": "bad-074",
+      "text": "A torn photograph"
+    },
+    {
+      "id": "bad-075",
+      "text": "A lost keepsake"
+    },
+    {
+      "id": "bad-076",
+      "text": "A stolen donation"
+    },
+    {
+      "id": "bad-077",
+      "text": "A fraudulent request"
+    },
+    {
+      "id": "bad-078",
+      "text": "A cancelled flight"
+    },
+    {
+      "id": "bad-079",
+      "text": "A missed train"
+    },
+    {
+      "id": "bad-080",
+      "text": "A lost suitcase"
+    },
+    {
+      "id": "bad-081",
+      "text": "A stolen ticket"
+    },
+    {
+      "id": "bad-082",
+      "text": "A delayed ambulance"
+    },
+    {
+      "id": "bad-083",
+      "text": "A dangerous driver"
+    },
+    {
+      "id": "bad-084",
+      "text": "A reckless cyclist"
+    },
+    {
+      "id": "bad-085",
+      "text": "A near collision"
+    },
+    {
+      "id": "bad-086",
+      "text": "A slippery spill"
+    },
+    {
+      "id": "bad-087",
+      "text": "A broken staircase"
+    },
+    {
+      "id": "bad-088",
+      "text": "A faulty smoke alarm"
+    },
+    {
+      "id": "bad-089",
+      "text": "A blocked fire exit"
+    },
+    {
+      "id": "bad-090",
+      "text": "A dangerous pothole"
+    },
+    {
+      "id": "bad-091",
+      "text": "A toxic spill"
+    },
+    {
+      "id": "bad-092",
+      "text": "A polluted stream"
+    },
+    {
+      "id": "bad-093",
+      "text": "A littered beach"
+    },
+    {
+      "id": "bad-094",
+      "text": "A trapped animal"
+    },
+    {
+      "id": "bad-095",
+      "text": "A neglected pet"
+    },
+    {
+      "id": "bad-096",
+      "text": "A destroyed habitat"
+    },
+    {
+      "id": "bad-097",
+      "text": "An injured bird"
+    },
+    {
+      "id": "bad-098",
+      "text": "A damaged playground"
+    },
+    {
+      "id": "bad-099",
+      "text": "A bullying incident"
+    },
+    {
+      "id": "bad-100",
+      "text": "An unwanted insult"
+    }
+  ]
+}
