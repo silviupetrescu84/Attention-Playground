@@ -146,7 +146,11 @@ describe('fitGameCanvas', () => {
 describe('createGameCanvas', () => {
   let contexts: FakeContext[]
   /** The scaling set on the canvas's context, one entry per call. */
-  const transforms = () => contexts.at(-1)!.callsTo('setTransform').map((call) => call.args)
+  const transforms = () =>
+    contexts
+      .at(-1)!
+      .callsTo('setTransform')
+      .map((call) => call.args)
 
   function setViewport(width: number, height: number, pixelRatio = 1) {
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: width })
@@ -324,9 +328,9 @@ describe('createGameCanvas', () => {
     vi.mocked(HTMLCanvasElement.prototype.getContext).mockReturnValue(null)
     const container = document.createElement('main')
 
-    expect(() =>
-      createGameCanvas(container, { signal: new AbortController().signal }),
-    ).toThrow('Canvas 2D drawing is not supported')
+    expect(() => createGameCanvas(container, { signal: new AbortController().signal })).toThrow(
+      'Canvas 2D drawing is not supported',
+    )
     expect(container.children).toHaveLength(0)
   })
 

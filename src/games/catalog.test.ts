@@ -2,12 +2,15 @@ import { describe, expect, it, vi } from 'vitest'
 import { gamePath, games, preloadGames, TOTAL_GAMES, type CatalogGame } from './catalog'
 
 describe('games catalog', () => {
-  it('lists the four games in their order on the home screen', () => {
+  it('lists the seven games in their order on the home screen', () => {
     expect(games.map((game) => [game.id, game.name])).toEqual([
       ['emotions-rise', 'Emotions Rise'],
       ['align-the-actions', 'Align the Actions'],
       ['shift-perspective', 'Shift Perspective'],
       ['focus-attention', 'Focus Attention'],
+      ['break-it-down', 'Break It Down'],
+      ['pause-before-reacting', 'Pause Before Reacting'],
+      ['improve-inner-voice', 'Improve Inner Voice'],
     ])
   })
 
@@ -26,6 +29,9 @@ describe('games catalog', () => {
       '/games/align-the-actions',
       '/games/shift-perspective',
       '/games/focus-attention',
+      '/games/break-it-down',
+      '/games/pause-before-reacting',
+      '/games/improve-inner-voice',
     ])
   })
 
@@ -49,7 +55,8 @@ describe('games catalog', () => {
       { ...games[0], id: 'other', preload: slow },
     ]
 
-    expect(preloadGames(list)).toBeUndefined()
+    preloadGames(list)
+
     expect(slow).toHaveBeenCalledTimes(2)
   })
 
@@ -62,7 +69,10 @@ describe('games catalog', () => {
     ).not.toThrow()
 
     await vi.waitFor(() =>
-      expect(warn).toHaveBeenCalledWith('Could not preload Emotions Rise; it will load when opened', failure),
+      expect(warn).toHaveBeenCalledWith(
+        'Could not preload Emotions Rise; it will load when opened',
+        failure,
+      ),
     )
     warn.mockRestore()
   })

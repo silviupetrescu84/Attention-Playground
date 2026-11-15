@@ -2,7 +2,7 @@ import { readCssVariables } from '../shared/canvas-style'
 import type { GameDefinition } from '../shared/game-shell'
 import type { FontLoader } from '../shared/load-font'
 import type { Random } from '../shared/random'
-import { CANVAS_FONT, fitFontSize, loadCanvasFont } from '../shared/text'
+import { CANVAS_FONT, fitFontSize, loadWithCanvasFont } from '../shared/text'
 import data from './data/shift-perspective.json'
 import {
   CHOICE_TEXT_FIT,
@@ -45,9 +45,8 @@ export interface ShiftPerspectiveGameOptions {
  * again by the game itself in case it is not. Loading twice does not
  * download twice.
  */
-export async function preloadShiftPerspective(fonts?: FontLoader): Promise<HTMLImageElement> {
-  const [, bubbleImage] = await Promise.all([loadCanvasFont({ fonts }), loadBubbleImage()])
-  return bubbleImage
+export function preloadShiftPerspective(fonts?: FontLoader): Promise<HTMLImageElement> {
+  return loadWithCanvasFont(loadBubbleImage, { fonts })
 }
 
 /** How to play, shown with the Start button. */

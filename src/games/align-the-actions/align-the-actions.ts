@@ -1,3 +1,6 @@
+import { DIFFICULTY } from '../../config/difficulty'
+import { checkPositive } from '../shared/checks'
+import { checkStepTable, valueAt, type StepTable } from '../shared/difficulty'
 import { GAME_HEIGHT, GAME_WIDTH, type GamePoint } from '../shared/game-canvas'
 import { GAME_BAR_HEIGHT } from '../shared/game-hud'
 import type { Random } from '../shared/random'
@@ -29,10 +32,9 @@ import {
  * When a mistake ends the round, everything stops where it is: the row chosen
  * from at the circle, its goal still at the top, and no next row.
  *
- * The game gets harder as more goals are shown (one per row): rows move at
- * 60 px/s, then 80 px/s after 3 goals, 105 after 6, 135 after 9, 170 after
- * 12 and 210 from 15 on (SPEED_STEPS). A row keeps its speed until it
- * leaves.
+ * The game gets harder as more goals are shown (one per row): rows move
+ * faster (ROW_SPEED, set in config/difficulty.json). A row keeps its speed
+ * until it leaves.
  */
 
 export const LANE_COUNT = 4
@@ -52,31 +54,13 @@ export const CHECK_Y = GAME_HEIGHT - 60
 /** The lane the circle starts a round in: the leftmost. */
 export const START_LANE = 0
 
-/** The speed of the first rows, in px/s. */
-export const START_SPEED = 60
-
-/** Once `goalsShown` goals have been shown, the next rows move at `speed` px/s. */
-export type SpeedStep = readonly [goalsShown: number, speed: number]
-
-export const SPEED_STEPS: readonly SpeedStep[] = [
-  [3, 80],
-  [6, 105],
-  [9, 135],
-  [12, 170],
-  [15, 210],
-]
+/** How fast rows move, in px/s, by how many goals have been shown. */
+export const ROW_SPEED: StepTable = DIFFICULTY.alignTheActions.rowSpeedByGoals
+checkStepTable(ROW_SPEED, 'alignTheActions.rowSpeedByGoals', checkPositive)
 
 /** The speed of a row that comes out after `goalsShown` goals have been shown. */
 export function speedAfter(goalsShown: number): number {
-  let speed = START_SPEED
-
-  for (const [after, stepSpeed] of SPEED_STEPS) {
-    if (goalsShown >= after) {
-      speed = stepSpeed
-    }
-  }
-
-  return speed
+  return valueAt(ROW_SPEED, goalsShown)
 }
 
 export const POINTS = {
@@ -224,6 +208,7 @@ export function createAlignTheActions({
         const arrivedAtMs = arrivalMs(row)
         choose(row)
 
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- choose() can stop it
         if (stopped) {
           moveTo(arrivedAtMs)
           return

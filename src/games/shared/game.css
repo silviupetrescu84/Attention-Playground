@@ -13,7 +13,7 @@
    * A condensed font, so long words fit at a readable size. The fallbacks are
    * only used if it cannot load.
    */
-  --canvas-font-family: "Roboto Condensed", "Arial Narrow", sans-serif;
+  --canvas-font-family: 'Roboto Condensed', 'Arial Narrow', sans-serif;
   --canvas-font-weight: 600;
 
   /* A translucent white card with a thin ink border, for things to read. */
@@ -25,6 +25,8 @@
   /* Lighter hues for something chosen, as it fades out (see feedback.ts). */
   --canvas-right-hue: color-mix(in srgb, var(--color-good) 20%, transparent);
   --canvas-wrong-hue: color-mix(in srgb, var(--color-bad) 20%, transparent);
+  /* The shadow under buttons, on the page and drawn on the canvas (see pill.ts). */
+  --button-shadow: color-mix(in srgb, var(--color-ink) 25%, transparent);
 }
 
 /* Centred in the space kept free below the canvas (set by game-canvas.ts). */
@@ -59,11 +61,15 @@
   display: block;
   width: 100%;
   height: 100%;
-  background: #fff url('../../assets/background/canvas-background.png') center / cover
-    no-repeat;
   box-shadow: 0 1rem 2.5rem color-mix(in srgb, var(--color-ink) 12%, transparent);
   touch-action: none;
   user-select: none;
+}
+
+/* The canvas background, also behind the high scores screen (game-hud.ts). */
+.game-canvas,
+.game-hud__overlay--high-scores {
+  background: #fff url('../../assets/background/canvas-background.png') center / cover no-repeat;
 }
 
 /*
@@ -173,6 +179,16 @@
   backdrop-filter: blur(12px);
 }
 
+/*
+ * Over everything else (the top bar included), hiding the game: only the
+ * high scores and the Back button, on the canvas background.
+ */
+.game-hud__overlay--high-scores {
+  z-index: 3;
+  justify-content: flex-start;
+  padding-top: 96px;
+}
+
 .game-hud__overlay--finished {
   color: #fff;
   background: color-mix(in srgb, var(--color-ink) 40%, transparent);
@@ -196,7 +212,7 @@
 }
 
 .game-hud__final-score {
-  margin: 0 0 12px;
+  margin: 0;
   font-size: 26px;
   font-weight: 700;
 }
@@ -253,13 +269,14 @@
   border-radius: 999px;
   color: #fff;
   background: var(--color-ink);
-  box-shadow: 0 0.5rem 1.5rem color-mix(in srgb, var(--color-ink) 25%, transparent);
+  box-shadow: 0 0.5rem 1.5rem var(--button-shadow);
   font-size: 26px;
   font-weight: 800;
 }
 
 /* Lighter than Start, which stays the main action. */
-.game-hud .game-hud__difficulty {
+.game-hud .game-hud__difficulty,
+.game-hud .game-hud__high-scores-open {
   padding: 10px 28px;
   color: var(--color-ink);
   background: #fff;
@@ -270,4 +287,106 @@
   margin: 0;
   font-size: 18px;
   font-weight: 700;
+}
+
+/* How the round did among the high scores, under the final score. */
+.game-hud__round-result {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.game-hud__round-result--best {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+/* The name to save a high score under, with the Save button beside it. */
+.game-hud__name-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.game-hud__name-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.game-hud__name {
+  width: 190px;
+  padding: 10px 14px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  color: var(--color-ink);
+  background: #fff;
+  font: inherit;
+  font-size: 20px;
+  pointer-events: auto;
+  user-select: text;
+}
+
+.game-hud__name:focus-visible {
+  border-color: var(--color-focus);
+  outline: none;
+}
+
+.game-hud .game-hud__save {
+  padding: 10px 24px;
+  font-size: 20px;
+}
+
+/* On the finished screen, Save is a light button, like the name field. */
+.game-hud .game-hud__overlay--finished .game-hud__save {
+  color: var(--color-ink);
+  background: #fff;
+}
+
+.game-hud__high-scores-level {
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* Rank, name and score on each line; a long name is cut short. */
+.game-hud__high-scores {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 20px;
+  list-style: none;
+  font-size: 20px;
+}
+
+.game-hud__high-scores li {
+  display: grid;
+  grid-template-columns: 2ch minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: baseline;
+}
+
+.game-hud__high-score-rank {
+  font-weight: 600;
+  opacity: 0.6;
+  text-align: right;
+}
+
+.game-hud__high-score-name {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.game-hud__high-score-score {
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.game-hud__no-high-scores {
+  font-weight: 600;
 }

@@ -14,19 +14,40 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --coverage",
-    "test:watch": "vitest"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run --project unit --coverage",
+    "test:watch": "vitest --project unit",
+    "test:browser": "vitest run --project browser",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run test:browser"
   },
   "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@vitest/browser-playwright": "5.1.0",
     "@vitest/coverage-v8": "5.1.0",
+    "@vitest/eslint-plugin": "1.6.28",
+    "eslint": "10.14.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-perfectionist": "5.13.0",
+    "globals": "17.14.0",
     "jsdom": "29.1.1",
+    "playwright": "1.65.0",
+    "prettier": "3.9.10",
     "typescript": "7.0.2",
+    "typescript-eslint": "8.72.2",
+    "typescript-for-lint": "file:tools/typescript-for-lint",
     "vite": "8.3.3",
     "vitest": "5.1.0"
   },
   "overrides": {
     "postcss": "8.5.29",
-    "rolldown": "1.2.12"
+    "rolldown": "1.2.12",
+    "typescript": "$typescript",
+    "typescript-for-lint": {
+      "typescript": "6.0.3"
+    }
   },
   "dependencies": {
     "@fontsource/roboto-condensed": "5.3.0"

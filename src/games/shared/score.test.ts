@@ -112,13 +112,10 @@ describe('score', () => {
     expect(score.value).toBe(4)
   })
 
-  it.each([-1, Number.NaN, Number.POSITIVE_INFINITY])(
-    'rejects %s points',
-    (points) => {
-      const { score } = setup()
+  it.each([-1, Number.NaN, Number.POSITIVE_INFINITY])('rejects %s points', (points) => {
+    const { score } = setup()
 
-      expect(() => score.add(points)).toThrow(RangeError)
-      expect(score.value).toBe(0)
-    },
-  )
+    expect(() => score.add(points)).toThrow(RangeError)
+    expect(score.value).toBe(0)
+  })
 })

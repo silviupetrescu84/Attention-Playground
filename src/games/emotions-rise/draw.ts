@@ -1,8 +1,6 @@
-import ovalImageUrl from '../../assets/emotions-rise/oval.png'
-import { CARD_COLORS, type CssValues, type CssVariables } from '../shared/canvas-style'
-import { fadedOutAt, FEEDBACK_COLORS, type Chosen } from '../shared/feedback'
+import { drawBubbleImage, type BubbleSize } from '../shared/canvas-style'
+import { drawHue, fadedOutAt, hueFor, type BubbleColors, type Chosen } from '../shared/feedback'
 import { clearGameCanvas } from '../shared/game-canvas'
-import { createImageLoader } from '../shared/load-image'
 import type { TextFit } from '../shared/text'
 import {
   BUBBLE_HEIGHT,
@@ -19,22 +17,12 @@ import {
  * green or red hue over it (see the shared feedback).
  */
 
-/** The colours bubbles are drawn with: a card's, and the feedback hues. */
-export const EMOTION_COLORS = {
-  ...CARD_COLORS,
-  ...FEEDBACK_COLORS,
-} as const satisfies CssVariables
-
-export type BubbleColors = CssValues<keyof typeof EMOTION_COLORS>
-
 /** How every bubble looks: its text's font (one size for all) and its colours. */
 export interface BubbleLook {
   /** A canvas font shorthand, e.g. "600 19px …" (see `fontAt`). */
   readonly font: string
   readonly colors: BubbleColors
 }
-
-export const BUBBLE_BORDER_WIDTH = 1.5
 
 /**
  * Every emotion is drawn at one size: the largest, up to 22 px, at which the
@@ -46,8 +34,13 @@ export const EMOTION_TEXT_FIT: TextFit = {
   maxSize: 22,
 }
 
-/** Loads (once) the oval artwork used by every bubble. */
-export const loadBubbleImage = createImageLoader(ovalImageUrl, 'oval.png')
+/** A bubble's image, or a plain oval as big if it did not load. */
+const BUBBLE_SIZE: BubbleSize = {
+  width: BUBBLE_WIDTH,
+  height: BUBBLE_HEIGHT,
+  radiusX: BUBBLE_WIDTH / 2,
+  radiusY: BUBBLE_HEIGHT / 2,
+}
 
 /** A bubble with its word; `hue` (if any) tints the oval itself, under the word. */
 export function drawBubble(
@@ -58,31 +51,10 @@ export function drawBubble(
   hue?: string,
 ) {
   const { x, y, emotion } = bubble
-
-  if (bubbleImage) {
-    context.drawImage(
-      bubbleImage,
-      x - BUBBLE_WIDTH / 2,
-      y - BUBBLE_HEIGHT / 2,
-      BUBBLE_WIDTH,
-      BUBBLE_HEIGHT,
-    )
-  } else {
-    // Keep the game usable if the image cannot load.
-    context.beginPath()
-    context.ellipse(x, y, BUBBLE_WIDTH / 2, BUBBLE_HEIGHT / 2, 0, 0, Math.PI * 2)
-    context.fillStyle = colors.cardFill
-    context.fill()
-    context.lineWidth = BUBBLE_BORDER_WIDTH
-    context.strokeStyle = colors.cardBorder
-    context.stroke()
-  }
+  drawBubbleImage(context, bubbleImage, bubble, BUBBLE_SIZE, colors)
 
   if (hue) {
-    context.beginPath()
-    context.ellipse(x, y, BUBBLE_HIT_WIDTH / 2, BUBBLE_HIT_HEIGHT / 2, 0, 0, Math.PI * 2)
-    context.fillStyle = hue
-    context.fill()
+    drawHue(context, bubble, BUBBLE_HIT_WIDTH / 2, BUBBLE_HIT_HEIGHT / 2, hue)
   }
 
   context.font = font
@@ -113,7 +85,7 @@ export function drawScene(
 
   for (const { item, right, atMs } of tapped) {
     context.globalAlpha = fadedOutAt(atMs, timeMs)
-    const hue = right ? look.colors.rightHue : look.colors.wrongHue
+    const hue = hueFor(right, look.colors)
     drawBubble(context, item, look, bubbleImage, hue)
   }
 

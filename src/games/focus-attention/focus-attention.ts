@@ -1,6 +1,10 @@
-import { GAME_HEIGHT, GAME_WIDTH, type GamePoint } from '../shared/game-canvas'
-import { GAME_BAR_HEIGHT } from '../shared/game-hud'
+import { DIFFICULTY } from '../../config/difficulty'
+import { GREEN_BUBBLE_BODY } from '../shared/artwork'
+import { checkPositive } from '../shared/checks'
+import { checkStepTable, valueAt, type StepTable } from '../shared/difficulty'
 import { stillFading, type Chosen } from '../shared/feedback'
+import { GAME_HEIGHT, GAME_WIDTH, type GamePoint } from '../shared/game-canvas'
+import { GAME_BAR_HEIGHT, PLAY_CENTRE } from '../shared/game-hud'
 import type { Random } from '../shared/random'
 import type { Score } from '../shared/score'
 import { createWordPicker, type Word, type WordPicker } from '../shared/word-picker'
@@ -25,66 +29,38 @@ import { createWordPicker, type Word, type WordPicker } from '../shared/word-pic
  * Every bubble that reaches the projector (its edge touches the projector's
  * glowing orb) disappears and is a mistake, target or not.
  *
- * The first bubble comes the moment the round starts, then one every 3 s.
+ * The first bubble comes the moment the round starts, then one every
+ * SPAWN_DELAY.
  * Each comes at least 130 px from where the last 3 that came (and are still
  * on screen) are then; if nowhere is, as far from them as possible. Words
  * are picked like emotions in Emotions Rise (see the shared word picker),
  * never repeating one of the last 10 of their kind.
  *
- * The game gets harder with time (round time, in seconds):
- *
- * - every bubble on screen moves at 15 px/s, then 17.5 from 10 s, 22.5 from
- *   20 s, 30 from 30 s, 40 from 40 s, 52.5 from 50 s and 65 from 60 s on;
- * - bubbles come every 3 s, then every 2.8 s from 70 s, 2.6 s from 80 s,
- *   2.4 s from 90 s and 2 s from 100 s on.
+ * The game gets harder with the round's time: every bubble on screen moves
+ * faster (SPEED) and bubbles come more often (SPAWN_DELAY), both set in
+ * config/difficulty.json.
  *
  * When a mistake ends the round, everything stops where it is.
  */
 
-/** From `atMs` into the round, the value is `value`. */
-export type TimeStep = readonly [atMs: number, value: number]
+const { speedByTimeMs, spawnDelayMsByTimeMs } = DIFFICULTY.focusAttention
 
-/** The value of a setting that starts at `start` and follows `steps`, at `timeMs`. */
-export function valueAt(start: number, steps: readonly TimeStep[], timeMs: number): number {
-  let value = start
+/** How fast every bubble moves, in px/s, by the round's time. */
+export const SPEED: StepTable = speedByTimeMs
+checkStepTable(SPEED, 'focusAttention.speedByTimeMs', checkPositive)
 
-  for (const [atMs, stepValue] of steps) {
-    if (timeMs >= atMs) {
-      value = stepValue
-    }
-  }
-
-  return value
-}
-
-/** How fast every bubble moves at first, in px/s. */
-export const START_SPEED = 15
-export const SPEED_STEPS: readonly TimeStep[] = [
-  [10_000, 17.5],
-  [20_000, 22.5],
-  [30_000, 30],
-  [40_000, 40],
-  [50_000, 52.5],
-  [60_000, 65],
-]
-
-/** How often a bubble comes at first. */
-export const START_SPAWN_INTERVAL_MS = 3_000
-export const SPAWN_INTERVAL_STEPS: readonly TimeStep[] = [
-  [70_000, 2_800],
-  [80_000, 2_600],
-  [90_000, 2_400],
-  [100_000, 2_000],
-]
+/** The time from one bubble to the next, by the round's time. */
+export const SPAWN_DELAY: StepTable = spawnDelayMsByTimeMs
+checkStepTable(SPAWN_DELAY, 'focusAttention.spawnDelayMsByTimeMs', checkPositive)
 
 /** The speed of every bubble at `timeMs`. */
 export function speedAt(timeMs: number): number {
-  return valueAt(START_SPEED, SPEED_STEPS, timeMs)
+  return valueAt(SPEED, timeMs)
 }
 
 /** The time between a bubble that comes at `timeMs` and the next. */
 export function spawnIntervalAt(timeMs: number): number {
-  return valueAt(START_SPAWN_INTERVAL_MS, SPAWN_INTERVAL_STEPS, timeMs)
+  return valueAt(SPAWN_DELAY, timeMs)
 }
 
 /** How far a bubble moves from `fromMs` to `toMs`, following every speed change. */
@@ -92,7 +68,7 @@ export function distanceBetween(fromMs: number, toMs: number): number {
   let distance = 0
   let at = fromMs
 
-  for (const [stepAtMs] of SPEED_STEPS) {
+  for (const { from: stepAtMs } of SPEED.steps) {
     if (stepAtMs > at && stepAtMs < toMs) {
       distance += (speedAt(at) * (stepAtMs - at)) / 1_000
       at = stepAtMs
@@ -107,7 +83,7 @@ export function whenMoved(fromMs: number, distance: number): number {
   let left = distance
   let at = fromMs
 
-  for (const [stepAtMs] of SPEED_STEPS) {
+  for (const { from: stepAtMs } of SPEED.steps) {
     if (stepAtMs > at) {
       const canMove = (speedAt(at) * (stepAtMs - at)) / 1_000
       if (left <= canMove) {
@@ -127,7 +103,7 @@ export const POINTS = {
 } as const
 
 /** Where the projector is: the middle of the canvas below the score bar. */
-export const CENTRE: GamePoint = { x: GAME_WIDTH / 2, y: (GAME_BAR_HEIGHT + GAME_HEIGHT) / 2 }
+export const CENTRE: GamePoint = PLAY_CENTRE
 /** The projector image is drawn at this size… */
 export const PROJECTOR_SIZE = 180
 /** …and its glowing orb reaches this share of the way from its centre to its edge (measured). */
@@ -137,10 +113,8 @@ export const PROJECTOR_RADIUS = (PROJECTOR_SIZE / 2) * PROJECTOR_ORB
 
 /** Bubbles are drawn at this size (the image, glow included)… */
 export const BUBBLE_SIZE = 130
-/** …and the bubble itself, without its glow, is at least this share of it (measured). */
-export const BUBBLE_BODY = 0.9
-/** The radius of a bubble as seen. */
-export const BUBBLE_RADIUS = (BUBBLE_SIZE / 2) * BUBBLE_BODY
+/** The radius of a bubble as seen: the bubble itself, without its glow. */
+export const BUBBLE_RADIUS = (BUBBLE_SIZE / 2) * GREEN_BUBBLE_BODY
 /** A bubble reaches the projector when its centre is this close to the projector's. */
 export const TOUCH_DISTANCE = PROJECTOR_RADIUS + BUBBLE_RADIUS
 
@@ -440,7 +414,12 @@ export function createFocusAttention({
       }
       // Coming into view only matters when there is no target.
       if (!target && bubble.inViewAtMs > timeMs && bubble.inViewAtMs < next.atMs) {
-        next = { atMs: bubble.inViewAtMs, run: () => {} }
+        next = {
+          atMs: bubble.inViewAtMs,
+          run: () => {
+            // Nothing to do but get there: a target is picked from then on.
+          },
+        }
       }
     }
 
@@ -457,6 +436,7 @@ export function createFocusAttention({
       moveTo(event.atMs)
       event.run()
 
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- run() can stop it
       if (stopped) {
         return
       }
@@ -525,6 +505,7 @@ export function createFocusAttention({
       if (target) {
         answer(target, button.answer)
 
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- answer() can stop it
         if (!stopped) {
           retarget(timeMs)
         }

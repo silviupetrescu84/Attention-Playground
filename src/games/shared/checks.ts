@@ -10,3 +10,37 @@ export function checkNotNegative(value: number, name: string): void {
     throw new RangeError(`${name} must be a finite number ≥ 0, got ${value}`)
   }
 }
+
+/** Throws unless `value` is a finite number above 0. */
+export function checkPositive(value: number, name: string): void {
+  if (!Number.isFinite(value) || value <= 0) {
+    throw new RangeError(`${name} must be a finite number > 0, got ${value}`)
+  }
+}
+
+/** Throws unless `value` is a whole number from `min` to `max` (by default, any). */
+export function checkWholeNumber(
+  value: number,
+  name: string,
+  min = -Infinity,
+  max = Infinity,
+): void {
+  if (!Number.isInteger(value) || value < min || value > max) {
+    throw new RangeError(`${name} must be a whole number${rangeText(min, max)}, got ${value}`)
+  }
+}
+
+/** " from 2 to 6", " ≥ 1", " ≤ 6", or "" for any number. */
+function rangeText(min: number, max: number) {
+  if (min === -Infinity) {
+    return max === Infinity ? '' : ` ≤ ${max}`
+  }
+  return max === Infinity ? ` ≥ ${min}` : ` from ${min} to ${max}`
+}
+
+/** Throws unless `value` is at least `min`, named `minName`. */
+export function checkAtLeast(value: number, name: string, min: number, minName: string): void {
+  if (!(value >= min)) {
+    throw new RangeError(`${name} must be ≥ ${minName} (${min}), got ${value}`)
+  }
+}

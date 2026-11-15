@@ -1,6 +1,8 @@
 import type { GameLifecycle } from './game-lifecycle'
 
-type ListenOptions = { signal: AbortSignal }
+interface ListenOptions {
+  signal: AbortSignal
+}
 
 /** The parts of `document` and `window` this helper needs (lets tests pass fakes). */
 export interface PageEvents {

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { createGameLifecycle, type GameLifecycle } from './game-lifecycle'
 import { FakeFrames } from '../../test/fake-frames'
+import { createGameLifecycle, type GameLifecycle } from './game-lifecycle'
 import {
   browserFrameScheduler,
   createGameLoop,

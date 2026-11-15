@@ -1,0 +1,11 @@
+{
+  "name": "typescript-for-lint",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TypeScript 6 for typescript-eslint, until it supports TypeScript 7 (see index.js).",
+  "type": "module",
+  "main": "index.js",
+  "dependencies": {
+    "typescript": "6.0.3"
+  }
+}

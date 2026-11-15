@@ -1,5 +1,5 @@
-import { GAME_HEIGHT, GAME_WIDTH } from '../../games/shared/game-canvas'
 import { BUBBLE_HIT_HEIGHT, BUBBLE_HIT_WIDTH } from '../../games/emotions-rise/emotions-rise'
+import { GAME_HEIGHT, GAME_WIDTH } from '../../games/shared/game-canvas'
 
 /** Anything with a centre: bubbles, or bubbles read back from a drawing. */
 export interface Centred {

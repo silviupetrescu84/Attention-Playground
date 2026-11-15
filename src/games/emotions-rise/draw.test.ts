@@ -1,16 +1,9 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import ovalImageUrl from '../../assets/emotions-rise/oval.png'
+import { describe, expect, it } from 'vitest'
 import { createFakeContext } from '../../test/fake-canvas-context'
-import { stubImages } from '../../test/fake-image'
+import { BUBBLE_BORDER_WIDTH } from '../shared/canvas-style'
 import { fitFontSize, type CanvasFont } from '../shared/text'
 import emotions from './data/emotions.json'
-import {
-  BUBBLE_BORDER_WIDTH,
-  drawBubble,
-  drawScene,
-  EMOTION_TEXT_FIT,
-  type BubbleLook,
-} from './draw'
+import { drawBubble, drawScene, EMOTION_TEXT_FIT, type BubbleLook } from './draw'
 import {
   BUBBLE_HEIGHT,
   BUBBLE_HIT_HEIGHT,
@@ -230,23 +223,5 @@ describe('drawing the scene', () => {
     const names = context.calls.map((call) => call.name)
     expect(names.indexOf('drawImage')).toBeLessThan(names.indexOf('fill'))
     expect(names.indexOf('fill')).toBeLessThan(names.indexOf('fillText'))
-  })
-})
-
-describe('loading the bubble image', () => {
-  afterEach(() => {
-    vi.unstubAllGlobals()
-  })
-
-  it('loads the oval artwork', async () => {
-    // A fresh copy of the module, so no image loaded by another test is used.
-    vi.resetModules()
-    const { loadBubbleImage } = await import('./draw')
-    const images = stubImages()
-
-    const image = await loadBubbleImage()
-
-    expect(images).toEqual([image])
-    expect(image.src).toBe(ovalImageUrl)
   })
 })

@@ -1,10 +1,10 @@
 import { CARD_COLORS, type CssValues, type CssVariables } from '../shared/canvas-style'
 import { clearGameCanvas, GAME_HEIGHT, GAME_WIDTH } from '../shared/game-canvas'
+import { remember } from '../shared/remember'
 import {
   drawTextBlock,
   fitFontSize,
-  fontAt,
-  wrapText,
+  layOutText,
   type CanvasFont,
   type TextBlock,
   type TextFit,
@@ -84,7 +84,7 @@ export interface SceneLook {
   /** The size for every goal (see GOAL_TEXT_FIT). */
   readonly goalFontSize: number
   /** How to write each of a row's actions, in lane order. */
-  textOf(row: Row): readonly TextBlock[]
+  readonly textOf: (row: Row) => readonly TextBlock[]
   readonly colors: AlignColors
   readonly font: CanvasFont
 }
@@ -96,12 +96,7 @@ export function layOutActions(
   texts: readonly string[],
 ): TextBlock[] {
   const fontSize = fitFontSize(context, font, texts, ACTION_TEXT_FIT)
-  context.font = fontAt(font, fontSize)
-
-  return texts.map((text) => ({
-    fontSize,
-    lines: wrapText(context, text, ACTION_TEXT_FIT.maxWidth),
-  }))
+  return texts.map((text) => layOutText(context, font, text, fontSize, ACTION_TEXT_FIT.maxWidth))
 }
 
 /**
@@ -112,22 +107,13 @@ export function createActionText(
   context: CanvasRenderingContext2D,
   font: CanvasFont,
 ): (row: Row) => TextBlock[] {
-  const laidOut = new WeakMap<Row, TextBlock[]>()
-
-  return (row) => {
-    let blocks = laidOut.get(row)
-
-    if (!blocks) {
-      blocks = layOutActions(
-        context,
-        font,
-        row.actions.map((action) => action.text),
-      )
-      laidOut.set(row, blocks)
-    }
-
-    return blocks
-  }
+  return remember((row: Row) =>
+    layOutActions(
+      context,
+      font,
+      row.actions.map((action) => action.text),
+    ),
+  )
 }
 
 function drawCard(
@@ -204,10 +190,9 @@ export function drawGoal(context: CanvasRenderingContext2D, goal: Goal, look: Sc
   const width = GAME_WIDTH - 2 * GOAL_MARGIN
   drawCard(context, GOAL_MARGIN, top, width, GOAL_CARD_HEIGHT, colors.cardFill, colors.cardBorder)
 
-  context.font = fontAt(font, fontSize)
-  const lines = wrapText(context, goal.title, GOAL_TEXT_FIT.maxWidth)
+  const block = layOutText(context, font, goal.title, fontSize, GOAL_TEXT_FIT.maxWidth)
   const centre = GOAL_TOP + GOAL_HEIGHT / 2
-  drawTextBlock(context, { fontSize, lines }, GAME_WIDTH / 2, centre, font, colors.text)
+  drawTextBlock(context, block, GAME_WIDTH / 2, centre, font, colors.text)
 }
 
 export function drawScene(

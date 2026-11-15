@@ -1,16 +1,16 @@
+import { loadGreenBubbleImage } from '../shared/artwork'
 import { readCssVariables } from '../shared/canvas-style'
 import { clearGameCanvas } from '../shared/game-canvas'
 import type { GameDefinition } from '../shared/game-shell'
 import type { FontLoader } from '../shared/load-font'
 import type { Random } from '../shared/random'
-import { CANVAS_FONT, fitFontSize, loadCanvasFont } from '../shared/text'
+import { CANVAS_FONT, fitFontSize, loadWithCanvasFont } from '../shared/text'
 import type { Word } from '../shared/word-picker'
 import data from './data/focus-attention.json'
 import {
   BUTTON_TEXT_FIT,
   drawScene,
   FOCUS_COLORS,
-  loadBubbleImage,
   loadProjectorImage,
   WORD_TEXT_FIT,
   type SceneLook,
@@ -49,11 +49,10 @@ export interface FocusAttentionGameOptions {
 export async function preloadFocusAttention(
   fonts?: FontLoader,
 ): Promise<{ bubbleImage: HTMLImageElement; projectorImage: HTMLImageElement }> {
-  const [, bubbleImage, projectorImage] = await Promise.all([
-    loadCanvasFont({ fonts }),
-    loadBubbleImage(),
-    loadProjectorImage(),
-  ])
+  const [bubbleImage, projectorImage] = await loadWithCanvasFont(
+    () => Promise.all([loadGreenBubbleImage(), loadProjectorImage()]),
+    { fonts },
+  )
   return { bubbleImage, projectorImage }
 }
 
@@ -121,8 +120,7 @@ export function focusAttentionGame({
         game.stop()
       },
       summary() {
-        const { valuesFocused, valuesLeft, antiValuesLeft, antiValuesFocused, reached } =
-          game.stats
+        const { valuesFocused, valuesLeft, antiValuesLeft, antiValuesFocused, reached } = game.stats
         return [
           { label: 'Values focused on', value: valuesFocused },
           { label: 'Values changed attention from', value: valuesLeft },

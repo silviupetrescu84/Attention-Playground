@@ -20,6 +20,12 @@ games connected to Practice of Happiness.
   see it before time runs out.
 - **Focus Attention**: values and anti-values drift towards a projector; focus
   on the values and change attention from the anti-values before they reach it.
+- **Break It Down**: a goal sits in a bubble among actions; tap the small
+  action that leads to it to shrink it, while distractions make it grow.
+- **Pause Before Reacting**: situations pop up around the screen; react to the
+  helpful ones and let the unhelpful impulses pass.
+- **Improve Inner Voice**: words fall from the top; move the pad to catch the
+  helpful ones and let the unhelpful ones fall.
 
 ## Prerequisites
 
@@ -59,6 +65,21 @@ npm test
 
 This also reports test coverage (open `coverage/index.html` for the full
 report) and fails if any code is left untested.
+
+Some tests run in a real browser (Chromium). Install it once, then run them:
+
+```sh
+npx playwright install chromium
+npm run test:browser
+```
+
+## Check and format the code
+
+```sh
+npm run lint          # ESLint (npm run lint:fix fixes what it can)
+npm run format        # Prettier formats every file
+npm run check         # everything: formatting, lint, types, all tests
+```
 
 ## License and rights
 

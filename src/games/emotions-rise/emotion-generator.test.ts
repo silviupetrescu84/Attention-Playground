@@ -27,7 +27,9 @@ describe('emotions', () => {
         const texts = ofType(sequence, type)
         for (let start = 0; start + REPEAT_WINDOW <= texts.length; start++) {
           const window = texts.slice(start, start + REPEAT_WINDOW)
-          expect(new Set(window).size, `${type} at ${start}: ${window}`).toBe(REPEAT_WINDOW)
+          expect(new Set(window).size, `${type} at ${start}: ${window.join(', ')}`).toBe(
+            REPEAT_WINDOW,
+          )
         }
       }
     }

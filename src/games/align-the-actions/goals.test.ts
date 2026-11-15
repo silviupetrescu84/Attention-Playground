@@ -1,12 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { constantRandom, seededRandom } from '../../test/random'
 import data from './data/align_the_actions_goals.json'
-import {
-  AGAINST_PER_SET,
-  createActionSetGenerator,
-  goalsFrom,
-  type Goal,
-} from './goals'
+import { AGAINST_PER_SET, createActionSetGenerator, goalsFrom, type Goal } from './goals'
 
 const goals = goalsFrom(data)
 

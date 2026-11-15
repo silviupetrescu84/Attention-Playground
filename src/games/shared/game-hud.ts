@@ -1,6 +1,9 @@
 import { pauseIcon, playIcon } from '../../components/icons'
+import { findElement } from './dom'
+import { GAME_HEIGHT, GAME_WIDTH, type GamePoint } from './game-canvas'
 import type { GameLifecycle, GameState } from './game-lifecycle'
 import type { GameLoop } from './game-loop'
+import { canSave, MAX_NAME_LENGTH, type HighScores } from './high-scores'
 import { DIFFICULTY_NAMES, MISTAKES_TO_FAIL, type Mistakes } from './mistakes'
 import type { Score, ScoreChange } from './score'
 
@@ -11,17 +14,26 @@ import type { Score, ScoreChange } from './score'
  *             disabled while the game loads), the difficulty button under it
  *             ("Difficulty: Easy"; each press picks the next difficulty),
  *             under that the mistake it fails on ("Fail on 10 mistakes"),
- *             and under that the game's instructions (if any) on a white card.
+ *             then a High scores button, and under that the game's
+ *             instructions (if any) on a white card.
  * - playing:  "Score: x" top left (flashing green when points are won);
  *             "Mistakes: x" in the middle; the time in seconds and a Pause
  *             button top right.
  * - paused:   the same bar, with Resume instead of Pause, over a dimmed game
  *             with a Restart button (back to the Start button).
- * - finished: "Game over", the final score, the game's own summary (if any,
- *             on the same white card as the instructions) and a Restart
- *             button.
+ * - finished: "Game over", the final score, then how it did among the high
+ *             scores (see high-scores.ts): a score that makes them ("New
+ *             best score!", "New high score: #4") comes with a name field
+ *             and a Save button; once saved, where it went ("Saved: #4 on
+ *             Easy"); otherwise, the best score ("Best score: 12 by Sam").
+ *             Then the game's own summary (if any, on the same white card as
+ *             the instructions) and a Restart button.
  *
- * The score, mistakes and time are always shown.
+ * The score, mistakes and time are always shown, except on the high scores
+ * screen: opened with the High scores button, it shows the high scores of
+ * the difficulty chosen (names and scores, best first, or a message when
+ * there are none) on the canvas background, with nothing else from the game
+ * but a Back button to the Start button.
  */
 
 /** One line of a game's end-of-round summary, e.g. "Good emotions tapped: 12". */
@@ -47,6 +59,7 @@ export interface GameHudOptions {
   loop: GameLoop
   score: Score
   mistakes: Mistakes
+  highScores: HighScores
 }
 
 /**
@@ -56,14 +69,36 @@ export interface GameHudOptions {
  */
 export const GAME_BAR_HEIGHT = 64
 
+/** The middle of the canvas below the score bar, where games put what they are about. */
+export const PLAY_CENTRE: GamePoint = {
+  x: GAME_WIDTH / 2,
+  y: (GAME_BAR_HEIGHT + GAME_HEIGHT) / 2,
+}
+
 /** Whole seconds, at least two digits: 00, 01, … 99, 100, … */
 export function formatSeconds(ms: number): string {
   return String(Math.floor(ms / 1000)).padStart(2, '0')
 }
 
+/** A new `tag` element with `text` in it (as text, never as HTML), and `className` if given. */
+function textElement<Tag extends keyof HTMLElementTagNameMap>(
+  tag: Tag,
+  text: string,
+  className?: string,
+): HTMLElementTagNameMap[Tag] {
+  const element = document.createElement(tag)
+  element.textContent = text
+
+  if (className) {
+    element.className = className
+  }
+
+  return element
+}
+
 export function createGameHud(
   stage: HTMLElement,
-  { lifecycle, loop, score, mistakes }: GameHudOptions,
+  { lifecycle, loop, score, mistakes, highScores }: GameHudOptions,
 ): GameHud {
   const element = document.createElement('div')
   element.className = 'game-hud'
@@ -81,6 +116,7 @@ export function createGameHud(
       <button class="game-hud__button game-hud__start" type="button">Start</button>
       <button class="game-hud__button game-hud__difficulty" type="button"></button>
       <p class="game-hud__fail-on"></p>
+      <button class="game-hud__button game-hud__high-scores-open" type="button">High scores</button>
       <div class="game-hud__card game-hud__instructions" hidden></div>
     </div>
     <div class="game-hud__overlay game-hud__overlay--paused">
@@ -89,51 +125,78 @@ export function createGameHud(
     <div class="game-hud__overlay game-hud__overlay--finished">
       <p class="game-hud__title">Game over</p>
       <p class="game-hud__final-score"></p>
+      <p class="game-hud__round-result" hidden></p>
+      <form class="game-hud__name-form" hidden>
+        <label class="game-hud__name-label">
+          Your name
+          <input
+            class="game-hud__name"
+            type="text"
+            name="name"
+            maxlength="${MAX_NAME_LENGTH}"
+            autocomplete="nickname"
+            spellcheck="false"
+            required
+          />
+        </label>
+        <button class="game-hud__button game-hud__save" type="submit">Save</button>
+      </form>
       <dl class="game-hud__card game-hud__summary" hidden></dl>
       <button class="game-hud__button game-hud__restart" type="button">Restart</button>
+    </div>
+    <div
+      class="game-hud__overlay game-hud__overlay--high-scores"
+      role="dialog"
+      aria-label="High scores"
+      hidden
+    >
+      <p class="game-hud__title">High scores</p>
+      <p class="game-hud__high-scores-level"></p>
+      <ol class="game-hud__card game-hud__high-scores"></ol>
+      <p class="game-hud__card game-hud__no-high-scores">No high scores yet</p>
+      <button class="game-hud__button game-hud__back" type="button">Back</button>
     </div>
   `
   stage.append(element)
 
-  function find<T extends HTMLElement>(selector: string) {
-    return element.querySelector<T>(selector)!
-  }
-
-  const scoreText = find('.game-hud__score')
-  const mistakesText = find('.game-hud__mistakes')
-  const failOnText = find('.game-hud__fail-on')
-  const timeText = find('.game-hud__time')
-  const pauseButton = find<HTMLButtonElement>('.game-hud__pause')
-  const startOverlay = find('.game-hud__overlay--start')
-  const pausedOverlay = find('.game-hud__overlay--paused')
-  const finishedOverlay = find('.game-hud__overlay--finished')
-  const difficultyButton = find<HTMLButtonElement>('.game-hud__difficulty')
-  const startButton = find<HTMLButtonElement>('.game-hud__start')
-  const finalScoreText = find('.game-hud__final-score')
-  const summaryList = find('.game-hud__summary')
-  const instructionsCard = find('.game-hud__instructions')
+  const scoreText = findElement(element, '.game-hud__score', HTMLElement)
+  const mistakesText = findElement(element, '.game-hud__mistakes', HTMLElement)
+  const failOnText = findElement(element, '.game-hud__fail-on', HTMLElement)
+  const timeText = findElement(element, '.game-hud__time', HTMLElement)
+  const pauseButton = findElement(element, '.game-hud__pause', HTMLButtonElement)
+  const startOverlay = findElement(element, '.game-hud__overlay--start', HTMLElement)
+  const pausedOverlay = findElement(element, '.game-hud__overlay--paused', HTMLElement)
+  const finishedOverlay = findElement(element, '.game-hud__overlay--finished', HTMLElement)
+  const difficultyButton = findElement(element, '.game-hud__difficulty', HTMLButtonElement)
+  const startButton = findElement(element, '.game-hud__start', HTMLButtonElement)
+  const finalScoreText = findElement(element, '.game-hud__final-score', HTMLElement)
+  const summaryList = findElement(element, '.game-hud__summary', HTMLElement)
+  const instructionsCard = findElement(element, '.game-hud__instructions', HTMLElement)
+  const bar = findElement(element, '.game-hud__bar', HTMLElement)
+  const roundResultText = findElement(element, '.game-hud__round-result', HTMLElement)
+  const nameForm = findElement(element, '.game-hud__name-form', HTMLFormElement)
+  const nameInput = findElement(element, '.game-hud__name', HTMLInputElement)
+  const saveButton = findElement(element, '.game-hud__save', HTMLButtonElement)
+  const highScoresButton = findElement(element, '.game-hud__high-scores-open', HTMLButtonElement)
+  const highScoresOverlay = findElement(element, '.game-hud__overlay--high-scores', HTMLElement)
+  const highScoresLevel = findElement(element, '.game-hud__high-scores-level', HTMLElement)
+  const highScoresList = findElement(element, '.game-hud__high-scores', HTMLElement)
+  const noHighScoresText = findElement(element, '.game-hud__no-high-scores', HTMLElement)
+  const backButton = findElement(element, '.game-hud__back', HTMLButtonElement)
+  let highScoresOpen = false
 
   function showSummary(items: readonly SummaryItem[]) {
     summaryList.replaceChildren(
-      ...items.flatMap(({ label, value }) => {
-        const term = document.createElement('dt')
-        term.textContent = label
-        const detail = document.createElement('dd')
-        detail.textContent = String(value)
-        return [term, detail]
-      }),
+      ...items.flatMap(({ label, value }) => [
+        textElement('dt', label),
+        textElement('dd', String(value)),
+      ]),
     )
     summaryList.hidden = items.length === 0
   }
 
   function showInstructions(paragraphs: readonly string[]) {
-    instructionsCard.replaceChildren(
-      ...paragraphs.map((text) => {
-        const paragraph = document.createElement('p')
-        paragraph.textContent = text
-        return paragraph
-      }),
-    )
+    instructionsCard.replaceChildren(...paragraphs.map((text) => textElement('p', text)))
     instructionsCard.hidden = paragraphs.length === 0
   }
 
@@ -149,8 +212,8 @@ export function createGameHud(
       return
     }
 
-    // Reading the layout restarts the animation when the class comes back.
-    void scoreText.offsetWidth
+    // Measuring the layout restarts the animation when the class comes back.
+    scoreText.getBoundingClientRect()
     scoreText.classList.add('game-hud__score--up')
   }
 
@@ -164,7 +227,10 @@ export function createGameHud(
 
   function showState(state: GameState) {
     element.dataset.state = state
-    startOverlay.hidden = state !== 'ready'
+    // The high scores screen shows nothing else but its Back button.
+    bar.hidden = highScoresOpen
+    highScoresOverlay.hidden = !highScoresOpen
+    startOverlay.hidden = state !== 'ready' || highScoresOpen
     pausedOverlay.hidden = state !== 'paused'
     finishedOverlay.hidden = state !== 'finished'
     // No Pause button while the Start button is shown or once finished.
@@ -196,9 +262,108 @@ export function createGameHud(
     failOnText.textContent = `Fail on ${failOn} ${failOn === 1 ? 'mistake' : 'mistakes'}`
   }
 
+  /** How the round just over did among the high scores, and the name form if it made them. */
+  function showRoundResult() {
+    const round = highScores.lastRound
+    const best = round && highScores.best(round.level)
+    let text = ''
+
+    if (canSave(round)) {
+      text = round.newBest ? 'New best score!' : `New high score: #${round.rank + 1}`
+    } else if (round?.savedAs !== undefined) {
+      text =
+        round.rank === undefined
+          ? 'No longer a high score'
+          : `Saved: #${round.rank + 1} on ${DIFFICULTY_NAMES[round.level]}`
+    } else if (best) {
+      text = `Best score: ${best.score} by ${best.name}`
+    }
+
+    roundResultText.textContent = text
+    roundResultText.hidden = text === ''
+    const newBest = canSave(round) && round.newBest
+    roundResultText.classList.toggle('game-hud__round-result--best', newBest)
+
+    const asking = canSave(round)
+    if (asking && nameForm.hidden) {
+      // Suggest the name last saved, ready to change.
+      nameInput.value = highScores.playerName
+      updateSaveButton()
+    }
+    nameForm.hidden = !asking
+  }
+
+  function updateSaveButton() {
+    saveButton.disabled = nameInput.value.trim() === ''
+  }
+
+  /** The high scores of the difficulty chosen, best first. */
+  function showHighScores() {
+    const { level } = mistakes
+    const kept = highScores.table[level]
+
+    highScoresLevel.textContent = DIFFICULTY_NAMES[level]
+    highScoresList.replaceChildren(
+      ...kept.map(({ name, score: value }, rank) => {
+        const item = document.createElement('li')
+        const rankText = textElement('span', String(rank + 1), 'game-hud__high-score-rank')
+        // The list already tells screen readers each one's place.
+        rankText.setAttribute('aria-hidden', 'true')
+        item.append(
+          rankText,
+          textElement('span', name, 'game-hud__high-score-name'),
+          textElement('span', String(value), 'game-hud__high-score-score'),
+        )
+        return item
+      }),
+    )
+    highScoresList.hidden = kept.length === 0
+    noHighScoresText.hidden = kept.length !== 0
+  }
+
+  function setHighScoresOpen(open: boolean) {
+    highScoresOpen = open
+
+    if (open) {
+      showHighScores()
+    }
+    showState(lifecycle.state)
+    // Keyboard users stay where they are: on Back while open, then back on High scores.
+    if (open) {
+      backButton.focus()
+    } else {
+      highScoresButton.focus()
+    }
+  }
+
   function showMistakes(count: number) {
     mistakesText.textContent = `Mistakes: ${count}`
   }
+
+  highScoresButton.addEventListener('click', () => setHighScoresOpen(true))
+  backButton.addEventListener('click', () => setHighScoresOpen(false))
+  highScoresOverlay.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      setHighScoresOpen(false)
+    }
+  })
+
+  nameInput.addEventListener('input', updateSaveButton)
+  nameForm.addEventListener('submit', (event) => {
+    event.preventDefault()
+
+    if (!canSave(highScores.lastRound) || saveButton.disabled) {
+      return
+    }
+
+    highScores.save(nameInput.value)
+    // The form is gone: Restart is what comes next.
+    findElement(
+      element,
+      '.game-hud__overlay--finished .game-hud__restart',
+      HTMLButtonElement,
+    ).focus()
+  })
 
   difficultyButton.addEventListener('click', () => {
     mistakes.nextLevel()
@@ -219,7 +384,12 @@ export function createGameHud(
     })
   }
 
-  lifecycle.subscribe(({ state }) => showState(state))
+  lifecycle.subscribe(({ state }) => {
+    // A round starting (or the game stopping) closes the high scores.
+    highScoresOpen = false
+    showState(state)
+  })
+  highScores.subscribe(showRoundResult)
   score.subscribe((value, change) => {
     showScore(value)
     flashScore(change)

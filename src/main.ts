@@ -1,22 +1,13 @@
 import './style.css'
 import { preloadGames } from './games/catalog'
+import { findElement } from './games/shared/dom'
 import { mountGame } from './games/shared/game-shell'
 import { resolveRoute } from './router'
 import { getScreenSignal, leaveScreen } from './screen-signal'
 import { gameScreen } from './views/game-screen'
 import { homeScreen } from './views/home-screen'
 
-function getAppElement() {
-  const element = document.querySelector<HTMLDivElement>('#app')
-
-  if (!element) {
-    throw new Error('Missing #app element')
-  }
-
-  return element
-}
-
-const app = getAppElement()
+const app = findElement(document, '#app', HTMLDivElement)
 
 function renderApp() {
   // Stop everything the previous screen started before showing the next one.
@@ -26,9 +17,10 @@ function renderApp() {
 
   if (route.page === 'game') {
     app.innerHTML = gameScreen(route.game.name)
-    mountGame(app.querySelector<HTMLElement>('.game-screen')!, {
+    mountGame(findElement(app, '.game-screen', HTMLElement), {
       signal: getScreenSignal(),
       game: route.game.create(),
+      gameId: route.game.id,
     })
     return
   }

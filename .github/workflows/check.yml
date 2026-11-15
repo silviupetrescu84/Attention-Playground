@@ -1,0 +1,21 @@
+# Checks every push and pull request as `npm run check` does locally:
+# formatting, lint, types, unit tests (with coverage) and browser tests.
+name: Check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # The browser the browser tests run in, and what it needs to run on Linux.
+      - run: npx playwright install --with-deps chromium
+      - run: npm run check

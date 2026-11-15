@@ -41,10 +41,7 @@ export function fitGameCanvas(
   bottomPadding = GAME_BOTTOM_PADDING,
 ): GameCanvasLayout {
   const availableHeight = Math.max(0, viewportHeight - topPadding - bottomPadding)
-  const scale = Math.max(
-    0,
-    Math.min(1, viewportWidth / GAME_WIDTH, availableHeight / GAME_HEIGHT),
-  )
+  const scale = Math.max(0, Math.min(1, viewportWidth / GAME_WIDTH, availableHeight / GAME_HEIGHT))
   const width = GAME_WIDTH * scale
   const height = GAME_HEIGHT * scale
 
@@ -123,14 +120,7 @@ export function createGameCanvas(
     throw new Error('Canvas 2D drawing is not supported')
   }
 
-  context.setTransform(
-    element.width / GAME_WIDTH,
-    0,
-    0,
-    element.height / GAME_HEIGHT,
-    0,
-    0,
-  )
+  context.setTransform(element.width / GAME_WIDTH, 0, 0, element.height / GAME_HEIGHT, 0, 0)
 
   // Lets the page place the Home button above the canvas and the status bar
   // below it.

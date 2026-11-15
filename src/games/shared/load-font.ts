@@ -20,6 +20,11 @@ export interface LoadFontOptions {
 
 export const FONT_TIMEOUT_MS = 5_000
 
+/** The page's fonts: none outside a browser (e.g. in tests without a page). */
+function pageFonts(): FontLoader | undefined {
+  return typeof document === 'undefined' ? undefined : document.fonts
+}
+
 /**
  * Resolves `true` once `font` (a CSS font shorthand like `600 20px "Roboto
  * Condensed"`) is ready to draw with, or `false` if it is not declared, fails
@@ -27,7 +32,7 @@ export const FONT_TIMEOUT_MS = 5_000
  */
 export async function loadFont(
   font: string,
-  { fonts = globalThis.document?.fonts, timeoutMs = FONT_TIMEOUT_MS }: LoadFontOptions = {},
+  { fonts = pageFonts(), timeoutMs = FONT_TIMEOUT_MS }: LoadFontOptions = {},
 ): Promise<boolean> {
   if (!fonts) {
     return false

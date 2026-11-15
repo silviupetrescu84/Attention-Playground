@@ -21,14 +21,12 @@ import {
   positionAt,
   PROJECTOR_RADIUS,
   RECENT_WORDS_TO_AVOID,
-  SPAWN_INTERVAL_STEPS,
+  SPAWN_DELAY,
   SPAWN_POINTS,
   SPAWN_SPACING_COUNT,
   spawnIntervalAt,
-  SPEED_STEPS,
+  SPEED,
   speedAt,
-  START_SPAWN_INTERVAL_MS,
-  START_SPEED,
   TOUCH_DISTANCE,
   VIEW,
   whenMoved,
@@ -77,7 +75,11 @@ const distanceFromCentre = ({ x, y }: { x: number; y: number }) =>
 function play(
   game: Game,
   untilMs: number,
-  { from = 0, each = () => {}, stop = () => false }: {
+  {
+    from = 0,
+    each = () => {},
+    stop = () => false,
+  }: {
     from?: number
     each?: (t: number) => void
     stop?: () => boolean
@@ -111,22 +113,26 @@ function untilTargetIs(game: Game, type: WordType) {
 
 describe('settings', () => {
   it('uses the agreed numbers', () => {
-    expect(START_SPEED).toBe(15)
-    expect(SPEED_STEPS).toEqual([
-      [10_000, 17.5],
-      [20_000, 22.5],
-      [30_000, 30],
-      [40_000, 40],
-      [50_000, 52.5],
-      [60_000, 65],
-    ])
-    expect(START_SPAWN_INTERVAL_MS).toBe(3_000)
-    expect(SPAWN_INTERVAL_STEPS).toEqual([
-      [70_000, 2_800],
-      [80_000, 2_600],
-      [90_000, 2_400],
-      [100_000, 2_000],
-    ])
+    expect(SPEED).toEqual({
+      start: 15,
+      steps: [
+        { from: 10_000, value: 17.5 },
+        { from: 20_000, value: 22.5 },
+        { from: 30_000, value: 30 },
+        { from: 40_000, value: 40 },
+        { from: 50_000, value: 52.5 },
+        { from: 60_000, value: 65 },
+      ],
+    })
+    expect(SPAWN_DELAY).toEqual({
+      start: 3_000,
+      steps: [
+        { from: 70_000, value: 2_800 },
+        { from: 80_000, value: 2_600 },
+        { from: 90_000, value: 2_400 },
+        { from: 100_000, value: 2_000 },
+      ],
+    })
     expect([MIN_SPAWN_DISTANCE, SPAWN_SPACING_COUNT, RECENT_WORDS_TO_AVOID]).toEqual([130, 3, 10])
     expect(POINTS).toEqual({ focusValue: 1, leaveAntiValue: 1 })
   })
@@ -238,7 +244,7 @@ describe('where bubbles come from', () => {
     expect(SPAWN_POINTS.some(({ y }) => y === -half)).toBe(true)
     expect(SPAWN_POINTS.some(({ y }) => y === 800 + half)).toBe(true)
     // Every 2 px round the outside.
-    expect(SPAWN_POINTS).toHaveLength(2 * (530 + 930) / 2)
+    expect(SPAWN_POINTS).toHaveLength((2 * (530 + 930)) / 2)
   })
 
   it('anywhere round the outside when nothing is in the way', () => {
@@ -505,7 +511,7 @@ describe('the target', () => {
           if (!game.target || inView().length < 3) return
           game.tap(buttonFor('focus'))
           const closest = Math.min(...inView().map(distanceFromCentre))
-          expect(distanceFromCentre(game.target!)).toBe(closest)
+          expect(distanceFromCentre(game.target)).toBe(closest)
           checked++
         },
       })

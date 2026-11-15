@@ -8,5 +8,4 @@
   --focus-button-fill: var(--color-ink);
   --focus-button-text: #fff;
   --focus-button-pressed: color-mix(in srgb, var(--color-ink) 80%, white);
-  --focus-button-shadow: color-mix(in srgb, var(--color-ink) 25%, transparent);
 }

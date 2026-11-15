@@ -3,30 +3,27 @@ import { seededRandom } from '../../test/random'
 import { GAME_BAR_HEIGHT } from '../shared/game-hud'
 import { createGameLifecycle } from '../shared/game-lifecycle'
 import { createScore } from '../shared/score'
+import { timeLeftAt } from '../shared/timed-turns'
 import data from './data/shift-perspective.json'
 import {
   CENTRE,
   CHOICE_DISTANCE,
   CHOICE_RADIUS,
   CHOICE_SIZE,
-  CHOICE_STEPS,
   choicePositions,
+  CHOICES,
   choicesAfter,
   choicesOpacityAt,
   createShiftPerspective,
   FADE_MS,
-  MIN_TIME_LIMIT_MS,
   MOST_CHOICES,
+  MOST_CHOICES_THAT_FIT,
   POINTS,
   READING_MS,
-  START_CHOICES,
-  START_TIME_LIMIT_MS,
   THOUGHT_RADIUS,
   THOUGHT_SIZE,
   thoughtOpacityAt,
-  THOUGHTS_PER_TIME_STEP,
-  TIME_LIMIT_STEP_MS,
-  timeLeftAt,
+  TIME_LIMIT,
   timeLimitAfter,
   type Mistake,
   type ShiftPerspectiveOptions,
@@ -93,18 +90,17 @@ function turnAt(endedAtMs?: number): Turn {
 
 describe('settings', () => {
   it('uses the agreed numbers', () => {
-    expect(START_CHOICES).toBe(2)
-    expect(CHOICE_STEPS).toEqual([
-      [3, 3],
-      [7, 4],
-      [15, 5],
-      [25, 6],
-    ])
-    expect(MOST_CHOICES).toBe(6)
-    expect(START_TIME_LIMIT_MS).toBe(10_000)
-    expect([TIME_LIMIT_STEP_MS, THOUGHTS_PER_TIME_STEP, MIN_TIME_LIMIT_MS]).toEqual([
-      500, 10, 5_000,
-    ])
+    expect(CHOICES).toEqual({
+      start: 2,
+      steps: [
+        { from: 3, value: 3 },
+        { from: 7, value: 4 },
+        { from: 15, value: 5 },
+        { from: 25, value: 6 },
+      ],
+    })
+    expect([MOST_CHOICES, MOST_CHOICES_THAT_FIT]).toEqual([6, 6])
+    expect(TIME_LIMIT).toEqual({ start: 10_000, change: -500, every: 10, limit: 5_000 })
     expect(FADE_MS).toBe(100)
     expect(READING_MS).toBe(3_000)
     expect(POINTS).toEqual({ good: 1 })
@@ -169,7 +165,7 @@ describe('layout', () => {
     expect(CHOICE_RADIUS).toBeCloseTo(THOUGHT_RADIUS * 0.9, 9)
   })
 
-  it.each([
+  it.each<[number, number[]]>([
     [2, [0, 180]],
     [3, [0, 120, 240]],
     [4, [0, 90, 180, 270]],
@@ -209,7 +205,13 @@ describe('layout', () => {
     ])
   })
 
-  it.each([2, 3, 4, 5, 6])('keeps %i choices on the canvas, below the bar, apart', (count) => {
+  const fitting = Array.from({ length: MOST_CHOICES_THAT_FIT - 1 }, (_, i) => i + 2)
+
+  it('fits up to 6 choices', () => {
+    expect(fitting).toEqual([2, 3, 4, 5, 6])
+  })
+
+  it.each(fitting)('keeps %i choices on the canvas, below the bar, apart', (count) => {
     const positions = choicePositions(count)
 
     for (const { x, y } of positions) {

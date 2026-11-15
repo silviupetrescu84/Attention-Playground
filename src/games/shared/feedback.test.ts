@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { cssVariables } from '../../test/css-variables'
-import { fadedOutAt, FEEDBACK_COLORS, FEEDBACK_FADE_MS, stillFading } from './feedback'
+import { createFakeContext } from '../../test/fake-canvas-context'
+import {
+  drawHue,
+  fadedOutAt,
+  FEEDBACK_COLORS,
+  FEEDBACK_FADE_MS,
+  hueFor,
+  stillFading,
+} from './feedback'
 
 describe('feedback', () => {
   it('tints green for right and red for a mistake, at 20%', () => {
@@ -32,5 +40,25 @@ describe('feedback', () => {
     expect(stillFading(chosen, 1_099)).toEqual(chosen)
     expect(stillFading(chosen, 1_100)).toEqual([chosen[1]])
     expect(stillFading(chosen, 1_150)).toEqual([])
+  })
+})
+
+describe('drawing a hue', () => {
+  it('fills the ellipse as seen with the see-through hue', () => {
+    const context = createFakeContext()
+
+    drawHue(context.asContext(), { x: 100, y: 200 }, 60, 40, 'green hue')
+
+    expect(context.calls.map((call) => call.name)).toEqual(['beginPath', 'ellipse', 'fill'])
+    expect(context.callsTo('ellipse')[0].args).toEqual([100, 200, 60, 40, 0, 0, Math.PI * 2])
+    expect(context.callsTo('fill')[0].fillStyle).toBe('green hue')
+  })
+})
+
+describe('the hue for a choice', () => {
+  it('is green when right, red when a mistake', () => {
+    const colors = { rightHue: 'green hue', wrongHue: 'red hue' }
+
+    expect([hueFor(true, colors), hueFor(false, colors)]).toEqual(['green hue', 'red hue'])
   })
 })

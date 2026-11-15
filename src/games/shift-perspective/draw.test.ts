@@ -3,6 +3,7 @@ import purpleBubbleUrl from '../../assets/shift-perspective/purple-bubble.png'
 import { cssVariables } from '../../test/css-variables'
 import { createFakeContext, type DrawCall } from '../../test/fake-canvas-context'
 import { stubImages } from '../../test/fake-image'
+import { BUBBLE_BORDER_WIDTH } from '../shared/canvas-style'
 import {
   fitFontSize,
   fontAt,
@@ -11,17 +12,15 @@ import {
   type CanvasFont,
   type TextBlock,
 } from '../shared/text'
+import { TIME_RING_WIDTH } from '../shared/time-ring'
 import data from './data/shift-perspective.json'
 import {
-  BUBBLE_BORDER_WIDTH,
   CHOICE_TEXT_FIT,
   createTurnText,
   drawBubble,
-  drawRing,
   drawScene,
   drawTurn,
   RING_RADIUS,
-  RING_WIDTH,
   SHIFT_COLORS,
   TEXT_MARGIN,
   THOUGHT_TEXT_FIT,
@@ -196,8 +195,8 @@ describe('drawing a bubble', () => {
 
     drawBubble(context.asContext(), 150, 300, 120, { colors })
 
-    expect(context.callsTo('arc').map((call) => call.args)).toEqual([
-      [150, 300, CHOICE_RADIUS, 0, Math.PI * 2],
+    expect(context.callsTo('ellipse').map((call) => call.args)).toEqual([
+      [150, 300, CHOICE_RADIUS, CHOICE_RADIUS, 0, 0, Math.PI * 2],
     ])
     expect(context.callsTo('fill')[0].fillStyle).toBe('card fill')
     const [stroke] = context.callsTo('stroke')
@@ -206,37 +205,10 @@ describe('drawing a bubble', () => {
   })
 })
 
-describe('drawing the ring', () => {
+describe('the ring', () => {
   it('is just outside the thought’s bubble, and clear of the choices', () => {
     expect(RING_RADIUS).toBeCloseTo(THOUGHT_RADIUS + 6, 9)
-    expect(CHOICE_DISTANCE - CHOICE_RADIUS - (RING_RADIUS + RING_WIDTH / 2)).toBeGreaterThan(5)
-  })
-
-  it.each([
-    [1, 2 * Math.PI],
-    [0.75, 1.5 * Math.PI],
-    [0.5, Math.PI],
-    [0.1, 0.2 * Math.PI],
-  ])('with %s of the time left, goes that far round, clockwise from the top', (left, sweep) => {
-    const context = createFakeContext()
-
-    drawRing(context.asContext(), left, 'ring purple')
-
-    const [arc] = context.callsTo('arc')
-    const [x, y, radius, start, end] = arc.args as number[]
-    expect([x, y, radius, start]).toEqual([CENTRE.x, CENTRE.y, RING_RADIUS, -Math.PI / 2])
-    expect(end - start).toBeCloseTo(sweep, 9)
-    const [stroke] = context.callsTo('stroke')
-    expect([stroke.strokeStyle, stroke.lineWidth]).toEqual(['ring purple', RING_WIDTH])
-    expect(context.lineCap).toBe('round')
-  })
-
-  it('is gone when no time is left', () => {
-    const context = createFakeContext()
-
-    drawRing(context.asContext(), 0, 'ring purple')
-
-    expect(context.calls).toEqual([])
+    expect(CHOICE_DISTANCE - CHOICE_RADIUS - (RING_RADIUS + TIME_RING_WIDTH / 2)).toBeGreaterThan(5)
   })
 })
 
@@ -340,7 +312,15 @@ describe('showing what was chosen', () => {
     const hues = context.callsTo('fill')
     expect(hues.map((call) => [call.fillStyle, call.globalAlpha])).toEqual([[hue, 0.6]])
     const { x, y } = shown.choices[chosen]
-    expect(context.callsTo('arc').at(-1)!.args).toEqual([x, y, CHOICE_RADIUS, 0, Math.PI * 2])
+    expect(context.callsTo('ellipse').at(-1)!.args).toEqual([
+      x,
+      y,
+      CHOICE_RADIUS,
+      CHOICE_RADIUS,
+      0,
+      0,
+      Math.PI * 2,
+    ])
     // Over its bubble, under its text.
     const calls = names(context.calls)
     const fill = calls.indexOf('fill')

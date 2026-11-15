@@ -1,24 +1,17 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cssCanvasFont, cssVariables, useCssVariables } from '../../test/css-variables'
-import {
-  fontSizeOf,
-  useFakeCanvasContexts,
-  type FakeContext,
-} from '../../test/fake-canvas-context'
-import { FakeFrames } from '../../test/fake-frames'
-import { loadedFonts, mountForTest } from '../../test/mounted-game'
+import { fontSizeOf, useFakeCanvasContexts, type FakeContext } from '../../test/fake-canvas-context'
+import { loadedFonts, mountForTest, mountWaitingForFont } from '../../test/mounted-game'
 import { seededRandom } from '../../test/random'
-import { mountGame } from '../shared/game-shell'
-import type { FontLoader } from '../shared/load-font'
 import { fitFontSize, fontAt } from '../shared/text'
 import {
   ACTION_SIZE,
   CHECK_Y,
   laneCentre,
+  ROW_SPEED,
   SPAWN_Y,
   START_LANE,
-  START_SPEED,
 } from './align-the-actions'
 import data from './data/align_the_actions_goals.json'
 import { GOAL_TEXT_FIT } from './draw'
@@ -45,7 +38,7 @@ function setup(seed = 1) {
 }
 
 /** 50 ms frames until just after the first row reaches the circle (10.7 s). */
-const framesToFirstChoice = Math.ceil((((CHECK_Y - SPAWN_Y) / START_SPEED) * 1_000 + 500) / 50)
+const framesToFirstChoice = Math.ceil((((CHECK_Y - SPAWN_Y) / ROW_SPEED.start) * 1_000 + 500) / 50)
 
 /**
  * What the most recent drawing shows, read back from the text drawn: the
@@ -54,7 +47,9 @@ const framesToFirstChoice = Math.ceil((((CHECK_Y - SPAWN_Y) / START_SPEED) * 1_0
  */
 function lastDrawn() {
   const linesAt = new Map<number, string[]>()
-  for (const { args } of context().lastDrawing().filter((call) => call.name === 'fillText')) {
+  for (const { args } of context()
+    .lastDrawing()
+    .filter((call) => call.name === 'fillText')) {
     const [text, x] = args as [string, number]
     linesAt.set(x, [...(linesAt.get(x) ?? []), text])
   }
@@ -67,7 +62,9 @@ function lastDrawn() {
     if (goal.against.includes(text)) return 'against'
     return 'otherGoal'
   }
-  const circle = context().lastDrawing().find((call) => call.name === 'arc')
+  const circle = context()
+    .lastDrawing()
+    .find((call) => call.name === 'arc')
   return {
     goal,
     actions,
@@ -78,25 +75,16 @@ function lastDrawn() {
 
 describe('loading', () => {
   it('loads the game font before Start can be pressed', async () => {
-    let finishLoading = (_: { status: string }[]) => {}
-    const fonts: FontLoader & { load: ReturnType<typeof vi.fn> } = {
-      load: vi.fn(() => new Promise<{ status: string }[]>((resolve) => (finishLoading = resolve))),
-    }
-    const container = document.createElement('main')
-    document.body.replaceChildren(container)
-    mountGame(container, {
-      signal: new AbortController().signal,
-      game: alignTheActionsGame({ fonts }),
-      scheduler: new FakeFrames(),
-    })
-    const start = container.querySelector<HTMLButtonElement>('.game-hud__start')!
+    const { fonts, start, finishLoading } = mountWaitingForFont((fonts) =>
+      alignTheActionsGame({ fonts }),
+    )
 
     expect(fonts.load).toHaveBeenCalledExactlyOnceWith(
       expect.stringContaining(cssCanvasFont.family),
     )
     expect(start.disabled).toBe(true)
 
-    finishLoading([{ status: 'loaded' }])
+    finishLoading()
     await vi.waitFor(() => expect(start.disabled).toBe(false))
   })
 })
@@ -167,12 +155,15 @@ describe('Align the Actions', () => {
   it('moves the actions down as time passes', async () => {
     const { click, frames } = await setup()
     click('.game-hud__start')
-    const yOf = () => context().lastDrawing().find((call) => call.name === 'roundRect')!.args[1]
+    const yOf = () =>
+      context()
+        .lastDrawing()
+        .find((call) => call.name === 'roundRect')!.args[1]
     const before = yOf() as number
 
     frames.frames(40, 50)
 
-    expect(yOf()).toBeCloseTo(before + START_SPEED * 2, 6)
+    expect(yOf()).toBeCloseTo(before + ROW_SPEED.start * 2, 6)
   })
 
   it('shows one row on its way at a time; the one chosen from moves on down, tinted', async () => {
@@ -191,9 +182,7 @@ describe('Align the Actions', () => {
       const drawing = context().lastDrawing()
       // Each row is 4 squares, oldest row first; the last card is the goal's.
       const squares = drawing.filter((call) => call.name === 'roundRect').slice(0, -1)
-      const fills = drawing
-        .filter((call) => call.name === 'fill')
-        .map((call) => `${call.fillStyle}`)
+      const fills = context().lastFills().map(String)
       const centres = [0, 4]
         .slice(0, squares.length / 4)
         .map((first) => (squares[first].args[1] as number) + ACTION_SIZE / 2)
@@ -343,7 +332,11 @@ describe('Align the Actions', () => {
     click('.game-hud__pause')
 
     click('.game-hud__overlay--paused .game-hud__restart')
-    expect(context().lastDrawing().map((call) => call.name)).toEqual(['clearRect'])
+    expect(
+      context()
+        .lastDrawing()
+        .map((call) => call.name),
+    ).toEqual(['clearRect'])
 
     click('.game-hud__start')
     expect(lastDrawn().goal).toBeDefined()

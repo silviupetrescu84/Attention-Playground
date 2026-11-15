@@ -2,7 +2,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useFakeCanvasContexts } from '../../test/fake-canvas-context'
 import { FakeFrames } from '../../test/fake-frames'
+import { FakeStorage } from '../../test/fake-storage'
+import type { GamePoint } from './game-canvas'
+import type { GameFrame } from './game-loop'
 import { mountGame, type GameHandlers, type GameSession } from './game-shell'
+import { highScoresKey, parseHighScores } from './high-scores'
 
 beforeEach(() => {
   useFakeCanvasContexts()
@@ -12,7 +16,10 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-function setup(extra: Pick<GameHandlers, 'instructions'> = {}) {
+function setup(
+  extra: Pick<GameHandlers, 'instructions' | 'drag'> = {},
+  storage = new FakeStorage(),
+) {
   const container = document.createElement('main')
   document.body.replaceChildren(container)
   const screen = new AbortController()
@@ -20,7 +27,7 @@ function setup(extra: Pick<GameHandlers, 'instructions'> = {}) {
   const handlers = {
     reset: vi.fn(),
     start: vi.fn(),
-    frame: vi.fn(),
+    frame: vi.fn<(frame: GameFrame) => void>(),
     tap: vi.fn(),
     summary: undefined as GameHandlers['summary'],
     ...extra,
@@ -31,7 +38,13 @@ function setup(extra: Pick<GameHandlers, 'instructions'> = {}) {
     return handlers
   })
 
-  const returned = mountGame(container, { signal: screen.signal, game, scheduler: frames })
+  const returned = mountGame(container, {
+    signal: screen.signal,
+    game,
+    gameId: 'test-game',
+    storage,
+    scheduler: frames,
+  })
 
   const button = (selector: string) =>
     container.querySelector<HTMLButtonElement>(`.game-hud ${selector}`)!
@@ -40,7 +53,7 @@ function setup(extra: Pick<GameHandlers, 'instructions'> = {}) {
       new MouseEvent('pointerdown', { clientX, clientY, bubbles: true }),
     )
 
-  return { container, screen, frames, handlers, game, session, returned, button, tapAt }
+  return { container, screen, frames, handlers, game, session, returned, button, tapAt, storage }
 }
 
 describe('mounting a game', () => {
@@ -191,6 +204,58 @@ describe('mistakes', () => {
   })
 })
 
+describe('high scores', () => {
+  /** Hard: the third mistake ends the round. */
+  function playHardRound({ handlers, frames, session, button }: ReturnType<typeof setup>) {
+    button('.game-hud__difficulty').click()
+    button('.game-hud__difficulty').click()
+    button('.game-hud__start').click()
+    session.score.add(5)
+    handlers.frame.mockImplementation(() => session.mistakes.add())
+    frames.frames(3)
+  }
+
+  it("saves a round that ends under the player's name and the game's id, at its difficulty", () => {
+    const storage = new FakeStorage()
+    const played = setup({}, storage)
+    const { session, container } = played
+    playHardRound(played)
+    expect(session.lifecycle.state).toBe('finished')
+
+    const name = container.querySelector<HTMLInputElement>('.game-hud__name')!
+    name.value = 'Ana'
+    name.dispatchEvent(new Event('input'))
+    container.querySelector<HTMLFormElement>('.game-hud__name-form')!.requestSubmit()
+
+    expect(session.highScores.best('hard')).toEqual({ name: 'Ana', score: 5 })
+    expect(parseHighScores(storage.getItem(highScoresKey('test-game'))).hard).toEqual([
+      { name: 'Ana', score: 5 },
+    ])
+  })
+
+  it('counts the score the round ended on, even if the game adds points as it stops', () => {
+    const { handlers, session, button } = setup()
+    Object.assign(handlers, { end: () => session.score.add(100) })
+    button('.game-hud__start').click()
+    session.score.add(2)
+
+    session.lifecycle.finish()
+
+    expect(session.highScores.lastRound?.score).toBe(2)
+  })
+
+  it('shows the high scores saved before the game was opened', () => {
+    const storage = new FakeStorage()
+    const saved = { easy: [{ name: 'Bo', score: 8 }] }
+    storage.setItem(highScoresKey('test-game'), JSON.stringify(saved))
+    const { container, button } = setup({}, storage)
+
+    button('.game-hud__high-scores-open').click()
+
+    expect(container.querySelector('.game-hud__high-scores li')!.textContent).toBe('1Bo8')
+  })
+})
+
 describe('tapping', () => {
   function withCanvasAt(setupResult: ReturnType<typeof setup>) {
     // Shown at half size with its top-left corner at (100, 50).
@@ -229,13 +294,123 @@ describe('tapping', () => {
     const session = mountGame(container, {
       signal: new AbortController().signal,
       game: () => ({ reset() {}, start() {}, frame() {} }),
+      gameId: 'test-game',
+      storage: new FakeStorage(),
       scheduler: new FakeFrames(),
     })
     session.lifecycle.start()
 
-    expect(() =>
-      session.canvas.element.dispatchEvent(new MouseEvent('pointerdown')),
-    ).not.toThrow()
+    expect(() => session.canvas.element.dispatchEvent(new MouseEvent('pointerdown'))).not.toThrow()
+  })
+})
+
+describe('dragging', () => {
+  /** A game that follows drags, its canvas shown at half size with its top-left corner at (100, 50). */
+  function dragging() {
+    const drag = vi.fn<(point: GamePoint | undefined) => void>()
+    const played = setup({ drag })
+    vi.spyOn(played.session.canvas.element, 'getBoundingClientRect').mockReturnValue(
+      new DOMRect(100, 50, 200, 400),
+    )
+    /** A pointer event of `type` at (clientX, clientY) on screen, for pointer 1 unless told. */
+    const pointer = (type: string, clientX: number, clientY: number, pointerId = 1) =>
+      new PointerEvent(type, { clientX, clientY, pointerId, bubbles: true })
+    const down = (x: number, y: number, id?: number) =>
+      played.session.canvas.element.dispatchEvent(pointer('pointerdown', x, y, id))
+    const move = (x: number, y: number, id?: number) =>
+      window.dispatchEvent(pointer('pointermove', x, y, id))
+    const up = (type = 'pointerup', id?: number) => window.dispatchEvent(pointer(type, 0, 0, id))
+    return { ...played, drag, down, move, up }
+  }
+
+  it('tells the game where the finger goes down and moves, in game units, then that it lifted', () => {
+    const { drag, button, down, move, up } = dragging()
+    button('.game-hud__start').click()
+
+    down(150, 250)
+    move(200, 250)
+    // Off the game: still followed.
+    move(50, 500)
+    up()
+
+    expect(drag.mock.calls).toEqual([
+      [{ x: 100, y: 400 }],
+      [{ x: 200, y: 400 }],
+      [{ x: -100, y: 900 }],
+      [undefined],
+    ])
+  })
+
+  it('follows one finger at a time', () => {
+    const { drag, button, down, move, up } = dragging()
+    button('.game-hud__start').click()
+    down(150, 250, 1)
+
+    move(200, 250, 2)
+    up('pointerup', 2)
+
+    expect(drag).toHaveBeenCalledOnce()
+  })
+
+  it('hears a finger lifted when the browser cancels it, e.g. to scroll', () => {
+    const { drag, button, down, up } = dragging()
+    button('.game-hud__start').click()
+    down(150, 250)
+
+    up('pointercancel')
+
+    expect(drag).toHaveBeenLastCalledWith(undefined)
+  })
+
+  it('ignores fingers before the round, and moves or lifts without a finger down', () => {
+    const { drag, button, down, move, up } = dragging()
+    down(150, 250)
+    button('.game-hud__start').click()
+
+    move(200, 250)
+    up()
+
+    expect(drag).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ['paused', 'pause'],
+    ['over', 'finish'],
+  ] as const)(
+    'lifts the finger for the game when the round is %s, and ignores it after',
+    (_when, action) => {
+      const { drag, button, down, move, up, session } = dragging()
+      button('.game-hud__start').click()
+      down(150, 250)
+
+      session.lifecycle[action]()
+      move(200, 250)
+      up()
+
+      expect(drag.mock.calls).toEqual([[{ x: 100, y: 400 }], [undefined]])
+    },
+  )
+
+  it('does not start a drag when the tap under it ended the round', () => {
+    const { drag, handlers, button, down, session } = dragging()
+    handlers.tap.mockImplementation(() => session.lifecycle.finish())
+    button('.game-hud__start').click()
+
+    down(150, 250)
+
+    expect(drag).not.toHaveBeenCalled()
+  })
+
+  it('stops following drags when the game is left', () => {
+    const { drag, button, down, move, screen } = dragging()
+    button('.game-hud__start').click()
+    down(150, 250)
+    screen.abort()
+
+    move(200, 250)
+
+    // Only the lift, as the round stopped being played.
+    expect(drag.mock.calls).toEqual([[{ x: 100, y: 400 }], [undefined]])
   })
 })
 
@@ -245,6 +420,8 @@ describe('loading', () => {
     const session = mountGame(container, {
       signal: new AbortController().signal,
       game: () => ({ load, reset() {}, start() {}, frame() {} }),
+      gameId: 'test-game',
+      storage: new FakeStorage(),
       scheduler: new FakeFrames(),
     })
     const start = container.querySelector<HTMLButtonElement>('.game-hud__start')!
@@ -309,16 +486,22 @@ describe('status bar', () => {
   })
 
   it.each([
-    ['a new round starts', (s: GameSession) => {
-      s.lifecycle.pause()
-      s.lifecycle.restart()
-      s.status.show('Oops', 'bad')
-      s.lifecycle.start()
-    }],
-    ['the game restarts', (s: GameSession) => {
-      s.lifecycle.pause()
-      s.lifecycle.restart()
-    }],
+    [
+      'a new round starts',
+      (s: GameSession) => {
+        s.lifecycle.pause()
+        s.lifecycle.restart()
+        s.status.show('Oops', 'bad')
+        s.lifecycle.start()
+      },
+    ],
+    [
+      'the game restarts',
+      (s: GameSession) => {
+        s.lifecycle.pause()
+        s.lifecycle.restart()
+      },
+    ],
   ])('is cleared when %s', (_when, act) => {
     const { session, button } = setup()
     button('.game-hud__start').click()

@@ -4,14 +4,24 @@ import { cssVariables, useCssVariables } from '../../test/css-variables'
 import { createFakeContext, fontSizeOf } from '../../test/fake-canvas-context'
 import {
   CANVAS_FONT,
+  chooseTextStyle,
+  defaultTextStyle,
   drawTextBlock,
   fitFontSize,
   fitInCircle,
+  fitInEllipse,
   fontAt,
+  largestTextStyle,
+  layOutText,
   LINE_HEIGHT,
   loadCanvasFont,
+  loadWithCanvasFont,
+  READABLE_SIZE,
+  textsFit,
+  textStyleAt,
   wrapText,
   type CanvasFont,
+  type TextShape,
 } from './text'
 
 // The fake font is 0.6 × size wide per character, spaces included.
@@ -30,7 +40,7 @@ describe('the canvas font', () => {
       weight: '--canvas-font-weight',
     })
     expect(cssVariables.get('--canvas-font-family')).toBe(
-      '"Roboto Condensed", "Arial Narrow", sans-serif',
+      "'Roboto Condensed', 'Arial Narrow', sans-serif",
     )
     expect(cssVariables.get('--canvas-font-weight')).toBe('600')
   })
@@ -46,7 +56,7 @@ describe('the canvas font', () => {
     await expect(loadCanvasFont({ fonts })).resolves.toBe(true)
 
     expect(fonts.load).toHaveBeenCalledExactlyOnceWith(
-      '600 16px "Roboto Condensed", "Arial Narrow", sans-serif',
+      "600 16px 'Roboto Condensed', 'Arial Narrow', sans-serif",
     )
   })
 
@@ -215,5 +225,151 @@ describe('fitInCircle', () => {
 
       expect(Math.hypot(maxWidth / 2 + 4, halfHeight)).toBeLessThanOrEqual(radius)
     }
+  })
+})
+
+describe('fitInEllipse', () => {
+  it('makes lines as wide as the ellipse at the top and bottom of the text, less a margin', () => {
+    const fit = fitInEllipse(100, 50, 8, { maxLines: 2, minSize: 10, maxSize: 15 })
+
+    // 2 lines of 15 px: 36 px high. 18 px from the centre, the ellipse is
+    // 2 × 100 × √(1 − (18/50)²) = 186.6 wide.
+    expect(fit).toEqual({ maxWidth: 170, maxLines: 2, minSize: 10, maxSize: 15 })
+  })
+
+  it('is a circle when both radii are the same', () => {
+    const options = { maxLines: 3, minSize: 8, maxSize: 16 }
+
+    expect(fitInEllipse(56, 56, 4, options)).toEqual(fitInCircle(56, 4, options))
+  })
+
+  it('keeps every corner of the tallest text inside the ellipse', () => {
+    for (const [radiusX, radiusY, maxLines, maxSize] of [
+      [93, 50, 2, 24],
+      [93, 50, 3, 20],
+      [60, 40, 1, 30],
+    ]) {
+      const { maxWidth } = fitInEllipse(radiusX, radiusY, 8, { maxLines, minSize: 8, maxSize })
+      const halfHeight = (maxLines * maxSize * LINE_HEIGHT) / 2
+
+      const corner = ((maxWidth / 2 + 8) / radiusX) ** 2 + (halfHeight / radiusY) ** 2
+      expect(corner).toBeLessThanOrEqual(1)
+    }
+  })
+
+  it('refuses text taller than the ellipse', () => {
+    expect(() => fitInEllipse(100, 30, 4, { maxLines: 3, minSize: 10, maxSize: 20 })).toThrow(
+      '3 lines of 20 px do not fit 60 px high',
+    )
+  })
+})
+
+describe('textsFit', () => {
+  const context = () => createFakeContext().asContext()
+
+  it('tells whether every text fits in its lines at a size', () => {
+    const twoLines = { maxWidth: 30, maxLines: 2 }
+
+    // 6 px a character at 10 px.
+    expect(textsFit(context(), font, ['Aaaa Bbbb'], 10, twoLines)).toBe(true)
+    expect(textsFit(context(), font, ['Aaaa Bbbb', 'Cccccc'], 10, twoLines)).toBe(false)
+    expect(textsFit(context(), font, ['Aaaa Bbbb'], 10, { maxWidth: 30 })).toBe(false)
+    expect(textsFit(context(), font, ['Aaaa Bbbb'], 10, { maxWidth: 54 })).toBe(true)
+  })
+
+  it('leaves the context set to that size', () => {
+    const fake = context()
+
+    textsFit(fake, font, ['A'], 13, { maxWidth: 100 })
+
+    expect(fake.font).toBe(fontAt(font, 13))
+  })
+})
+
+describe('layOutText', () => {
+  it('breaks a text into lines at a size, in the font', () => {
+    const context = createFakeContext()
+
+    // 6 px a character at 10 px: 60 px is 10 characters.
+    const block = layOutText(context.asContext(), font, 'Dim the lights', 10, 60)
+
+    expect(block).toEqual({ fontSize: 10, lines: ['Dim the', 'lights'] })
+    expect(context.font).toBe(fontAt(font, 10))
+  })
+})
+
+describe('text styles', () => {
+  /** A shape `radiusX` wide (across, from the middle), tall enough for 3 lines. */
+  const shape = (radiusX: number): TextShape => ({
+    radiusX,
+    radiusY: 200,
+    margin: 8,
+    minSize: 10,
+    maxSize: 20,
+  })
+  const context = () => createFakeContext().asContext()
+
+  it('fit lines at a size as wide as the shape is at their top and bottom, less the margin', () => {
+    expect(textStyleAt(shape(100), 2, 20)).toEqual({
+      fontSize: 20,
+      fit: fitInEllipse(100, 200, 8, { maxLines: 2, minSize: 20, maxSize: 20 }),
+    })
+  })
+
+  it('start at the largest size, on 2 lines, until the font is measured', () => {
+    expect(defaultTextStyle(shape(100))).toEqual(textStyleAt(shape(100), 2, 20))
+  })
+
+  it('write every text of a kind at the largest size they all fit on 2 lines', () => {
+    // "Aaaa Bbbb" is 9 characters: 2 lines of 4 fit 20 px with room to spare.
+    const style = chooseTextStyle(context(), font, ['Aaaa Bbbb', 'Cc Dd'], shape(100))
+
+    expect(style.fontSize).toBe(20)
+    expect(style.fit.maxLines).toBe(2)
+  })
+
+  it('go to 3 lines when 2 would be under 14 px and 3 allow larger', () => {
+    // Three words of 8: one a line needs 8 × 0.6 × size ≤ width.
+    const style = chooseTextStyle(context(), font, ['Aaaaaaaa Bbbbbbbb Cccccccc'], shape(70))
+
+    expect(READABLE_SIZE).toBe(14)
+    expect(style.fit.maxLines).toBe(3)
+    expect(style.fontSize).toBeGreaterThanOrEqual(READABLE_SIZE)
+  })
+
+  it('stay on 2 lines when they are 14 px or more', () => {
+    const style = chooseTextStyle(context(), font, ['Aaaaaaaa Bbbbbbbb Cccccccc'], shape(130))
+
+    expect(style.fit.maxLines).toBe(2)
+    expect(style.fontSize).toBeGreaterThanOrEqual(READABLE_SIZE)
+  })
+
+  it('can be the largest on so many lines, e.g. single words on 1', () => {
+    // 12 px a character at 20 px: "Aaaaaaaa" is 96 px, under 200 − 2 × 8 across.
+    const style = largestTextStyle(context(), font, ['Aaaaaaaa', 'Bbb'], shape(100), 1)
+
+    expect(style).toEqual(textStyleAt(shape(100), 1, 20))
+  })
+
+  it('stay on 2 lines at the smallest size when 3 would be no larger', () => {
+    // One long word: more lines do not help.
+    const style = chooseTextStyle(context(), font, ['Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'], shape(60))
+
+    expect(style).toEqual(textStyleAt(shape(60), 2, 10))
+  })
+})
+
+describe('loading the font with a game’s images', () => {
+  it('loads both at once, and gives what the game loaded', async () => {
+    useCssVariables()
+    let finishImages: (images: string[]) => void = () => {}
+    const images = new Promise<string[]>((resolve) => (finishImages = resolve))
+    const fonts = { load: vi.fn(async () => [{ status: 'loaded' }]) }
+
+    const loading = loadWithCanvasFont(() => images, { fonts })
+
+    expect(fonts.load).toHaveBeenCalledOnce()
+    finishImages(['bubble'])
+    await expect(loading).resolves.toEqual(['bubble'])
   })
 })

@@ -16,11 +16,10 @@ import {
   laneCentre,
   LANES_TOP,
   POINTS,
+  ROW_SPEED,
   SPAWN_Y,
-  SPEED_STEPS,
   speedAfter,
   START_LANE,
-  START_SPEED,
   type AlignTheActionsOptions,
   type Mistake,
   type Row,
@@ -67,14 +66,16 @@ const PAST_LAST_STEP_MS = 150_000
 describe('settings', () => {
   it('uses the agreed numbers', () => {
     expect([LANE_COUNT, LANE_WIDTH]).toEqual([4, 100])
-    expect(START_SPEED).toBe(60)
-    expect(SPEED_STEPS).toEqual([
-      [3, 80],
-      [6, 105],
-      [9, 135],
-      [12, 170],
-      [15, 210],
-    ])
+    expect(ROW_SPEED).toEqual({
+      start: 60,
+      steps: [
+        { from: 3, value: 80 },
+        { from: 6, value: 105 },
+        { from: 9, value: 135 },
+        { from: 12, value: 170 },
+        { from: 15, value: 210 },
+      ],
+    })
     expect(POINTS).toEqual({ aligned: 1 })
     expect(START_LANE).toBe(0)
   })
@@ -319,9 +320,7 @@ describe('choosing', () => {
 
     game.update(firstCheckMs)
 
-    expect(mistakes).toEqual([
-      { mistake: 'against', action: row.actions[lane], goal: row.goal },
-    ])
+    expect(mistakes).toEqual([{ mistake: 'against', action: row.actions[lane], goal: row.goal }])
   })
 
   it('reports choosing an action for another goal, naming both goals', () => {

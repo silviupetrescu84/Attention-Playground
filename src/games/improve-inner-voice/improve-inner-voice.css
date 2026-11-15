@@ -1,0 +1,8 @@
+/* Colours Improve Inner Voice draws on the canvas with (read by draw.ts). */
+:root {
+  /* The pad: white with ink text, like the app's white buttons (Difficulty, High scores). */
+  --inner-voice-pad-fill: #fff;
+  --inner-voice-pad-text: var(--color-ink);
+  /* While empowered: the pad's border, and the line along the bottom of the canvas. */
+  --inner-voice-empowered: var(--color-good);
+}

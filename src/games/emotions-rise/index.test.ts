@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { bubblesAt, findPoint } from '../../test/emotions-rise/bubbles'
 import { cssCanvasFont, cssVariables, useCssVariables } from '../../test/css-variables'
+import { bubblesAt, findPoint } from '../../test/emotions-rise/bubbles'
 import { useFakeCanvasContexts, type FakeContext } from '../../test/fake-canvas-context'
 import { FakeFrames } from '../../test/fake-frames'
 import { stubImages } from '../../test/fake-image'
-import { loadedFonts, mountForTest } from '../../test/mounted-game'
+import { FakeStorage } from '../../test/fake-storage'
+import { loadedFonts, mountForTest, mountWaitingForFont } from '../../test/mounted-game'
 import { seededRandom } from '../../test/random'
 import { mountGame } from '../shared/game-shell'
 import type { FontLoader } from '../shared/load-font'
@@ -13,7 +14,7 @@ import { fitFontSize, fontAt } from '../shared/text'
 import emotions from './data/emotions.json'
 import { EMOTION_TEXT_FIT } from './draw'
 import { SPAWN_Y } from './emotions-rise'
-import { emotionsRiseGame, mistakeMessage } from './index'
+import { EMOTION_WORDS, emotionsRiseGame } from './index'
 
 let contexts: FakeContext[]
 
@@ -48,25 +49,16 @@ const isGood = (word: string) => emotions.positive.includes(word)
 
 describe('loading', () => {
   it('loads the emotion font before Start can be pressed', async () => {
-    let finishLoading = (_: { status: string }[]) => {}
-    const fonts: FontLoader & { load: ReturnType<typeof vi.fn> } = {
-      load: vi.fn(() => new Promise<{ status: string }[]>((resolve) => (finishLoading = resolve))),
-    }
-    const container = document.createElement('main')
-    document.body.replaceChildren(container)
-    mountGame(container, {
-      signal: new AbortController().signal,
-      game: emotionsRiseGame({ fonts }),
-      scheduler: new FakeFrames(),
-    })
-    const start = container.querySelector<HTMLButtonElement>('.game-hud__start')!
+    const { fonts, start, finishLoading } = mountWaitingForFont((fonts) =>
+      emotionsRiseGame({ fonts }),
+    )
 
     expect(fonts.load).toHaveBeenCalledExactlyOnceWith(
       expect.stringContaining(cssCanvasFont.family),
     )
     expect(start.disabled).toBe(true)
 
-    finishLoading([{ status: 'loaded' }])
+    finishLoading()
     await vi.waitFor(() => expect(start.disabled).toBe(false))
   })
 
@@ -77,6 +69,8 @@ describe('loading', () => {
     const session = mountGame(container, {
       signal: new AbortController().signal,
       game: emotionsRiseGame({ fonts }),
+      gameId: 'emotions-rise',
+      storage: new FakeStorage(),
       scheduler: new FakeFrames(),
     })
     const start = container.querySelector<HTMLButtonElement>('.game-hud__start')!
@@ -124,7 +118,11 @@ describe('loading', () => {
     click('.game-hud__start')
     frames.frames(300, 50)
 
-    const sizes = new Set(context().callsTo('fillText').map((call) => call.font))
+    const sizes = new Set(
+      context()
+        .callsTo('fillText')
+        .map((call) => call.font),
+    )
     const allEmotions = [...emotions.positive, ...emotions.negative]
     const size = fitFontSize(context().asContext(), cssCanvasFont, allEmotions, EMOTION_TEXT_FIT)
     expect(sizes).toEqual(new Set([fontAt(cssCanvasFont, size)]))
@@ -222,11 +220,7 @@ describe('Emotions Rise', () => {
       expect(text('.game-hud__score')).toBe(score)
       // Still there, where it was tapped, with its hue over it…
       expect(lastDrawnBubbles()).toContainEqual(tapped)
-      const hues = context()
-        .lastDrawing()
-        .filter((call) => call.name === 'fill')
-        .map((call) => call.fillStyle)
-      expect(hues).toEqual([cssVariables.get(hue)])
+      expect(context().lastFills()).toEqual([cssVariables.get(hue)])
 
       // …then, 0.1 s later, gone, while the others went on rising.
       frames.frame(50)
@@ -265,13 +259,13 @@ describe('Emotions Rise', () => {
     expect(lastDrawnBubbles()).toHaveLength(1)
   })
 
-  it('explains mistakes in the status bar below the canvas', () => {
-    expect(mistakeMessage('badTapped', { text: 'Fear', type: 'bad' })).toBe(
-      'Tapped a bad emotion: Fear',
-    )
-    expect(mistakeMessage('goodMissed', { text: 'Joy', type: 'good' })).toBe(
-      'Missed a good emotion: Joy',
-    )
+  it('names emotions in the status bar and the summary', () => {
+    expect(EMOTION_WORDS).toEqual({
+      one: 'emotion',
+      many: 'emotions',
+      tapped: 'tapped',
+      letGo: 'let go',
+    })
   })
 
   it('shows a red message when a bad emotion is tapped, and none for a good one', async () => {
@@ -310,13 +304,13 @@ describe('Emotions Rise', () => {
     // No taps: every good and every bad emotion that reaches the top escapes.
     for (let t = 0; t < 60_000 && session.lifecycle.state === 'playing'; t += 20) {
       frames.frame(20)
-      const message = session.status.element.textContent!
+      const message = session.status.element.textContent
       if (message) messages.add(message)
     }
 
     expect(messages.size).toBeGreaterThan(5)
     for (const message of messages) {
-      const missed = message.match(/^Missed a good emotion: (.+)$/)
+      const missed = /^Missed a good emotion: (.+)$/.exec(message)
       expect(emotions.positive, message).toContain(missed?.[1])
     }
   })
@@ -383,7 +377,7 @@ describe('Emotions Rise', () => {
     // Tap one emotion every 2 seconds, so others escape.
     for (let i = 0; i < 30 && session.lifecycle.state === 'playing'; i++) {
       frames.frames(40, 50)
-      const [bubble] = lastDrawnBubbles().filter((b) => b.y < 700)
+      const bubble = lastDrawnBubbles().find((b) => b.y < 700)
       if (bubble) tapAt(bubble.x, bubble.y)
     }
     playUntilOver()

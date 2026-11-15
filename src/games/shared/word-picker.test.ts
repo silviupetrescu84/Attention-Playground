@@ -11,11 +11,7 @@ import {
 const good = ['Joy', 'Hope', 'Calm', 'Love', 'Awe']
 const bad = ['Fear', 'Anger', 'Shame', 'Envy', 'Guilt']
 
-function take(
-  count: number,
-  random: () => number,
-  options: Partial<WordPickerOptions> = {},
-) {
+function take(count: number, random: () => number, options: Partial<WordPickerOptions> = {}) {
   const picker = createWordPicker({ good, bad, recentToAvoid: 4, random, ...options })
   return Array.from({ length: count }, () => picker.next())
 }
@@ -57,8 +53,16 @@ describe('choosing the type', () => {
     const types = take(10, constantRandom(0)).map((word) => word.type)
 
     expect(types).toEqual([
-      'good', 'good', 'good', 'good', 'bad',
-      'good', 'good', 'good', 'good', 'bad',
+      'good',
+      'good',
+      'good',
+      'good',
+      'bad',
+      'good',
+      'good',
+      'good',
+      'good',
+      'bad',
     ])
   })
 
@@ -98,9 +102,18 @@ describe('choosing the word', () => {
     const goodOnes = ofType(take(20, constantRandom(0)), 'good')
 
     expect(goodOnes.slice(0, 12)).toEqual([
-      'Joy', 'Hope', 'Calm', 'Love', 'Awe',
-      'Joy', 'Hope', 'Calm', 'Love', 'Awe',
-      'Joy', 'Hope',
+      'Joy',
+      'Hope',
+      'Calm',
+      'Love',
+      'Awe',
+      'Joy',
+      'Hope',
+      'Calm',
+      'Love',
+      'Awe',
+      'Joy',
+      'Hope',
     ])
   })
 

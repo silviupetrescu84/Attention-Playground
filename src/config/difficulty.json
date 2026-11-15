@@ -1,0 +1,76 @@
+{
+  "mistakesToFail": { "easy": 10, "medium": 6, "hard": 3, "extreme": 1 },
+  "emotionsRise": {
+    "speed": { "min": 40, "max": 80 },
+    "spawnDelayMs": { "min": 700, "max": 1500 },
+    "harderByTimeMs": [
+      { "from": 20000, "percent": 10 },
+      { "from": 40000, "percent": 25 },
+      { "from": 60000, "percent": 45 },
+      { "from": 80000, "percent": 70 },
+      { "from": 100000, "percent": 110 }
+    ]
+  },
+  "alignTheActions": {
+    "rowSpeedByGoals": {
+      "start": 60,
+      "steps": [
+        { "from": 3, "value": 80 },
+        { "from": 6, "value": 105 },
+        { "from": 9, "value": 135 },
+        { "from": 12, "value": 170 },
+        { "from": 15, "value": 210 }
+      ]
+    }
+  },
+  "shiftPerspective": {
+    "readingMs": 3000,
+    "choicesByThoughts": {
+      "start": 2,
+      "steps": [
+        { "from": 3, "value": 3 },
+        { "from": 7, "value": 4 },
+        { "from": 15, "value": 5 },
+        { "from": 25, "value": 6 }
+      ]
+    },
+    "timeToChooseMsByThoughts": { "start": 10000, "change": -500, "every": 10, "limit": 5000 }
+  },
+  "focusAttention": {
+    "speedByTimeMs": {
+      "start": 15,
+      "steps": [
+        { "from": 10000, "value": 17.5 },
+        { "from": 20000, "value": 22.5 },
+        { "from": 30000, "value": 30 },
+        { "from": 40000, "value": 40 },
+        { "from": 50000, "value": 52.5 },
+        { "from": 60000, "value": 65 }
+      ]
+    },
+    "spawnDelayMsByTimeMs": {
+      "start": 3000,
+      "steps": [
+        { "from": 70000, "value": 2800 },
+        { "from": 80000, "value": 2600 },
+        { "from": 90000, "value": 2400 },
+        { "from": 100000, "value": 2000 }
+      ]
+    }
+  },
+  "breakItDown": {
+    "readingMs": 3000,
+    "actionsByGoals": { "start": 2, "change": 1, "every": 2, "limit": 6 },
+    "timeToChooseMsByGoals": { "start": 10000, "change": -500, "every": 2, "limit": 5000 }
+  },
+  "pauseBeforeReacting": {
+    "mostOnScreen": 5,
+    "spawnDelayMsBySituations": { "start": 3000, "change": -100, "every": 10, "limit": 2000 }
+  },
+  "improveInnerVoice": {
+    "spawnDelayMsByWords": { "start": 3000, "change": -100, "every": 10, "limit": 2000 },
+    "fallSpeedByWords": { "start": 40, "change": 10, "every": 10, "limit": 140 },
+    "padSpeed": { "start": 60, "max": 80, "accelerationPerS": 10 },
+    "goodInARowToEmpower": 3
+  }
+}

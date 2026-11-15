@@ -12,19 +12,17 @@ export function createImageLoader(url: string, name: string): () => Promise<HTML
   let loading: Promise<HTMLImageElement> | undefined
 
   return () => {
-    if (!loading) {
-      loading = new Promise<HTMLImageElement>((resolve, reject) => {
-        const image = new Image()
-        image.addEventListener('load', () => resolve(image), { once: true })
-        image.addEventListener('error', () => reject(new Error(`Could not load ${name}`)), {
-          once: true,
-        })
-        image.src = url
-      }).catch((error: unknown) => {
-        loading = undefined
-        throw error
+    loading ??= new Promise<HTMLImageElement>((resolve, reject) => {
+      const image = new Image()
+      image.addEventListener('load', () => resolve(image), { once: true })
+      image.addEventListener('error', () => reject(new Error(`Could not load ${name}`)), {
+        once: true,
       })
-    }
+      image.src = url
+    }).catch((error: unknown) => {
+      loading = undefined
+      throw error
+    })
 
     return loading
   }

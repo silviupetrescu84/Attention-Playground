@@ -1,8 +1,21 @@
-import { checkNotNegative } from './checks'
+import { checkNotNegative, checkWholeNumber } from './checks'
 
 /**
- * Difficulty that rises with the round's time, for games that get harder
- * as the round goes on.
+ * How games get harder as a round goes on, shared by every minigame. Each
+ * game's numbers are in config/difficulty.json.
+ *
+ * Three ways:
+ *
+ * - `Steps`: a value that changes by the same amount every so many things
+ *   counted (words shown, goals played…), up to a limit;
+ * - `StepTable`: a value that changes to each of a list of values, from some
+ *   count or time in the round on;
+ * - `createDifficulty`: settings that all get harder by the same percentage,
+ *   from some times in the round on.
+ *
+ * ---
+ *
+ * `createDifficulty`: difficulty that rises with the round's time.
  *
  * Each game declares its own settings: what they are called, their value at
  * the start of a round, and whether a higher or a lower value is harder. For
@@ -14,7 +27,7 @@ import { checkNotNegative } from './checks'
  * and the moments it gets harder, with how much harder than the start, as a
  * percentage (not of the step before):
  *
- *   [[10_000, 10], [20_000, 25]]
+ *   [{ from: 10_000, percent: 10 }, { from: 20_000, percent: 25 }]
  *
  *   0–10 s: ×1.0 (starting values)   10–20 s: ×1.1   from 20 s: ×1.25
  *
@@ -28,10 +41,13 @@ import { checkNotNegative } from './checks'
  */
 
 /**
- * From `atMs` into the round, the game is `increasePercent` % harder than at
- * the start: [30_000, 45] means ×1.45 from 30 s on.
+ * From `from` ms into the round, the game is `percent` % harder than at the
+ * start: { from: 30_000, percent: 45 } means ×1.45 from 30 s on.
  */
-export type DifficultyStep = readonly [atMs: number, increasePercent: number]
+export interface DifficultyStep {
+  readonly from: number
+  readonly percent: number
+}
 
 export interface DifficultySetting {
   /** The value at the start of a round. */
@@ -67,12 +83,12 @@ export function createDifficulty<Name extends string>({
   steps,
   settings,
 }: DifficultyOptions<Name>): Difficulty<Name> {
-  checkSteps(steps)
+  checkDifficultySteps(steps, 'Difficulty steps')
 
   // Copied, so changing either afterwards cannot change the difficulty.
-  const multipliers = steps.map(([atMs, increasePercent]) => ({
-    atMs,
-    multiplier: 1 + increasePercent / 100,
+  const multipliers = steps.map(({ from, percent }) => ({
+    atMs: from,
+    multiplier: 1 + percent / 100,
   }))
   // Object.entries and Object.keys lose the names' type; these are exactly
   // the names in `settings`.
@@ -112,16 +128,114 @@ export function createDifficulty<Name extends string>({
   }
 }
 
-function checkSteps(steps: readonly DifficultyStep[]) {
-  steps.forEach(([atMs, increasePercent], i) => {
-    checkNotNegative(atMs, 'Difficulty step time (ms)')
-    checkNotNegative(increasePercent, 'Difficulty increase (%)')
+/**
+ * Throws unless `steps` (named `name`) are in order of time, each at 0 ms or
+ * later and each 0 % harder or more.
+ */
+export function checkDifficultySteps(steps: readonly DifficultyStep[], name: string): void {
+  steps.forEach(({ from, percent }, i) => {
+    checkNotNegative(from, `${name}[${i}].from`)
+    checkNotNegative(percent, `${name}[${i}].percent`)
+  })
+  checkInOrder(steps, name)
+}
 
-    const previousAtMs = steps[i - 1]?.[0]
-    if (previousAtMs !== undefined && atMs <= previousAtMs) {
-      throw new RangeError(
-        `Difficulty steps must be in order of time, got ${atMs} ms after ${previousAtMs} ms`,
-      )
+/** Throws unless each of `steps` is `from` later than the one before. */
+function checkInOrder(steps: readonly { readonly from: number }[], name: string) {
+  steps.forEach(({ from }, i) => {
+    const previous = i > 0 ? steps[i - 1].from : -Infinity
+    if (from <= previous) {
+      throw new RangeError(`${name} must be in order of "from", got ${from} after ${previous}`)
     }
   })
+}
+
+/** Checks a value a setting can take, naming it `name` if it throws. */
+export type ValueCheck = (value: number, name: string) => void
+
+/**
+ * A setting that changes in steps as things are counted (thoughts shown,
+ * goals played…): `start` at first, then `change` more (less, if negative)
+ * every `every` of them, never going past `limit`.
+ */
+export interface Steps {
+  readonly start: number
+  readonly change: number
+  readonly every: number
+  readonly limit: number
+}
+
+/** The value of `steps` once `count` have been counted. */
+export function steppedAfter({ start, change, every, limit }: Steps, count: number): number {
+  const value = start + change * Math.floor(count / every)
+  return change < 0 ? Math.max(limit, value) : Math.min(limit, value)
+}
+
+/**
+ * Throws unless `steps` (named `name`) start and end on values `checkValue`
+ * accepts, change every whole number of things (1 or more), and change
+ * towards their limit (or not at all).
+ */
+export function checkSteps(steps: Steps, name: string, checkValue: ValueCheck): void {
+  const { start, change, every, limit } = steps
+  checkValue(start, `${name}.start`)
+  checkValue(limit, `${name}.limit`)
+  checkWholeNumber(every, `${name}.every`, 1)
+
+  if (!Number.isFinite(change)) {
+    throw new RangeError(`${name}.change must be a finite number, got ${change}`)
+  }
+  if (change < 0 ? limit > start : limit < start) {
+    const way = change < 0 ? 'down' : 'up'
+    throw new RangeError(
+      `${name} goes ${way} (change ${change}), so its limit must be ${change < 0 ? '≤' : '≥'} ` +
+        `its start (${start}), got ${limit}`,
+    )
+  }
+}
+
+/**
+ * A setting that is `start` at first, then each step's `value` from its
+ * `from` on: from that many things counted (goals shown…), or from that
+ * time in the round (in ms). Steps are in order of `from`.
+ */
+export interface StepTable {
+  readonly start: number
+  readonly steps: readonly TableStep[]
+}
+
+export interface TableStep {
+  readonly from: number
+  readonly value: number
+}
+
+/** The value of `table` at `at` (a count, or a time in the round). */
+export function valueAt({ start, steps }: StepTable, at: number): number {
+  let value = start
+
+  for (const step of steps) {
+    if (at >= step.from) {
+      value = step.value
+    }
+  }
+
+  return value
+}
+
+/** The largest value `table` ever takes. */
+export function largestIn({ start, steps }: StepTable): number {
+  return Math.max(start, ...steps.map((step) => step.value))
+}
+
+/**
+ * Throws unless `table` (named `name`) only takes values `checkValue`
+ * accepts, with its steps in order, each from 0 or later.
+ */
+export function checkStepTable(table: StepTable, name: string, checkValue: ValueCheck): void {
+  checkValue(table.start, `${name}.start`)
+  table.steps.forEach(({ from, value }, i) => {
+    checkNotNegative(from, `${name}.steps[${i}].from`)
+    checkValue(value, `${name}.steps[${i}].value`)
+  })
+  checkInOrder(table.steps, `${name}.steps`)
 }

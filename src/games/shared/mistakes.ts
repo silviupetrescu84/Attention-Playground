@@ -1,3 +1,5 @@
+import { DIFFICULTY } from '../../config/difficulty'
+import { checkWholeNumber } from './checks'
 import { isNewRound, type GameLifecycle } from './game-lifecycle'
 import { createListeners } from './listeners'
 
@@ -5,9 +7,9 @@ import { createListeners } from './listeners'
  * The difficulty the player picks before a round, and the mistakes they
  * make in it, shared by every minigame.
  *
- * Each difficulty fails the round on a number of mistakes, the moment that
- * mistake happens: the 10th on easy, the 6th on medium, the 3rd on hard, the
- * first on extreme. Mistakes after that (say, a second wrong item under the
+ * Each difficulty fails the round on a number of mistakes (MISTAKES_TO_FAIL,
+ * set in config/difficulty.json), the moment that mistake happens. Mistakes
+ * after that (say, a second wrong item under the
  * same tap) are not counted, so the count ends on exactly that number.
  * What counts as a mistake is up to each game, which calls `add()` for each
  * one.
@@ -21,12 +23,20 @@ export const DIFFICULTY_LEVELS = ['easy', 'medium', 'hard', 'extreme'] as const
 
 export type DifficultyLevel = (typeof DIFFICULTY_LEVELS)[number]
 
-/** The mistake that fails (ends) the round. */
-export const MISTAKES_TO_FAIL: Readonly<Record<DifficultyLevel, number>> = {
-  easy: 10,
-  medium: 6,
-  hard: 3,
-  extreme: 1,
+/** A value for each difficulty: `valueFor` it. */
+export function byLevel<Value>(
+  valueFor: (level: DifficultyLevel) => Value,
+): Record<DifficultyLevel, Value> {
+  const entries = DIFFICULTY_LEVELS.map((level) => [level, valueFor(level)])
+  // Object.fromEntries loses the levels' type; these are exactly DIFFICULTY_LEVELS.
+  return Object.fromEntries(entries) as Record<DifficultyLevel, Value>
+}
+
+/** The mistake that fails (ends) the round, at each difficulty. */
+export const MISTAKES_TO_FAIL: Readonly<Record<DifficultyLevel, number>> = DIFFICULTY.mistakesToFail
+
+for (const level of DIFFICULTY_LEVELS) {
+  checkWholeNumber(MISTAKES_TO_FAIL[level], `mistakesToFail.${level}`, 1)
 }
 
 export const DIFFICULTY_NAMES: Readonly<Record<DifficultyLevel, string>> = {

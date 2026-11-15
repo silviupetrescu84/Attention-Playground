@@ -33,9 +33,7 @@ export type GameState = 'ready' | 'playing' | 'paused' | 'finished'
 
 export type GameAction = 'start' | 'pause' | 'resume' | 'finish' | 'restart'
 
-const transitions: Readonly<
-  Record<GameState, Readonly<Partial<Record<GameAction, GameState>>>>
-> = {
+const transitions: Readonly<Record<GameState, Readonly<Partial<Record<GameAction, GameState>>>>> = {
   ready: { start: 'playing' },
   playing: { pause: 'paused', finish: 'finished' },
   paused: { resume: 'playing', restart: 'ready' },
@@ -45,10 +43,7 @@ const transitions: Readonly<
 export const initialGameState: GameState = 'ready'
 
 /** Returns the state `action` leads to from `state`, or `undefined` if not allowed. */
-export function nextGameState(
-  state: GameState,
-  action: GameAction,
-): GameState | undefined {
+export function nextGameState(state: GameState, action: GameAction): GameState | undefined {
   return transitions[state][action]
 }
 
@@ -119,9 +114,7 @@ export interface GameLifecycle {
   subscribe(listener: GameStateListener): Unsubscribe
 }
 
-export function createGameLifecycle({
-  signal,
-}: GameLifecycleOptions): GameLifecycle {
+export function createGameLifecycle({ signal }: GameLifecycleOptions): GameLifecycle {
   let state: GameState = initialGameState
   let stopped = false
   const listeners = createListeners<[GameStateChange]>()

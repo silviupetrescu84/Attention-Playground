@@ -1,12 +1,18 @@
 import alignTheActionsIcon from '../assets/game-icons/align-the-actions.png'
+import breakItDownIcon from '../assets/game-icons/break-it-down.png'
 import emotionsRiseIcon from '../assets/game-icons/emotions-rise.png'
 import focusAttentionIcon from '../assets/game-icons/focus-attention.png'
+import improveInnerVoiceIcon from '../assets/game-icons/improve-inner-voice.png'
+import pauseBeforeReactingIcon from '../assets/game-icons/pause-before-reacting.png'
 import shiftPerspectiveIcon from '../assets/game-icons/shift-perspective.png'
 import { alignTheActionsGame, preloadAlignTheActions } from './align-the-actions'
+import { breakItDownGame, preloadBreakItDown } from './break-it-down'
 import { emotionsRiseGame, preloadEmotionsRise } from './emotions-rise'
 import { focusAttentionGame, preloadFocusAttention } from './focus-attention'
-import { preloadShiftPerspective, shiftPerspectiveGame } from './shift-perspective'
+import { improveInnerVoiceGame, preloadImproveInnerVoice } from './improve-inner-voice'
+import { pauseBeforeReactingGame, preloadPauseBeforeReacting } from './pause-before-reacting'
 import type { GameDefinition } from './shared/game-shell'
+import { preloadShiftPerspective, shiftPerspectiveGame } from './shift-perspective'
 
 /**
  * Every game in the playground, in the order shown on the home screen. The
@@ -56,6 +62,27 @@ export const games: readonly CatalogGame[] = [
     icon: focusAttentionIcon,
     create: () => focusAttentionGame(),
     preload: () => preloadFocusAttention(),
+  },
+  {
+    id: 'break-it-down',
+    name: 'Break It Down',
+    icon: breakItDownIcon,
+    create: () => breakItDownGame(),
+    preload: () => preloadBreakItDown(),
+  },
+  {
+    id: 'pause-before-reacting',
+    name: 'Pause Before Reacting',
+    icon: pauseBeforeReactingIcon,
+    create: () => pauseBeforeReactingGame(),
+    preload: () => preloadPauseBeforeReacting(),
+  },
+  {
+    id: 'improve-inner-voice',
+    name: 'Improve Inner Voice',
+    icon: improveInnerVoiceIcon,
+    create: () => improveInnerVoiceGame(),
+    preload: () => preloadImproveInnerVoice(),
   },
 ]
 

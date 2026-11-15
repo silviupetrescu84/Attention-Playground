@@ -15,7 +15,9 @@ export interface DrawCall {
   readonly font: string
   readonly globalAlpha: number
   readonly globalCompositeOperation: string
+  readonly shadowColor: string
   readonly shadowBlur: number
+  readonly shadowOffsetY: number
 }
 
 export interface FakeContext {
@@ -36,6 +38,8 @@ export interface FakeContext {
   callsTo(name: string): DrawCall[]
   /** The calls since the canvas was last cleared (`clearRect`), that one included. */
   lastDrawing(): DrawCall[]
+  /** The colours filled with in the last drawing, in order (e.g. the hue of what was chosen). */
+  lastFills(): unknown[]
   asContext(): CanvasRenderingContext2D
 }
 
@@ -68,6 +72,12 @@ export function createFakeContext(): FakeContext {
       const lastClear = calls.map((call) => call.name).lastIndexOf('clearRect')
       return calls.slice(Math.max(0, lastClear))
     },
+    lastFills() {
+      return context
+        .lastDrawing()
+        .filter((call) => call.name === 'fill')
+        .map((call) => call.fillStyle)
+    },
     asContext() {
       return context as unknown as CanvasRenderingContext2D
     },
@@ -84,7 +94,9 @@ export function createFakeContext(): FakeContext {
         font: context.font,
         globalAlpha: context.globalAlpha,
         globalCompositeOperation: context.globalCompositeOperation,
+        shadowColor: context.shadowColor,
         shadowBlur: context.shadowBlur,
+        shadowOffsetY: context.shadowOffsetY,
       })
       return result?.(...args)
     }
@@ -130,7 +142,7 @@ export function useFakeCanvasContexts(): FakeContext[] {
   vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(() => {
     const context = createFakeContext()
     contexts.push(context)
-    return context.asContext() as never
+    return context.asContext()
   })
 
   return contexts

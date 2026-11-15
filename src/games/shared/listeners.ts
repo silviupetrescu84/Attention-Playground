@@ -14,8 +14,8 @@ export type Listener<Args extends unknown[]> = (...args: Args) => void
 
 export interface Listeners<Args extends unknown[]> {
   /** Adds `listener`; returns a function that removes it. */
-  add(listener: Listener<Args>): () => void
-  notify(...args: Args): void
+  readonly add: (listener: Listener<Args>) => () => void
+  readonly notify: (...args: Args) => void
 }
 
 export function createListeners<Args extends unknown[]>(): Listeners<Args> {

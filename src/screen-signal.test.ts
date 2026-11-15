@@ -1,8 +1,5 @@
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
-import {
-  createGameLifecycle,
-  GameStoppedError,
-} from './games/shared/game-lifecycle'
+import { createGameLifecycle, GameStoppedError } from './games/shared/game-lifecycle'
 import { pauseWhenAway } from './games/shared/pause-when-away'
 import { getScreenSignal, leaveScreen } from './screen-signal'
 

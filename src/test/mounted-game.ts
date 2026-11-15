@@ -2,9 +2,34 @@ import { expect, vi } from 'vitest'
 import { mountGame, type GameDefinition } from '../games/shared/game-shell'
 import type { FontLoader } from '../games/shared/load-font'
 import { FakeFrames } from './fake-frames'
+import { FakeStorage } from './fake-storage'
 
 /** A font loader whose font is always ready. */
 export const loadedFonts: FontLoader = { load: async () => [{ status: 'loaded' }] }
+
+/**
+ * Mounts the game `create` makes with a font loader that waits until the
+ * test calls `finishLoading`, to check that Start waits for it. Returns the
+ * loader (a mock), the Start button and `finishLoading`.
+ */
+export function mountWaitingForFont(create: (fonts: FontLoader) => GameDefinition) {
+  let resolve: (faces: { status: string }[]) => void = () => {}
+  const fonts = {
+    load: vi.fn(() => new Promise<{ status: string }[]>((done) => (resolve = done))),
+  } satisfies FontLoader
+  const container = document.createElement('main')
+  document.body.replaceChildren(container)
+  mountGame(container, {
+    signal: new AbortController().signal,
+    game: create(fonts),
+    gameId: 'test-game',
+    storage: new FakeStorage(),
+    scheduler: new FakeFrames(),
+  })
+  const start = container.querySelector<HTMLButtonElement>('.game-hud__start')!
+
+  return { fonts, start, finishLoading: () => resolve([{ status: 'loaded' }]) }
+}
 
 /**
  * Mounts `game` in a new container on the page, with frames that only run
@@ -21,6 +46,8 @@ export async function mountForTest(game: GameDefinition) {
   const session = mountGame(container, {
     signal: new AbortController().signal,
     game,
+    gameId: 'test-game',
+    storage: new FakeStorage(),
     scheduler: frames,
   })
   const startButton = container.querySelector<HTMLButtonElement>('.game-hud__start')!
@@ -36,9 +63,7 @@ export async function mountForTest(game: GameDefinition) {
   const text = (selector: string) => container.querySelector(selector)!.textContent
   /** Taps the canvas at a position in game units. */
   const tapAt = (x: number, y: number) =>
-    session.canvas.element.dispatchEvent(
-      new MouseEvent('pointerdown', { clientX: x, clientY: y }),
-    )
+    session.canvas.element.dispatchEvent(new MouseEvent('pointerdown', { clientX: x, clientY: y }))
 
   /** Plays in 50 ms frames until the round is over; fails if it goes on for 3 minutes. */
   const playUntilOver = () => {

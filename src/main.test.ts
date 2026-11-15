@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import goalsData from './games/align-the-actions/data/align_the_actions_goals.json'
 import { goalsFrom } from './games/align-the-actions/goals'
 import emotions from './games/emotions-rise/data/emotions.json'
 import focusData from './games/focus-attention/data/focus-attention.json'
+import { highScoresKey } from './games/shared/high-scores'
 import { cssCanvasFont, useCssVariables } from './test/css-variables'
 import { useFakeCanvasContexts, type FakeContext } from './test/fake-canvas-context'
 import { stubImages } from './test/fake-image'
@@ -37,7 +38,15 @@ function onError(event: ErrorEvent) {
   uncaughtErrors.push(event.error)
 }
 
+// The first import of the app's modules is slow (each is transformed once),
+// more so while other test files run at the same time. Do it before the
+// tests, so the first one does not pay for it and time out.
+beforeAll(async () => {
+  await import('./games/catalog')
+})
+
 beforeEach(() => {
+  localStorage.clear()
   uncaughtErrors = []
   window.addEventListener('error', onError)
   trackListeners(document)
@@ -84,9 +93,7 @@ function click(target: EventTarget) {
 }
 
 function routeLink(href: string) {
-  const link = document.querySelector<HTMLAnchorElement>(
-    `#app a[data-route][href="${href}"]`,
-  )
+  const link = document.querySelector<HTMLAnchorElement>(`#app a[data-route][href="${href}"]`)
   expect(link, `link to ${href}`).not.toBeNull()
   return link!
 }
@@ -129,6 +136,9 @@ describe('app start', () => {
     ['/games/align-the-actions', 'Align the Actions'],
     ['/games/shift-perspective', 'Shift Perspective'],
     ['/games/focus-attention', 'Focus Attention'],
+    ['/games/break-it-down', 'Break It Down'],
+    ['/games/pause-before-reacting', 'Pause Before Reacting'],
+    ['/games/improve-inner-voice', 'Improve Inner Voice'],
   ])('opens %s directly on the %s screen', async (pathname, gameName) => {
     await startApp(pathname)
 
@@ -155,9 +165,9 @@ describe('navigation', () => {
 
   it('opens a game for every game link on the home screen', async () => {
     await startApp('/')
-    const hrefs = [
-      ...document.querySelectorAll<HTMLAnchorElement>('#app a[data-route]'),
-    ].map((link) => link.getAttribute('href')!)
+    const hrefs = [...document.querySelectorAll<HTMLAnchorElement>('#app a[data-route]')].map(
+      (link) => link.getAttribute('href')!,
+    )
     expect(hrefs.length).toBeGreaterThan(0)
 
     for (const href of hrefs) {
@@ -291,17 +301,17 @@ describe('games', () => {
     '/games/align-the-actions',
     '/games/shift-perspective',
     '/games/focus-attention',
-  ])(
-    '%s first shows a Start button',
-    async (pathname) => {
-      const { app } = await startApp(pathname)
-      const start = app.querySelector<HTMLElement>('.game-hud__start')
+    '/games/break-it-down',
+    '/games/pause-before-reacting',
+    '/games/improve-inner-voice',
+  ])('%s first shows a Start button', async (pathname) => {
+    const { app } = await startApp(pathname)
+    const start = app.querySelector<HTMLElement>('.game-hud__start')
 
-      expect(start).not.toBeNull()
-      expect(start!.closest('[hidden]')).toBeNull()
-      expect(app.querySelector<HTMLElement>('.game-hud__pause')!.hidden).toBe(true)
-    },
-  )
+    expect(start).not.toBeNull()
+    expect(start!.closest('[hidden]')).toBeNull()
+    expect(app.querySelector<HTMLElement>('.game-hud__pause')!.hidden).toBe(true)
+  })
 
   it('plays Align the Actions on its screen', async () => {
     const { app } = await startApp('/games/align-the-actions')
@@ -312,7 +322,10 @@ describe('games', () => {
     start.click()
 
     // The goal and its row of 4 actions.
-    const drawn = contexts.at(-1)!.callsTo('fillText').map((call) => String(call.args[0]))
+    const drawn = contexts
+      .at(-1)!
+      .callsTo('fillText')
+      .map((call) => String(call.args[0]))
     const titles = goalsFrom(goalsData).map((goal) => goal.title)
     expect(drawn.some((text) => titles.some((title) => title.startsWith(text)))).toBe(true)
     expect(contexts.at(-1)!.callsTo('roundRect')).toHaveLength(5)
@@ -327,7 +340,10 @@ describe('games', () => {
 
     start.click()
 
-    const drawn = contexts.at(-1)!.callsTo('fillText').map((call) => call.args[0])
+    const drawn = contexts
+      .at(-1)!
+      .callsTo('fillText')
+      .map((call) => call.args[0])
     expect(drawn).toHaveLength(1)
     expect([...emotions.positive, ...emotions.negative]).toContain(drawn[0])
   })
@@ -345,7 +361,12 @@ describe('games', () => {
     // fade in. (Its frames are not timed in jsdom: the game's own tests
     // play it frame by frame.)
     expect(app.querySelector<HTMLElement>('.game-hud__pause')!.hidden).toBe(false)
-    expect(contexts.at(-1)!.calls.slice(before).map((call) => call.name)).toEqual(['clearRect'])
+    expect(
+      contexts
+        .at(-1)!
+        .calls.slice(before)
+        .map((call) => call.name),
+    ).toEqual(['clearRect'])
   })
 
   it('plays Focus Attention on its screen', async () => {
@@ -364,6 +385,55 @@ describe('games', () => {
     expect(texts.slice(1)).toEqual(['Focus', 'Change attention'])
     expect(app.querySelector<HTMLElement>('.game-hud__pause')!.hidden).toBe(false)
   })
+})
+
+describe('high scores', () => {
+  it("shows each game's own high scores, kept in the browser", async () => {
+    const saved = (name: string, score: number) => JSON.stringify({ easy: [{ name, score }] })
+    localStorage.setItem(highScoresKey('emotions-rise'), saved('Ana', 12))
+    localStorage.setItem(highScoresKey('focus-attention'), saved('Bo', 3))
+    const { app } = await startApp('/games/emotions-rise')
+    const shown = () => {
+      app.querySelector<HTMLButtonElement>('.game-hud__high-scores-open')!.click()
+      const list = app.querySelector<HTMLElement>('.game-hud__high-scores')!
+      return list.hidden
+        ? app.querySelector('.game-hud__no-high-scores')!.textContent
+        : list.textContent
+    }
+
+    expect(shown()).toBe('1Ana12')
+
+    history.replaceState({}, '', '/games/focus-attention')
+    window.dispatchEvent(new PopStateEvent('popstate'))
+    expect(shown()).toBe('1Bo3')
+
+    history.replaceState({}, '', '/games/shift-perspective')
+    window.dispatchEvent(new PopStateEvent('popstate'))
+    expect(shown()).toBe('No high scores yet')
+  })
+})
+
+describe('games that start with nothing on screen', () => {
+  it.each(['/games/break-it-down', '/games/pause-before-reacting'])(
+    '%s starts a round with the canvas cleared, for what comes first to fade in',
+    async (pathname) => {
+      const { app } = await startApp(pathname)
+      const start = app.querySelector<HTMLButtonElement>('.game-hud__start')!
+      // jsdom cannot load fonts, so the game soon gives up and uses a fallback.
+      await vi.waitFor(() => expect(start.disabled).toBe(false))
+      const before = contexts.at(-1)!.calls.length
+
+      start.click()
+
+      // (Frames are not timed in jsdom: the games' own tests play them frame by frame.)
+      expect(app.querySelector<HTMLElement>('.game-hud__pause')!.hidden).toBe(false)
+      const drawn = contexts
+        .at(-1)!
+        .calls.slice(before)
+        .map((call) => call.name)
+      expect(drawn).toEqual(['clearRect'])
+    },
+  )
 })
 
 describe('leaving a screen', () => {

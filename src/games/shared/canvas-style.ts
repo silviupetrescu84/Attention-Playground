@@ -1,3 +1,5 @@
+import type { GamePoint } from './game-canvas'
+
 /**
  * How games draw on the canvas (colours, font), shared by every minigame.
  *
@@ -21,6 +23,55 @@ export const CARD_COLORS = {
   cardFill: '--canvas-card-fill',
   cardBorder: '--canvas-card-border',
 } as const satisfies CssVariables
+
+/** The border of a plain bubble (see `drawBubbleImage`). */
+export const BUBBLE_BORDER_WIDTH = 1.5
+
+/** Starts a path around the ellipse centred on `centre` (a circle if both radii are the same). */
+export function traceEllipse(
+  context: CanvasRenderingContext2D,
+  { x, y }: GamePoint,
+  radiusX: number,
+  radiusY: number,
+): void {
+  context.beginPath()
+  context.ellipse(x, y, radiusX, radiusY, 0, 0, Math.PI * 2)
+}
+
+/** How big a bubble image is drawn, and how big the bubble in it is as seen. */
+export interface BubbleSize {
+  readonly width: number
+  readonly height: number
+  /** The bubble itself, without its glow or transparent edges. */
+  readonly radiusX: number
+  readonly radiusY: number
+}
+
+/**
+ * A bubble centred on `centre`: `image` drawn at `size`, or, if it could not
+ * load, a plain bubble in the card colours the size of the bubble as seen,
+ * so the game can still be played.
+ */
+export function drawBubbleImage(
+  context: CanvasRenderingContext2D,
+  image: CanvasImageSource | undefined,
+  centre: GamePoint,
+  size: BubbleSize,
+  colors: CssValues<'cardFill' | 'cardBorder'>,
+): void {
+  if (image) {
+    const { width, height } = size
+    context.drawImage(image, centre.x - width / 2, centre.y - height / 2, width, height)
+    return
+  }
+
+  traceEllipse(context, centre, size.radiusX, size.radiusY)
+  context.fillStyle = colors.cardFill
+  context.fill()
+  context.lineWidth = BUBBLE_BORDER_WIDTH
+  context.strokeStyle = colors.cardBorder
+  context.stroke()
+}
 
 /**
  * The value of each of `variables` for `element` (the game's canvas). Throws

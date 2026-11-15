@@ -25,10 +25,7 @@ export interface GameStatusOptions {
   loop: GameLoop
 }
 
-export function createGameStatus(
-  container: HTMLElement,
-  { loop }: GameStatusOptions,
-): GameStatus {
+export function createGameStatus(container: HTMLElement, { loop }: GameStatusOptions): GameStatus {
   const element = document.createElement('p')
   element.className = 'game-status'
   element.setAttribute('role', 'status')

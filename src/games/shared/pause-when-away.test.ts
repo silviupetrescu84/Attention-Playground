@@ -1,9 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import {
-  createGameLifecycle,
-  type GameAction,
-  type GameState,
-} from './game-lifecycle'
+import { createGameLifecycle, type GameAction, type GameState } from './game-lifecycle'
 import { pauseWhenAway, type PageEvents } from './pause-when-away'
 
 // Calls listeners directly (unlike a real EventTarget, which would only report

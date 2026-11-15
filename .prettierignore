@@ -1,0 +1,4 @@
+# Written by npm, not by hand.
+package-lock.json
+# Game content, kept as it is handed over, so updates show only what changed.
+src/games/*/data/

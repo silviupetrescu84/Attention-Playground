@@ -1,10 +1,15 @@
-import greenBubbleUrl from '../../assets/focus-attention/green-bubble.png'
 import projectorUrl from '../../assets/focus-attention/focus-projector.png'
-import { CARD_COLORS, type CssValues, type CssVariables } from '../shared/canvas-style'
-import { fadedOutAt, FEEDBACK_COLORS, type Chosen } from '../shared/feedback'
+import {
+  drawBubbleImage,
+  type BubbleSize,
+  type CssValues,
+  type CssVariables,
+} from '../shared/canvas-style'
+import { BUBBLE_COLORS, drawHue, fadedOutAt, hueFor, type Chosen } from '../shared/feedback'
 import { clearGameCanvas, GAME_HEIGHT, GAME_WIDTH, type GamePoint } from '../shared/game-canvas'
 import { createImageLoader } from '../shared/load-image'
-import { fitInCircle, fontAt, type CanvasFont, type TextFit } from '../shared/text'
+import { drawPill, FLAT, PILL_COLORS, RAISED } from '../shared/pill'
+import { drawTextBlock, fitInCircle, type CanvasFont, type TextFit } from '../shared/text'
 import {
   BUBBLE_RADIUS,
   BUBBLE_SIZE,
@@ -30,22 +35,17 @@ import './focus-attention.css'
 
 /** The colours the game is drawn with, from CSS (game.css and focus-attention.css). */
 export const FOCUS_COLORS = {
-  ...CARD_COLORS,
-  ...FEEDBACK_COLORS,
+  ...BUBBLE_COLORS,
+  ...PILL_COLORS,
   projector: '--focus-projector',
   beam: '--focus-beam',
   buttonFill: '--focus-button-fill',
   buttonText: '--focus-button-text',
   buttonPressed: '--focus-button-pressed',
-  buttonShadow: '--focus-button-shadow',
 } as const satisfies CssVariables
 
 export type FocusColors = CssValues<keyof typeof FOCUS_COLORS>
 
-export const BUBBLE_BORDER_WIDTH = 1.5
-/** The shadow under a button, as the app's own buttons have (0 0.5rem 1.5rem). */
-export const BUTTON_SHADOW_BLUR = 24
-export const BUTTON_SHADOW_OFFSET = 8
 /** How far a pressed button goes down. */
 export const BUTTON_PRESS_DEPTH = 3
 /** How long a button shows as pressed. */
@@ -67,8 +67,6 @@ export const BUTTON_TEXT_FIT: TextFit = {
   maxSize: 20,
 }
 
-/** Loads (once) the green bubble every word is drawn in. */
-export const loadBubbleImage = createImageLoader(greenBubbleUrl, 'green-bubble.png')
 /** Loads (once) the projector. */
 export const loadProjectorImage = createImageLoader(projectorUrl, 'focus-projector.png')
 
@@ -81,21 +79,6 @@ export interface SceneLook {
   /** The artwork; plain shapes are drawn for any that did not load. */
   readonly bubbleImage?: CanvasImageSource
   readonly projectorImage?: CanvasImageSource
-}
-
-/** Writes one line centred on (x, y). */
-function writeLine(
-  context: CanvasRenderingContext2D,
-  text: string,
-  { x, y }: GamePoint,
-  font: string,
-  color: string,
-) {
-  context.font = font
-  context.fillStyle = color
-  context.textAlign = 'center'
-  context.textBaseline = 'middle'
-  context.fillText(text, x, y)
 }
 
 /**
@@ -151,6 +134,14 @@ export function drawBeam(context: CanvasRenderingContext2D, target: GamePoint, c
   context.restore()
 }
 
+/** A bubble's image, or a plain circle the size of the bubble itself if it did not load. */
+const BUBBLE_DRAWN: BubbleSize = {
+  width: BUBBLE_SIZE,
+  height: BUBBLE_SIZE,
+  radiusX: BUBBLE_RADIUS,
+  radiusY: BUBBLE_RADIUS,
+}
+
 /** A bubble with its word, centred on it; `hue` (if any) tints the bubble, under the word. */
 export function drawBubble(
   context: CanvasRenderingContext2D,
@@ -158,28 +149,14 @@ export function drawBubble(
   { bubbleImage, colors, font, wordFontSize }: SceneLook,
   hue?: string,
 ) {
-  if (bubbleImage) {
-    const half = BUBBLE_SIZE / 2
-    context.drawImage(bubbleImage, bubble.x - half, bubble.y - half, BUBBLE_SIZE, BUBBLE_SIZE)
-  } else {
-    // Keep the game usable if the image cannot load.
-    context.beginPath()
-    context.arc(bubble.x, bubble.y, BUBBLE_RADIUS, 0, Math.PI * 2)
-    context.fillStyle = colors.cardFill
-    context.fill()
-    context.lineWidth = BUBBLE_BORDER_WIDTH
-    context.strokeStyle = colors.cardBorder
-    context.stroke()
-  }
+  drawBubbleImage(context, bubbleImage, bubble, BUBBLE_DRAWN, colors)
 
   if (hue) {
-    context.beginPath()
-    context.arc(bubble.x, bubble.y, BUBBLE_RADIUS, 0, Math.PI * 2)
-    context.fillStyle = hue
-    context.fill()
+    drawHue(context, bubble, BUBBLE_RADIUS, BUBBLE_RADIUS, hue)
   }
 
-  writeLine(context, bubble.text, bubble, fontAt(font, wordFontSize), colors.text)
+  const line = { fontSize: wordFontSize, lines: [bubble.text] }
+  drawTextBlock(context, line, bubble.x, bubble.y, font, colors.text)
 }
 
 /**
@@ -192,20 +169,17 @@ export function drawButton(
   pressed: boolean,
   { colors, font, buttonFontSize }: SceneLook,
 ) {
-  const y = pressed ? button.y + BUTTON_PRESS_DEPTH : button.y
-
-  context.beginPath()
-  context.roundRect(button.x, y, button.width, button.height, button.height / 2)
-  context.shadowColor = colors.buttonShadow
-  context.shadowBlur = pressed ? 0 : BUTTON_SHADOW_BLUR
-  context.shadowOffsetY = pressed ? 0 : BUTTON_SHADOW_OFFSET
-  context.fillStyle = pressed ? colors.buttonPressed : colors.buttonFill
-  context.fill()
-  context.shadowBlur = 0
-  context.shadowOffsetY = 0
-
-  const centre = { x: button.x + button.width / 2, y: y + button.height / 2 }
-  writeLine(context, button.label, centre, fontAt(font, buttonFontSize), colors.buttonText)
+  const top = pressed ? button.y + BUTTON_PRESS_DEPTH : button.y
+  const box = { left: button.x, right: button.x + button.width, top, bottom: top + button.height }
+  const fill = pressed ? colors.buttonPressed : colors.buttonFill
+  const pillColors = { fill, text: colors.buttonText, shadow: colors.pillShadow }
+  drawPill(
+    context,
+    { box, label: button.label, fontSize: buttonFontSize },
+    font,
+    pillColors,
+    pressed ? FLAT : RAISED,
+  )
 }
 
 /** What the drawing shows: the game's current state. */
@@ -235,7 +209,7 @@ export function drawScene(
 
   for (const { item, right, atMs } of answered) {
     context.globalAlpha = fadedOutAt(atMs, timeMs)
-    drawBubble(context, item, look, right ? look.colors.rightHue : look.colors.wrongHue)
+    drawBubble(context, item, look, hueFor(right, look.colors))
   }
   context.globalAlpha = 1
 

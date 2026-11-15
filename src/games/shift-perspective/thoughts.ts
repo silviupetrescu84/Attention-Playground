@@ -1,4 +1,5 @@
-import { shuffled, type Random } from '../shared/random'
+import { createDeck } from '../shared/deck'
+import type { Random } from '../shared/random'
 
 /**
  * The thoughts of Shift Perspective, each with good and bad ways to see it,
@@ -38,8 +39,8 @@ export interface ThoughtPicker {
 
 /**
  * Picks every thought once, in random order, then all of them again in a
- * new order, and so on. The same thought never comes twice in a row, not
- * even from one round of all of them to the next.
+ * new order, and so on (see the shared deck). The same thought never comes
+ * twice in a row, not even from one round of all of them to the next.
  */
 export function createThoughtPicker(
   thoughts: readonly Thought[],
@@ -49,22 +50,14 @@ export function createThoughtPicker(
     throw new RangeError(`Need at least 2 thoughts, got ${thoughts.length}`)
   }
 
-  let left: Thought[] = []
+  const deck = createDeck(thoughts, random)
   let last: Thought | undefined
 
   return {
     next() {
-      if (left.length === 0) {
-        left = shuffled(random, thoughts)
-
-        // The last one of the new order comes first: make sure it is not the one just shown.
-        if (left.at(-1) === last) {
-          left.unshift(left.pop()!)
-        }
-      }
-
-      last = left.pop()!
-      return last
+      const [next] = deck.take(1, last ? [last] : [])
+      last = next
+      return next
     },
   }
 }

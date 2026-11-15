@@ -23,9 +23,13 @@ export interface Word {
 
 export const MAX_SAME_TYPE_IN_A_ROW = 4
 
-export interface WordPickerOptions {
-  good: readonly string[]
-  bad: readonly string[]
+/** Good words and bad ones: to react to and to let go, helpful and unhelpful… */
+export interface WordLists {
+  readonly good: readonly string[]
+  readonly bad: readonly string[]
+}
+
+export interface WordPickerOptions extends WordLists {
   /** How many of the last words of each type may not come again yet. */
   recentToAvoid: number
   random?: Random

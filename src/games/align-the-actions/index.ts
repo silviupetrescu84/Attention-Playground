@@ -17,10 +17,8 @@ const goalTitles = goals.map((goal) => goal.title)
  * mistake without a message here is a type error.
  */
 const mistakeMessages: Record<Mistake, (action: Action, goal: Goal) => string> = {
-  against: (action, goal) =>
-    `Works against “${goal.title}”: ${action.text}`,
-  otherGoal: (action) =>
-    `Belongs to “${action.goal.title}”: ${action.text}`,
+  against: (action, goal) => `Works against “${goal.title}”: ${action.text}`,
+  otherGoal: (action) => `Belongs to “${action.goal.title}”: ${action.text}`,
 }
 
 export function mistakeMessage(mistake: Mistake, action: Action, goal: Goal): string {

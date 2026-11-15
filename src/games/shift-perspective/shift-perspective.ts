@@ -1,7 +1,19 @@
-import { GAME_HEIGHT, GAME_WIDTH, type GamePoint } from '../shared/game-canvas'
-import { GAME_BAR_HEIGHT } from '../shared/game-hud'
+import { DIFFICULTY } from '../../config/difficulty'
+import { checkNotNegative, checkPositive, checkWholeNumber } from '../shared/checks'
+import {
+  checkSteps,
+  checkStepTable,
+  largestIn,
+  steppedAfter,
+  valueAt,
+  type Steps,
+  type StepTable,
+} from '../shared/difficulty'
+import type { GamePoint } from '../shared/game-canvas'
+import { PLAY_CENTRE } from '../shared/game-hud'
 import { randomItem, shuffled, type Random } from '../shared/random'
 import type { Score } from '../shared/score'
+import { fadeAt, passDeadlines, type TimedTurn } from '../shared/timed-turns'
 import { createThoughtPicker, type Thought, type ThoughtPicker } from './thoughts'
 
 /**
@@ -13,68 +25,50 @@ import { createThoughtPicker, type Thought, type ThoughtPicker } from './thought
  * one: +1. Tapping a bad one, or choosing nothing in time, is a mistake (see
  * onMistake) and scores nothing.
  *
- * The thought fades in over 0.1 s and is shown alone for the first 3 s, so
- * the player can read it. Then the choices fade in over 0.1 s, and only once
+ * The thought fades in over 0.1 s and is shown alone for READING_MS, so the
+ * player can read it. Then the choices fade in over 0.1 s, and only once
  * they have does the time to choose start (a ring around the thought shows
  * what is left; it stays full until then). As soon as the player chooses, or
  * the time is up, everything fades out over 0.1 s and then the next thought
  * fades in. Taps on choices that are fading out do nothing; taps on choices
  * that are fading in count.
  *
- * The game gets harder as more thoughts are shown:
- *
- * - 2 choices at first, then 3 after 3 thoughts, 4 after 7, 5 after 15 and
- *   6 after 25 (CHOICE_STEPS). They sit at the corners of a regular shape
- *   with one corner straight up: above and below, a triangle, N E S W, a
- *   pentagon, a hexagon.
- * - 10 s to choose at first, 0.5 s less after every 10 thoughts, down to 5 s
- *   (after 100 thoughts).
+ * The game gets harder as more thoughts are shown: more choices (CHOICES),
+ * and less time to choose (TIME_LIMIT). Both, and READING_MS, are set in
+ * config/difficulty.json. The choices sit at the corners of a regular shape
+ * with one corner straight up: above and below, a triangle, N E S W, a
+ * pentagon, a hexagon (at most MOST_CHOICES_THAT_FIT).
  *
  * When a mistake ends the round, everything stops as it is: the thought and
  * its choices stay on screen, and no next thought comes.
  */
 
-/** How many choices a thought comes with at first. */
-export const START_CHOICES = 2
+/** The most choices that fit around the thought, each clear of the others. */
+export const MOST_CHOICES_THAT_FIT = 6
 
-/** Once `thoughtsShown` thoughts have been shown, the next ones have `choices` choices. */
-export type ChoiceStep = readonly [thoughtsShown: number, choices: number]
+const { choicesByThoughts, timeToChooseMsByThoughts, readingMs } = DIFFICULTY.shiftPerspective
 
-export const CHOICE_STEPS: readonly ChoiceStep[] = [
-  [3, 3],
-  [7, 4],
-  [15, 5],
-  [25, 6],
-]
+/** How many choices a thought comes with, by how many were shown before it. */
+export const CHOICES: StepTable = choicesByThoughts
+checkStepTable(CHOICES, 'shiftPerspective.choicesByThoughts', (value, name) => {
+  checkWholeNumber(value, name, 2, MOST_CHOICES_THAT_FIT)
+})
 
 /** The most choices a thought is ever shown with: one good and the rest bad. */
-export const MOST_CHOICES = CHOICE_STEPS.at(-1)![1]
+export const MOST_CHOICES = largestIn(CHOICES)
 
 /** How many choices a thought comes with after `thoughtsShown` thoughts. */
 export function choicesAfter(thoughtsShown: number): number {
-  let choices = START_CHOICES
-
-  for (const [after, stepChoices] of CHOICE_STEPS) {
-    if (thoughtsShown >= after) {
-      choices = stepChoices
-    }
-  }
-
-  return choices
+  return valueAt(CHOICES, thoughtsShown)
 }
 
-export const START_TIME_LIMIT_MS = 10_000
-/** The time to choose gets this much shorter… */
-export const TIME_LIMIT_STEP_MS = 500
-/** …after every this many thoughts… */
-export const THOUGHTS_PER_TIME_STEP = 10
-/** …down to this. */
-export const MIN_TIME_LIMIT_MS = 5_000
+/** The time to choose, by how many thoughts were shown before. */
+export const TIME_LIMIT: Steps = timeToChooseMsByThoughts
+checkSteps(TIME_LIMIT, 'shiftPerspective.timeToChooseMsByThoughts', checkPositive)
 
 /** The time to choose for a thought shown after `thoughtsShown` thoughts. */
 export function timeLimitAfter(thoughtsShown: number): number {
-  const steps = Math.floor(thoughtsShown / THOUGHTS_PER_TIME_STEP)
-  return Math.max(MIN_TIME_LIMIT_MS, START_TIME_LIMIT_MS - steps * TIME_LIMIT_STEP_MS)
+  return steppedAfter(TIME_LIMIT, thoughtsShown)
 }
 
 export const POINTS = {
@@ -82,13 +76,14 @@ export const POINTS = {
 } as const
 
 /** How long the thought is shown alone, from when it starts to fade in, before the choices come. */
-export const READING_MS = 3_000
+export const READING_MS = readingMs
+checkNotNegative(READING_MS, 'shiftPerspective.readingMs')
 
 /** How long a thought and its choices take to fade in, and to fade out. */
 export const FADE_MS = 100
 
 /** Where the thought is: the middle of the canvas below the score bar. */
-export const CENTRE: GamePoint = { x: GAME_WIDTH / 2, y: (GAME_BAR_HEIGHT + GAME_HEIGHT) / 2 }
+export const CENTRE: GamePoint = PLAY_CENTRE
 /** Bubbles are drawn at this size (the image, glow included), in game px. */
 export const CHOICE_SIZE = 120
 /** The thought's bubble: choices are 10% smaller than it. */
@@ -122,7 +117,7 @@ export interface Choice extends GamePoint {
 }
 
 /** One thought, from when it starts to fade in until it has faded out. */
-export interface Turn {
+export interface Turn extends TimedTurn {
   readonly thought: string
   readonly choices: readonly Choice[]
   /** When the thought starts to fade in. */
@@ -141,30 +136,18 @@ export interface Turn {
 }
 
 /**
- * How visible something that starts to fade in at `fromMs` is at `timeMs`,
- * 0 (hidden) to 1, as part of `turn`: it stops fading in when the turn ends,
- * and fades out from there.
+ * How visible `turn`'s thought (and its ring) is at the round's time
+ * `timeMs`: 0 to 1. It fades out with the choices when the turn ends.
  */
-function fadedAt({ endedAtMs }: Turn, fromMs: number, timeMs: number): number {
-  const fadedIn = (Math.min(timeMs, endedAtMs ?? timeMs) - fromMs) / FADE_MS
-  const fadedOut = endedAtMs === undefined ? 1 : 1 - (timeMs - endedAtMs) / FADE_MS
-  return Math.min(1, Math.max(0, Math.min(fadedIn, fadedOut)))
-}
-
-/** How visible `turn`'s thought (and its ring) is at the round's time `timeMs`: 0 to 1. */
 export function thoughtOpacityAt(turn: Turn, timeMs: number): number {
-  return fadedAt(turn, turn.shownAtMs, timeMs)
+  const { shownAtMs, endedAtMs } = turn
+  return fadeAt({ fromMs: shownAtMs, endedAtMs, inMs: FADE_MS, outMs: FADE_MS }, timeMs)
 }
 
 /** How visible `turn`'s choices are at the round's time `timeMs`: 0 to 1. */
 export function choicesOpacityAt(turn: Turn, timeMs: number): number {
-  return fadedAt(turn, turn.choicesAtMs, timeMs)
-}
-
-/** How much of the time to choose is left at `timeMs`: 1 (all) to 0 (none). */
-export function timeLeftAt(turn: Turn, timeMs: number): number {
-  const now = Math.min(timeMs, turn.endedAtMs ?? timeMs)
-  return Math.min(1, Math.max(0, (turn.deadlineMs - now) / turn.timeLimitMs))
+  const { choicesAtMs, endedAtMs } = turn
+  return fadeAt({ fromMs: choicesAtMs, endedAtMs, inMs: FADE_MS, outMs: FADE_MS }, timeMs)
 }
 
 /** A mistake the player can make: choosing a bad way to see the thought, or nothing in time. */
@@ -314,19 +297,11 @@ export function createShiftPerspective({
         return
       }
 
-      // Each time that runs out does so at its exact moment, and the next
-      // thought follows from then, even if a frame took long.
-      while (turn.deadlineMs <= elapsedMs) {
-        const deadlineMs = turn.deadlineMs
-        end(turn, undefined, deadlineMs)
-
-        if (stopped) {
-          timeMs = deadlineMs
-          return
-        }
-      }
-
-      timeMs = elapsedMs
+      timeMs = passDeadlines(elapsedMs, {
+        current: () => turn,
+        expire: (expired) => end(expired, undefined, expired.deadlineMs),
+        stopped: () => stopped,
+      })
     },
     tap({ x, y }) {
       // Nothing to choose until the choices start to fade in (nor while the

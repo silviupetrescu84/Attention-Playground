@@ -1,17 +1,19 @@
 import purpleBubbleUrl from '../../assets/shift-perspective/purple-bubble.png'
-import { CARD_COLORS, type CssValues, type CssVariables } from '../shared/canvas-style'
-import { FEEDBACK_COLORS } from '../shared/feedback'
-import { clearGameCanvas, type GamePoint } from '../shared/game-canvas'
+import { drawBubbleImage, type CssValues, type CssVariables } from '../shared/canvas-style'
+import { BUBBLE_COLORS, drawHue, hueFor } from '../shared/feedback'
+import { clearGameCanvas } from '../shared/game-canvas'
 import { createImageLoader } from '../shared/load-image'
+import { remember } from '../shared/remember'
 import {
   drawTextBlock,
   fitInCircle,
-  fontAt,
-  wrapText,
+  layOutText,
   type CanvasFont,
   type TextBlock,
   type TextFit,
 } from '../shared/text'
+import { drawTimeRing } from '../shared/time-ring'
+import { timeLeftAt } from '../shared/timed-turns'
 import {
   BUBBLE_BODY,
   CENTRE,
@@ -21,7 +23,6 @@ import {
   THOUGHT_RADIUS,
   THOUGHT_SIZE,
   thoughtOpacityAt,
-  timeLeftAt,
   type Turn,
 } from './shift-perspective'
 import './shift-perspective.css'
@@ -38,17 +39,14 @@ import './shift-perspective.css'
 
 /** The colours the game is drawn with, from CSS (game.css and shift-perspective.css). */
 export const SHIFT_COLORS = {
-  ...CARD_COLORS,
-  ...FEEDBACK_COLORS,
+  ...BUBBLE_COLORS,
   ring: '--shift-ring',
 } as const satisfies CssVariables
 
 export type ShiftColors = CssValues<keyof typeof SHIFT_COLORS>
 
-export const RING_WIDTH = 4
-/** The ring is just outside the thought's bubble. */
+/** The ring is just outside the thought's bubble (its middle; it is TIME_RING_WIDTH thick). */
 export const RING_RADIUS = THOUGHT_RADIUS + 6
-export const BUBBLE_BORDER_WIDTH = 1.5
 /** Space kept between a text and its bubble's edge. */
 export const TEXT_MARGIN = 4
 
@@ -90,28 +88,14 @@ export function createTurnText(
   font: CanvasFont,
   { thoughtFontSize, choiceFontSize }: TextSizes,
 ): (turn: Turn) => TurnText {
-  const laidOut = new WeakMap<Turn, TurnText>()
-
   function layOut(text: string, fontSize: number, { maxWidth }: TextFit): TextBlock {
-    context.font = fontAt(font, fontSize)
-    return { fontSize, lines: wrapText(context, text, maxWidth) }
+    return layOutText(context, font, text, fontSize, maxWidth)
   }
 
-  return (turn) => {
-    let text = laidOut.get(turn)
-
-    if (!text) {
-      text = {
-        thought: layOut(turn.thought, thoughtFontSize, THOUGHT_TEXT_FIT),
-        choices: turn.choices.map((choice) =>
-          layOut(choice.text, choiceFontSize, CHOICE_TEXT_FIT),
-        ),
-      }
-      laidOut.set(turn, text)
-    }
-
-    return text
-  }
+  return remember((turn: Turn) => ({
+    thought: layOut(turn.thought, thoughtFontSize, THOUGHT_TEXT_FIT),
+    choices: turn.choices.map((choice) => layOut(choice.text, choiceFontSize, CHOICE_TEXT_FIT)),
+  }))
 }
 
 /** How the scene looks. */
@@ -131,43 +115,9 @@ export function drawBubble(
   size: number,
   { colors, bubbleImage }: Pick<SceneLook, 'colors' | 'bubbleImage'>,
 ) {
-  if (bubbleImage) {
-    context.drawImage(bubbleImage, x - size / 2, y - size / 2, size, size)
-    return
-  }
-
-  // Keep the game usable if the image cannot load.
-  context.beginPath()
-  context.arc(x, y, (size / 2) * BUBBLE_BODY, 0, Math.PI * 2)
-  context.fillStyle = colors.cardFill
-  context.fill()
-  context.lineWidth = BUBBLE_BORDER_WIDTH
-  context.strokeStyle = colors.cardBorder
-  context.stroke()
-}
-
-/** A see-through hue over a choice's bubble (see the shared feedback). */
-function drawHue(context: CanvasRenderingContext2D, { x, y }: GamePoint, hue: string) {
-  context.beginPath()
-  context.arc(x, y, CHOICE_RADIUS, 0, Math.PI * 2)
-  context.fillStyle = hue
-  context.fill()
-}
-
-/** The ring around the thought: full with all the time left, gone with none. */
-export function drawRing(context: CanvasRenderingContext2D, timeLeft: number, color: string) {
-  if (timeLeft <= 0) {
-    return
-  }
-
-  // From the top, clockwise.
-  const start = -Math.PI / 2
-  context.beginPath()
-  context.arc(CENTRE.x, CENTRE.y, RING_RADIUS, start, start + timeLeft * 2 * Math.PI)
-  context.lineWidth = RING_WIDTH
-  context.lineCap = 'round'
-  context.strokeStyle = color
-  context.stroke()
+  const radius = (size / 2) * BUBBLE_BODY
+  const drawn = { width: size, height: size, radiusX: radius, radiusY: radius }
+  drawBubbleImage(context, bubbleImage, { x, y }, drawn, colors)
 }
 
 /**
@@ -194,14 +144,14 @@ export function drawTurn(
   context.globalAlpha = thoughtOpacity
   drawBubble(context, CENTRE.x, CENTRE.y, THOUGHT_SIZE, look)
   drawTextBlock(context, text.thought, CENTRE.x, CENTRE.y, font, colors.text)
-  drawRing(context, timeLeftAt(turn, timeMs), colors.ring)
+  drawTimeRing(context, CENTRE, RING_RADIUS, timeLeftAt(turn, timeMs), colors.ring)
 
   if (choicesOpacity > 0) {
     context.globalAlpha = choicesOpacity
     turn.choices.forEach((choice, i) => {
       drawBubble(context, choice.x, choice.y, CHOICE_SIZE, look)
       if (choice === turn.chosen) {
-        drawHue(context, choice, choice.good ? colors.rightHue : colors.wrongHue)
+        drawHue(context, choice, CHOICE_RADIUS, CHOICE_RADIUS, hueFor(choice.good, colors))
       }
       drawTextBlock(context, text.choices[i], choice.x, choice.y, font, colors.text)
     })

@@ -1,17 +1,15 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import greenBubbleUrl from '../../assets/focus-attention/green-bubble.png'
 import projectorUrl from '../../assets/focus-attention/focus-projector.png'
 import { cssVariables } from '../../test/css-variables'
-import gameCss from '../shared/game.css?raw'
 import { createFakeContext, type DrawCall } from '../../test/fake-canvas-context'
 import { stubImages } from '../../test/fake-image'
+import { BUBBLE_BORDER_WIDTH } from '../shared/canvas-style'
+import gameCss from '../shared/game.css?raw'
+import { RAISED } from '../shared/pill'
 import { fitFontSize, fontAt, wrapText, type CanvasFont } from '../shared/text'
 import data from './data/focus-attention.json'
 import {
-  BUBBLE_BORDER_WIDTH,
   BUTTON_PRESS_DEPTH,
-  BUTTON_SHADOW_BLUR,
-  BUTTON_SHADOW_OFFSET,
   BUTTON_TEXT_FIT,
   drawBeam,
   drawBubble,
@@ -47,7 +45,7 @@ const colors: FocusColors = {
   buttonFill: 'button ink',
   buttonText: 'button white',
   buttonPressed: 'button light ink',
-  buttonShadow: 'shadow',
+  pillShadow: 'shadow',
   rightHue: 'green hue',
   wrongHue: 'red hue',
 }
@@ -97,10 +95,8 @@ describe('colours', () => {
     expect(cssVariables.get('--focus-button-fill')).toBe(property('background'))
     expect(cssVariables.get('--focus-button-text')).toBe(property('color'))
     // Its box-shadow: 0 0.5rem 1.5rem (8 px down, blurred 24 px), in ink at 25%.
-    expect(property('box-shadow')).toBe(
-      `0 0.5rem 1.5rem ${cssVariables.get('--focus-button-shadow')}`,
-    )
-    expect([BUTTON_SHADOW_OFFSET, BUTTON_SHADOW_BLUR]).toEqual([8, 24])
+    expect(property('box-shadow')).toBe(`0 0.5rem 1.5rem var(${FOCUS_COLORS.pillShadow})`)
+    expect(RAISED).toEqual({ offsetY: 8, blur: 24 })
     expect(cssVariables.get('--focus-button-pressed')).toBe(
       'color-mix(in srgb, var(--color-ink) 80%, white)',
     )
@@ -260,7 +256,15 @@ describe('drawing a bubble', () => {
 
     drawBubble(context.asContext(), bubble('Kindness', 150, 300), look, 'green hue')
 
-    expect(context.callsTo('arc')[0].args).toEqual([150, 300, BUBBLE_RADIUS, 0, Math.PI * 2])
+    expect(context.callsTo('ellipse')[0].args).toEqual([
+      150,
+      300,
+      BUBBLE_RADIUS,
+      BUBBLE_RADIUS,
+      0,
+      0,
+      Math.PI * 2,
+    ])
     const calls = names(context.calls)
     expect(calls.indexOf('drawImage')).toBeLessThan(calls.indexOf('fill'))
     expect(calls.indexOf('fill')).toBeLessThan(calls.indexOf('fillText'))
@@ -272,7 +276,15 @@ describe('drawing a bubble', () => {
 
     drawBubble(context.asContext(), bubble('Greed', 150, 300), { ...look, bubbleImage: undefined })
 
-    expect(context.callsTo('arc')[0].args).toEqual([150, 300, BUBBLE_RADIUS, 0, Math.PI * 2])
+    expect(context.callsTo('ellipse')[0].args).toEqual([
+      150,
+      300,
+      BUBBLE_RADIUS,
+      BUBBLE_RADIUS,
+      0,
+      0,
+      Math.PI * 2,
+    ])
     expect(context.callsTo('fill')[0].fillStyle).toBe('card fill')
     const [stroke] = context.callsTo('stroke')
     expect([stroke.strokeStyle, stroke.lineWidth]).toEqual(['card border', BUBBLE_BORDER_WIDTH])
@@ -296,7 +308,7 @@ describe('drawing a button', () => {
       focus.height / 2,
     ])
     const [fill] = context.callsTo('fill')
-    expect([fill.fillStyle, fill.shadowBlur]).toEqual(['button ink', BUTTON_SHADOW_BLUR])
+    expect([fill.fillStyle, fill.shadowBlur]).toEqual(['button ink', RAISED.blur])
     expect(context.callsTo('stroke')).toEqual([])
     const [label] = context.callsTo('fillText')
     expect([label.args, label.font, label.fillStyle, label.shadowBlur]).toEqual([
@@ -418,15 +430,15 @@ describe('loading the images', () => {
     vi.unstubAllGlobals()
   })
 
-  it('loads the green bubble and the projector artwork', async () => {
+  it('loads the projector artwork', async () => {
     // A fresh copy of the module, so no image loaded by another test is used.
     vi.resetModules()
-    const { loadBubbleImage, loadProjectorImage } = await import('./draw')
+    const { loadProjectorImage } = await import('./draw')
     const images = stubImages()
 
-    const loaded = await Promise.all([loadBubbleImage(), loadProjectorImage()])
+    const loaded = await loadProjectorImage()
 
-    expect(images).toEqual(loaded)
-    expect(loaded.map((image) => image.src)).toEqual([greenBubbleUrl, projectorUrl])
+    expect(images).toEqual([loaded])
+    expect(loaded.src).toBe(projectorUrl)
   })
 })

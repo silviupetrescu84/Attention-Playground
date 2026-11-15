@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from 'vitest'
 import {
   createGameLifecycle,
   GameStoppedError,
-  isNewRound,
   InvalidTransitionError,
+  isNewRound,
   nextGameState,
   type GameAction,
   type GameLifecycle,
@@ -15,22 +15,18 @@ const states: GameState[] = ['ready', 'playing', 'paused', 'finished']
 const actions: GameAction[] = ['start', 'pause', 'resume', 'finish', 'restart']
 
 // The expected state machine, spelled out independently of the implementation.
-const validTransitions: [from: GameState, action: GameAction, to: GameState][] =
-  [
-    ['ready', 'start', 'playing'],
-    ['playing', 'pause', 'paused'],
-    ['playing', 'finish', 'finished'],
-    ['paused', 'resume', 'playing'],
-    ['paused', 'restart', 'ready'],
-    ['finished', 'restart', 'ready'],
-  ]
+const validTransitions: [from: GameState, action: GameAction, to: GameState][] = [
+  ['ready', 'start', 'playing'],
+  ['playing', 'pause', 'paused'],
+  ['playing', 'finish', 'finished'],
+  ['paused', 'resume', 'playing'],
+  ['paused', 'restart', 'ready'],
+  ['finished', 'restart', 'ready'],
+]
 
 const invalidTransitions = states.flatMap((from) =>
   actions
-    .filter(
-      (action) =>
-        !validTransitions.some(([f, a]) => f === from && a === action),
-    )
+    .filter((action) => !validTransitions.some(([f, a]) => f === from && a === action))
     .map((action): [GameState, GameAction] => [from, action]),
 )
 
@@ -45,10 +41,7 @@ function newLifecycle(signal = new AbortController().signal) {
   return createGameLifecycle({ signal })
 }
 
-function lifecycleIn(
-  state: GameState,
-  signal = new AbortController().signal,
-): GameLifecycle {
+function lifecycleIn(state: GameState, signal = new AbortController().signal): GameLifecycle {
   const lifecycle = newLifecycle(signal)
 
   for (const action of pathTo[state]) {
@@ -65,9 +58,7 @@ describe('game lifecycle transitions', () => {
   })
 
   it('covers every state/action combination', () => {
-    expect(validTransitions.length + invalidTransitions.length).toBe(
-      states.length * actions.length,
-    )
+    expect(validTransitions.length + invalidTransitions.length).toBe(states.length * actions.length)
   })
 
   it.each(validTransitions)('%s --%s--> %s', (from, action, to) => {
@@ -132,14 +123,7 @@ describe('game lifecycle transitions', () => {
     lifecycle.restart()
     lifecycle.start()
 
-    expect(seen).toEqual([
-      'playing',
-      'paused',
-      'playing',
-      'finished',
-      'ready',
-      'playing',
-    ])
+    expect(seen).toEqual(['playing', 'paused', 'playing', 'finished', 'ready', 'playing'])
   })
 
   it('keeps separate lifecycles independent', () => {
@@ -398,9 +382,7 @@ describe('stopping a game lifecycle', () => {
     for (const action of actions) {
       expect(lifecycle.can(action)).toBe(false)
       expect(() => lifecycle[action]()).toThrow(GameStoppedError)
-      expect(() => lifecycle[action]()).toThrow(
-        `Cannot ${action} a game that has been stopped`,
-      )
+      expect(() => lifecycle[action]()).toThrow(`Cannot ${action} a game that has been stopped`)
     }
 
     expect(lifecycle.state).toBe(stoppedIn)

@@ -2,17 +2,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cssCanvasFont, cssVariables, useCssVariables } from '../../test/css-variables'
 import { useFakeCanvasContexts, type FakeContext } from '../../test/fake-canvas-context'
-import { FakeFrames } from '../../test/fake-frames'
 import { stubImages } from '../../test/fake-image'
-import { loadedFonts, mountForTest } from '../../test/mounted-game'
+import { loadedFonts, mountForTest, mountWaitingForFont } from '../../test/mounted-game'
 import { seededRandom } from '../../test/random'
-import { mountGame } from '../shared/game-shell'
-import type { FontLoader } from '../shared/load-font'
 import { fitFontSize, fontAt } from '../shared/text'
 import data from './data/shift-perspective.json'
 import { CHOICE_TEXT_FIT, THOUGHT_TEXT_FIT } from './draw'
-import { CENTRE } from './shift-perspective'
 import { mistakeMessage, shiftPerspectiveGame } from './index'
+import { CENTRE } from './shift-perspective'
 import { thoughtsFrom } from './thoughts'
 
 const thoughts = thoughtsFrom(data)
@@ -59,7 +56,8 @@ function lastDrawn() {
       bubbles.push({ ...last, text: `${last.text} ${String(args[0])}`.trim() })
     }
   }
-  const [thoughtBubble, ...choices] = bubbles
+  const thoughtBubble = bubbles.at(0)
+  const choices = bubbles.slice(1)
   const thought = thoughts.find((candidate) => candidate.text === thoughtBubble?.text)
   return {
     thought: thoughtBubble,
@@ -69,34 +67,18 @@ function lastDrawn() {
   }
 }
 
-/** The hues drawn in the most recent drawing (only a chosen bubble has one). */
-const hues = () =>
-  context()
-    .lastDrawing()
-    .filter((call) => call.name === 'fill')
-    .map((call) => call.fillStyle)
-
 describe('loading', () => {
   it('loads the game font and the bubble image before Start can be pressed', async () => {
-    let finishLoading = (_: { status: string }[]) => {}
-    const fonts: FontLoader & { load: ReturnType<typeof vi.fn> } = {
-      load: vi.fn(() => new Promise<{ status: string }[]>((resolve) => (finishLoading = resolve))),
-    }
-    const container = document.createElement('main')
-    document.body.replaceChildren(container)
-    mountGame(container, {
-      signal: new AbortController().signal,
-      game: shiftPerspectiveGame({ fonts }),
-      scheduler: new FakeFrames(),
-    })
-    const start = container.querySelector<HTMLButtonElement>('.game-hud__start')!
+    const { fonts, start, finishLoading } = mountWaitingForFont((fonts) =>
+      shiftPerspectiveGame({ fonts }),
+    )
 
     expect(fonts.load).toHaveBeenCalledExactlyOnceWith(
       expect.stringContaining(cssCanvasFont.family),
     )
     expect(start.disabled).toBe(true)
 
-    finishLoading([{ status: 'loaded' }])
+    finishLoading()
     await vi.waitFor(() => expect(start.disabled).toBe(false))
   })
 
@@ -116,7 +98,11 @@ describe('loading', () => {
     expect(session.lifecycle.state).toBe('playing')
     expect(context().callsTo('drawImage')).toEqual([])
     // The thought and its 2 choices, as circles.
-    expect(context().lastDrawing().filter((call) => call.name === 'fill')).toHaveLength(3)
+    expect(
+      context()
+        .lastDrawing()
+        .filter((call) => call.name === 'fill'),
+    ).toHaveLength(3)
   })
 })
 
@@ -150,7 +136,7 @@ describe('Shift Perspective', () => {
     click('.game-hud__start')
 
     frames.frame(50)
-    expect(lastDrawn().thought.opacity).toBeCloseTo(0.5, 9)
+    expect(lastDrawn().thought!.opacity).toBeCloseTo(0.5, 9)
     expect(lastDrawn().choices).toEqual([])
     frames.frame(2_949)
     expect(lastDrawn().thought).toMatchObject({ x: CENTRE.x, y: CENTRE.y, opacity: 1 })
@@ -224,13 +210,13 @@ describe('Shift Perspective', () => {
     const first = lastDrawn()
 
     tapAt(first.good!.x, first.good!.y)
-    expect(hues()).toEqual([cssVariables.get('--canvas-right-hue')])
+    expect(context().lastFills()).toEqual([cssVariables.get('--canvas-right-hue')])
     frames.frames(5, 50)
 
     expect(text('.game-hud__score')).toBe('Score: 1')
     expect(session.status.text).toBe('')
-    expect(lastDrawn().thought.opacity).toBe(1)
-    expect(lastDrawn().thought.text).not.toBe(first.thought.text)
+    expect(lastDrawn().thought!.opacity).toBe(1)
+    expect(lastDrawn().thought!.text).not.toBe(first.thought!.text)
   })
 
   it('counts a bad choice as a mistake, and says which in red', async () => {
@@ -241,7 +227,7 @@ describe('Shift Perspective', () => {
 
     tapAt(bad!.x, bad!.y)
 
-    expect(hues()).toEqual([cssVariables.get('--canvas-wrong-hue')])
+    expect(context().lastFills()).toEqual([cssVariables.get('--canvas-wrong-hue')])
     expect(text('.game-hud__score')).toBe('Score: 0')
     expect(text('.game-hud__mistakes')).toBe('Mistakes: 1')
     expect(session.status.text).toBe(`Chose a bad thought: ${bad!.text}`)
@@ -292,9 +278,9 @@ describe('Shift Perspective', () => {
       frames.frame(50)
       const { thought, good, bad } = lastDrawn()
       // Once its choices are fully shown.
-      if (!good || good.opacity < 1) continue
+      if (!thought || !good || good.opacity < 1) continue
       if (!fates.has(thought.text)) fates.set(thought.text, Math.floor(random() * 3))
-      if (fates.get(thought.text) === 0) tapAt(good!.x, good!.y)
+      if (fates.get(thought.text) === 0) tapAt(good.x, good.y)
       else if (fates.get(thought.text) === 1) tapAt(bad!.x, bad!.y)
     }
     expect(session.lifecycle.state).toBe('finished')
@@ -332,7 +318,11 @@ describe('Shift Perspective', () => {
     click('.game-hud__pause')
 
     click('.game-hud__overlay--paused .game-hud__restart')
-    expect(context().lastDrawing().map((call) => call.name)).toEqual(['clearRect'])
+    expect(
+      context()
+        .lastDrawing()
+        .map((call) => call.name),
+    ).toEqual(['clearRect'])
 
     click('.game-hud__start')
     frames.frame(3_100)

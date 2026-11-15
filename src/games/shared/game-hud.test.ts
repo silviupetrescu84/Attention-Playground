@@ -1,13 +1,17 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest'
-import gameCss from './game.css?raw'
-import { createGameHud, formatSeconds, GAME_BAR_HEIGHT } from './game-hud'
+import { FakeStorage } from '../../test/fake-storage'
+import { findElement } from './dom'
+import { GAME_HEIGHT, GAME_WIDTH } from './game-canvas'
+import { createGameHud, formatSeconds, GAME_BAR_HEIGHT, PLAY_CENTRE } from './game-hud'
 import { createGameLifecycle, isNewRound, type GameState } from './game-lifecycle'
 import type { GameLoop } from './game-loop'
+import gameCss from './game.css?raw'
+import { createHighScores, highScoresKey, PLAYER_NAME_KEY, type HighScore } from './high-scores'
 import { createMistakes } from './mistakes'
 import { createScore } from './score'
 
-function setup() {
+function setup(storage = new FakeStorage()) {
   const screen = new AbortController()
   const lifecycle = createGameLifecycle({ signal: screen.signal })
   const loop = { elapsedMs: 0 } satisfies GameLoop
@@ -17,28 +21,46 @@ function setup() {
   })
   const score = createScore({ lifecycle })
   const mistakes = createMistakes({ lifecycle })
+  const highScores = createHighScores({ gameId: 'test-game', lifecycle, score, mistakes, storage })
   const stage = document.createElement('div')
-  const hud = createGameHud(stage, { lifecycle, loop, score, mistakes })
+  const hud = createGameHud(stage, { lifecycle, loop, score, mistakes, highScores })
 
-  const get = <T extends HTMLElement = HTMLElement>(selector: string) =>
-    hud.element.querySelector<T>(selector)!
-  const visible = (element: HTMLElement) => !element.closest('[hidden]')
+  const visible = (element: Element) => !element.closest('[hidden]')
   const ui = {
-    score: get('.game-hud__score'),
-    time: get('.game-hud__time'),
-    pause: get<HTMLButtonElement>('.game-hud__pause'),
-    start: get<HTMLButtonElement>('.game-hud__start'),
-    difficulty: get<HTMLButtonElement>('.game-hud__difficulty'),
-    failOn: get('.game-hud__fail-on'),
-    mistakes: get('.game-hud__mistakes'),
-    startOverlay: get('.game-hud__overlay--start'),
-    pausedOverlay: get('.game-hud__overlay--paused'),
-    finishedOverlay: get('.game-hud__overlay--finished'),
-    pausedRestart: get<HTMLButtonElement>('.game-hud__overlay--paused .game-hud__restart'),
-    finishedRestart: get<HTMLButtonElement>('.game-hud__overlay--finished .game-hud__restart'),
-    finalScore: get('.game-hud__final-score'),
-    instructions: get('.game-hud__instructions'),
-    summary: get('.game-hud__summary'),
+    score: findElement(hud.element, '.game-hud__score', HTMLElement),
+    time: findElement(hud.element, '.game-hud__time', HTMLElement),
+    pause: findElement(hud.element, '.game-hud__pause', HTMLButtonElement),
+    start: findElement(hud.element, '.game-hud__start', HTMLButtonElement),
+    difficulty: findElement(hud.element, '.game-hud__difficulty', HTMLButtonElement),
+    failOn: findElement(hud.element, '.game-hud__fail-on', HTMLElement),
+    mistakes: findElement(hud.element, '.game-hud__mistakes', HTMLElement),
+    startOverlay: findElement(hud.element, '.game-hud__overlay--start', HTMLElement),
+    pausedOverlay: findElement(hud.element, '.game-hud__overlay--paused', HTMLElement),
+    finishedOverlay: findElement(hud.element, '.game-hud__overlay--finished', HTMLElement),
+    pausedRestart: findElement(
+      hud.element,
+      '.game-hud__overlay--paused .game-hud__restart',
+      HTMLButtonElement,
+    ),
+    finishedRestart: findElement(
+      hud.element,
+      '.game-hud__overlay--finished .game-hud__restart',
+      HTMLButtonElement,
+    ),
+    finalScore: findElement(hud.element, '.game-hud__final-score', HTMLElement),
+    instructions: findElement(hud.element, '.game-hud__instructions', HTMLElement),
+    summary: findElement(hud.element, '.game-hud__summary', HTMLElement),
+    bar: findElement(hud.element, '.game-hud__bar', HTMLElement),
+    roundResult: findElement(hud.element, '.game-hud__round-result', HTMLElement),
+    nameForm: findElement(hud.element, '.game-hud__name-form', HTMLFormElement),
+    name: findElement(hud.element, '.game-hud__name', HTMLInputElement),
+    save: findElement(hud.element, '.game-hud__save', HTMLButtonElement),
+    highScoresOpen: findElement(hud.element, '.game-hud__high-scores-open', HTMLButtonElement),
+    highScoresOverlay: findElement(hud.element, '.game-hud__overlay--high-scores', HTMLElement),
+    highScoresLevel: findElement(hud.element, '.game-hud__high-scores-level', HTMLElement),
+    highScoresList: findElement(hud.element, '.game-hud__high-scores', HTMLElement),
+    noHighScores: findElement(hud.element, '.game-hud__no-high-scores', HTMLElement),
+    back: findElement(hud.element, '.game-hud__back', HTMLButtonElement),
   }
 
   /** Which of the big pieces are visible. */
@@ -53,7 +75,7 @@ function setup() {
     }
   }
 
-  return { screen, lifecycle, loop, score, mistakes, stage, hud, ui, shown }
+  return { screen, lifecycle, loop, score, mistakes, highScores, stage, hud, ui, shown, visible }
 }
 
 describe('formatSeconds', () => {
@@ -76,6 +98,8 @@ describe('game HUD layout', () => {
     const { hud } = setup()
 
     expect(GAME_BAR_HEIGHT).toBe(64)
+    // What games are about goes in the middle of the rest of the canvas.
+    expect(PLAY_CENTRE).toEqual({ x: GAME_WIDTH / 2, y: (64 + GAME_HEIGHT) / 2 })
     expect(hud.element.style.getPropertyValue('--game-bar-height')).toBe('64px')
   })
 
@@ -98,10 +122,26 @@ describe('game HUD', () => {
   })
 
   it.each<[GameState, string[], ReturnType<ReturnType<typeof setup>['shown']>]>([
-    ['ready', [], { start: true, pause: false, paused: false, finished: false, score: true, time: true }],
-    ['playing', ['start'], { start: false, pause: true, paused: false, finished: false, score: true, time: true }],
-    ['paused', ['start', 'pause'], { start: false, pause: true, paused: true, finished: false, score: true, time: true }],
-    ['finished', ['start', 'finish'], { start: false, pause: false, paused: false, finished: true, score: true, time: true }],
+    [
+      'ready',
+      [],
+      { start: true, pause: false, paused: false, finished: false, score: true, time: true },
+    ],
+    [
+      'playing',
+      ['start'],
+      { start: false, pause: true, paused: false, finished: false, score: true, time: true },
+    ],
+    [
+      'paused',
+      ['start', 'pause'],
+      { start: false, pause: true, paused: true, finished: false, score: true, time: true },
+    ],
+    [
+      'finished',
+      ['start', 'finish'],
+      { start: false, pause: false, paused: false, finished: true, score: true, time: true },
+    ],
   ])('shows the right pieces when %s', (state, actions, expected) => {
     const { lifecycle, shown, hud } = setup()
 
@@ -163,7 +203,7 @@ describe('game HUD', () => {
     (presses) => {
       const { lifecycle, mistakes, ui } = setup()
       for (let i = 0; i < presses; i++) ui.difficulty.click()
-      const failOn = Number(/\d+/.exec(ui.failOn.textContent!)![0])
+      const failOn = Number(/\d+/.exec(ui.failOn.textContent)![0])
       ui.start.click()
 
       // More mistakes than needed: the ones after the round fails do not count.
@@ -195,7 +235,7 @@ describe('game HUD', () => {
 
     for (let i = 0; i < 4; i++) {
       ui.difficulty.click()
-      shownNames.push(ui.difficulty.textContent!)
+      shownNames.push(ui.difficulty.textContent)
     }
 
     expect(shownNames).toEqual([
@@ -350,11 +390,12 @@ describe('game HUD', () => {
 
     expect(seen()).toBe(true)
     expect(paragraphs()).toEqual(['Choose the good ones.', 'Let the bad ones go.'])
-    // Start, the difficulty and what it fails on, then the instructions.
+    // Start, the difficulty, what it fails on and the high scores, then the instructions.
     expect([...ui.startOverlay.children]).toEqual([
       ui.start,
       ui.difficulty,
       ui.failOn,
+      ui.highScoresOpen,
       ui.instructions,
     ])
 
@@ -465,7 +506,11 @@ describe('game HUD', () => {
     expect(ui.time.textContent).toBe('00')
 
     ui.start.click()
-    for (const [ms, text] of [[500, '00'], [1_000, '01'], [12_300, '12']] as const) {
+    for (const [ms, text] of [
+      [500, '00'],
+      [1_000, '01'],
+      [12_300, '12'],
+    ] as const) {
       loop.elapsedMs = ms
       hud.updateTime()
       expect(ui.time.textContent).toBe(text)
@@ -521,9 +566,391 @@ describe('game HUD', () => {
       ui.pause,
       ui.pausedRestart,
       ui.finishedRestart,
+      ui.highScoresOpen,
+      ui.back,
     ]) {
       expect(button.tagName).toBe('BUTTON')
       expect(button.type).toBe('button')
     }
+  })
+})
+
+/** A storage with `easy` (and `other` difficulties') high scores saved for the HUD's game. */
+function storageWith(saved: Partial<Record<string, HighScore[]>>, playerName?: string) {
+  const storage = new FakeStorage()
+  storage.setItem(highScoresKey('test-game'), JSON.stringify(saved))
+  if (playerName !== undefined) storage.setItem(PLAYER_NAME_KEY, playerName)
+  return storage
+}
+
+/** Plays a round ending on `points`. */
+function playRound({ lifecycle, score }: ReturnType<typeof setup>, points: number) {
+  if (lifecycle.state === 'finished') lifecycle.restart()
+  lifecycle.start()
+  score.add(points)
+  lifecycle.finish()
+}
+
+/** Types `name` in the name field, as the player does. */
+function typeName(ui: ReturnType<typeof setup>['ui'], name: string) {
+  ui.name.value = name
+  ui.name.dispatchEvent(new Event('input', { bubbles: true }))
+}
+
+/** Saves with the Save button (submitting the form, as the browser does). */
+function clickSave(ui: ReturnType<typeof setup>['ui']) {
+  ui.nameForm.requestSubmit(ui.save)
+}
+
+describe('high scores screen', () => {
+  /** The high scores shown, as [rank, name, score]. */
+  function listed(ui: ReturnType<typeof setup>['ui']) {
+    return [...ui.highScoresList.querySelectorAll('li')].map((item) =>
+      [...item.children].map((part) => part.textContent),
+    )
+  }
+
+  it('opens with a High scores button under what the round fails on', () => {
+    const { ui, visible } = setup()
+
+    expect(ui.failOn.nextElementSibling).toBe(ui.highScoresOpen)
+    expect(ui.highScoresOpen.textContent).toBe('High scores')
+    expect(visible(ui.highScoresOpen)).toBe(true)
+    expect(visible(ui.highScoresOverlay)).toBe(false)
+  })
+
+  it('shows nothing but the high scores and a Back button', () => {
+    const { hud, ui, visible } = setup()
+    document.body.append(hud.element)
+
+    ui.highScoresOpen.click()
+
+    // Of everything in the HUD, only the high scores screen is left: no
+    // score, mistakes or time, and nothing from the Start button's screen.
+    expect([...hud.element.children].filter((child) => visible(child))).toEqual([
+      ui.highScoresOverlay,
+    ])
+    expect(visible(ui.back)).toBe(true)
+    expect(ui.back.textContent).toBe('Back')
+    expect(ui.highScoresOverlay.getAttribute('role')).toBe('dialog')
+    expect(ui.highScoresOverlay.getAttribute('aria-label')).toBe('High scores')
+    expect(document.activeElement).toBe(ui.back)
+    expect(ui.highScoresOverlay.querySelectorAll('button')).toHaveLength(1)
+    hud.element.remove()
+  })
+
+  it('is on the canvas background, over the top bar and the game', () => {
+    // Every rule for `selector` on its own (not in a list of selectors), joined.
+    const rules = (selector: string) =>
+      [
+        ...gameCss.matchAll(
+          new RegExp(`(^|\n)${selector.replace(/\./g, '\\.')} \\{([^}]*)\\}`, 'g'),
+        ),
+      ]
+        .map((match) => match[2])
+        .join('')
+
+    expect(rules('.game-canvas,\n.game-hud__overlay--high-scores')).toMatch(
+      /background: #fff url\('..\/..\/assets\/background\/canvas-background.png'\)/,
+    )
+    expect(rules('.game-hud__overlay--high-scores')).toMatch(/z-index: 3;/)
+    expect(rules('.game-hud__bar')).toMatch(/z-index: 2;/)
+  })
+
+  it('goes back to the Start button with Back', () => {
+    const { hud, ui, visible } = setup()
+    document.body.append(hud.element)
+    ui.highScoresOpen.click()
+
+    ui.back.click()
+
+    expect(visible(ui.highScoresOverlay)).toBe(false)
+    expect(visible(ui.startOverlay)).toBe(true)
+    expect(visible(ui.bar)).toBe(true)
+    expect(document.activeElement).toBe(ui.highScoresOpen)
+    hud.element.remove()
+  })
+
+  it('goes back with Escape too', () => {
+    const { ui, visible } = setup()
+    ui.highScoresOpen.click()
+
+    ui.back.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+    expect(visible(ui.highScoresOverlay)).toBe(true)
+
+    ui.back.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    expect(visible(ui.startOverlay)).toBe(true)
+  })
+
+  it('shows the names and scores of the difficulty chosen, best first', () => {
+    const { ui } = setup(
+      storageWith({
+        easy: [
+          { name: 'Ana', score: 4 },
+          { name: 'Bo', score: 12 },
+        ],
+        hard: [{ name: 'Cy', score: 3 }],
+      }),
+    )
+
+    ui.highScoresOpen.click()
+    expect(ui.highScoresLevel.textContent).toBe('Easy')
+    expect(listed(ui)).toEqual([
+      ['1', 'Bo', '12'],
+      ['2', 'Ana', '4'],
+    ])
+
+    ui.back.click()
+    ui.difficulty.click()
+    ui.difficulty.click()
+    ui.highScoresOpen.click()
+    expect(ui.highScoresLevel.textContent).toBe('Hard')
+    expect(listed(ui)).toEqual([['1', 'Cy', '3']])
+  })
+
+  it('shows the 10 best', () => {
+    const easy = Array.from({ length: 12 }, (_, i) => ({ name: `P${i}`, score: i + 1 }))
+    const { ui } = setup(storageWith({ easy }))
+
+    ui.highScoresOpen.click()
+
+    expect(ui.highScoresList.tagName).toBe('OL')
+    expect(listed(ui).map(([rank, , score]) => [rank, score])).toEqual(
+      Array.from({ length: 10 }, (_, i) => [String(i + 1), String(12 - i)]),
+    )
+  })
+
+  it('leaves the ranks to the list for screen readers', () => {
+    const { ui } = setup(storageWith({ easy: [{ name: 'Ana', score: 4 }] }))
+
+    ui.highScoresOpen.click()
+
+    expect(ui.highScoresList.querySelector('li > :first-child')!.getAttribute('aria-hidden')).toBe(
+      'true',
+    )
+  })
+
+  it('says so when the difficulty chosen has no high scores yet', () => {
+    const { ui, visible } = setup(storageWith({ medium: [{ name: 'Ana', score: 4 }] }))
+
+    ui.highScoresOpen.click()
+    expect(visible(ui.noHighScores)).toBe(true)
+    expect(ui.noHighScores.textContent).toBe('No high scores yet')
+    expect(visible(ui.highScoresList)).toBe(false)
+
+    ui.back.click()
+    ui.difficulty.click()
+    ui.highScoresOpen.click()
+    expect(visible(ui.noHighScores)).toBe(false)
+    expect(visible(ui.highScoresList)).toBe(true)
+  })
+
+  it('shows names as plain text', () => {
+    const { ui } = setup(storageWith({ easy: [{ name: '<img src=x>', score: 4 }] }))
+
+    ui.highScoresOpen.click()
+
+    expect(ui.highScoresList.querySelector('img')).toBeNull()
+    expect(listed(ui)).toEqual([['1', '<img src=x>', '4']])
+  })
+
+  it('shows a high score saved after a round', () => {
+    const played = setup()
+    const { ui } = played
+    playRound(played, 6)
+    typeName(ui, 'Ana')
+    clickSave(ui)
+    ui.finishedRestart.click()
+
+    ui.highScoresOpen.click()
+
+    expect(listed(ui)).toEqual([['1', 'Ana', '6']])
+  })
+
+  it('closes when the game moves on', () => {
+    const { lifecycle, ui, visible } = setup()
+    ui.highScoresOpen.click()
+
+    lifecycle.start()
+
+    expect(visible(ui.highScoresOverlay)).toBe(false)
+    expect(visible(ui.bar)).toBe(true)
+  })
+})
+
+describe('saving a high score at game over', () => {
+  it('asks for a name under the final score when the round beat every high score', () => {
+    const played = setup()
+    const { ui, visible } = played
+
+    playRound(played, 5)
+
+    expect(ui.finalScore.nextElementSibling).toBe(ui.roundResult)
+    expect(ui.roundResult.nextElementSibling).toBe(ui.nameForm)
+    expect(ui.roundResult.textContent).toBe('New best score!')
+    expect(ui.roundResult.classList).toContain('game-hud__round-result--best')
+    expect(visible(ui.nameForm)).toBe(true)
+    expect(ui.nameForm.textContent).toContain('Your name')
+    expect(ui.name.labels![0]).toBe(ui.name.closest('label'))
+    expect(ui.name.maxLength).toBe(16)
+    expect(ui.save.textContent).toBe('Save')
+  })
+
+  it('asks for a name when the round makes the 10 best, telling where', () => {
+    const played = setup(storageWith({ easy: [{ name: 'Ana', score: 9 }] }))
+    const { ui, visible } = played
+
+    playRound(played, 4)
+
+    expect(ui.roundResult.textContent).toBe('New high score: #2')
+    expect(ui.roundResult.classList).not.toContain('game-hud__round-result--best')
+    expect(visible(ui.nameForm)).toBe(true)
+  })
+
+  it('suggests the name last saved, or none the first time', () => {
+    const first = setup()
+    playRound(first, 5)
+    expect(first.ui.name.value).toBe('')
+    expect(first.ui.save.disabled).toBe(true)
+
+    const again = setup(storageWith({}, 'Ana'))
+    playRound(again, 5)
+    expect(again.ui.name.value).toBe('Ana')
+    expect(again.ui.save.disabled).toBe(false)
+  })
+
+  it('saves under the name typed, and says where it went', () => {
+    const played = setup(storageWith({ easy: [{ name: 'Ana', score: 9 }] }))
+    const { hud, highScores, ui, visible } = played
+    document.body.append(hud.element)
+    playRound(played, 4)
+
+    typeName(ui, '  Bo  ')
+    clickSave(ui)
+
+    expect(highScores.table.easy).toEqual([
+      { name: 'Ana', score: 9 },
+      { name: 'Bo', score: 4 },
+    ])
+    expect(ui.roundResult.textContent).toBe('Saved: #2 on Easy')
+    expect(visible(ui.nameForm)).toBe(false)
+    // The form is gone: Restart is next.
+    expect(document.activeElement).toBe(ui.finishedRestart)
+    hud.element.remove()
+  })
+
+  it('only lets a name be saved once one is typed', () => {
+    const played = setup()
+    const { highScores, ui } = played
+    playRound(played, 5)
+
+    typeName(ui, '   ')
+    expect(ui.save.disabled).toBe(true)
+    // Enter in the field, with Save disabled.
+    ui.nameForm.requestSubmit()
+    expect(highScores.lastRound?.savedAs).toBeUndefined()
+
+    typeName(ui, 'A')
+    expect(ui.save.disabled).toBe(false)
+  })
+
+  it('saves only once', () => {
+    const played = setup()
+    const { highScores, ui } = played
+    playRound(played, 5)
+    typeName(ui, 'Ana')
+    clickSave(ui)
+
+    expect(() => ui.nameForm.requestSubmit()).not.toThrow()
+
+    expect(highScores.table.easy).toHaveLength(1)
+  })
+
+  it('suggests the name just saved for the next high score', () => {
+    const played = setup()
+    const { ui } = played
+    playRound(played, 5)
+    typeName(ui, 'Ana')
+    clickSave(ui)
+
+    playRound(played, 7)
+
+    expect(ui.name.value).toBe('Ana')
+  })
+
+  it('does not keep a round the player did not save', () => {
+    const played = setup()
+    const { highScores, ui, visible } = played
+    playRound(played, 5)
+    typeName(ui, 'Ana')
+
+    ui.finishedRestart.click()
+    playRound(played, 0)
+
+    expect(highScores.table.easy).toEqual([])
+    expect(visible(ui.nameForm)).toBe(false)
+    expect(visible(ui.roundResult)).toBe(false)
+  })
+
+  it.each([0, 2])(
+    'shows the best score instead when the round does not make the high scores (%i)',
+    (points) => {
+      const played = setup(
+        storageWith({
+          easy: Array.from({ length: 10 }, (_, i) => ({
+            name: i ? `P${i}` : 'Ana',
+            score: 12 - i,
+          })),
+        }),
+      )
+      const { ui, visible } = played
+
+      playRound(played, points)
+
+      expect(ui.roundResult.textContent).toBe('Best score: 12 by Ana')
+      expect(visible(ui.nameForm)).toBe(false)
+    },
+  )
+
+  it('shows nothing about high scores for a round under 1 point when there are none', () => {
+    const played = setup()
+    const { ui, visible } = played
+
+    playRound(played, 0)
+
+    expect(visible(ui.roundResult)).toBe(false)
+    expect(visible(ui.nameForm)).toBe(false)
+  })
+
+  it('tells when another tab took the place before it was saved', () => {
+    const full = Array.from({ length: 9 }, (_, i) => ({ name: `P${i}`, score: 20 - i }))
+    const storage = storageWith({ easy: full })
+    const played = setup(storage)
+    const { ui } = played
+    playRound(played, 3)
+    storage.setItem(
+      highScoresKey('test-game'),
+      JSON.stringify({ easy: [...full, { name: 'Other tab', score: 10 }] }),
+    )
+
+    typeName(ui, 'Ana')
+    clickSave(ui)
+
+    expect(ui.roundResult.textContent).toBe('No longer a high score')
+  })
+
+  it('shows names typed as plain text', () => {
+    const played = setup()
+    const { ui } = played
+    playRound(played, 5)
+    typeName(ui, '<b>Ana</b>')
+    clickSave(ui)
+    played.lifecycle.restart()
+    playRound(played, 1)
+
+    expect(ui.roundResult.textContent).toBe('New high score: #2')
+    ui.finishedRestart.click()
+    ui.highScoresOpen.click()
+    expect(ui.highScoresList.querySelector('b')).toBeNull()
   })
 })

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createGameLifecycle } from './game-lifecycle'
 import {
+  byLevel,
   createMistakes,
   DIFFICULTY_LEVELS,
   DIFFICULTY_NAMES,
@@ -168,5 +169,20 @@ describe('counting mistakes', () => {
     mistakes.add()
 
     expect(heard).toEqual([1])
+  })
+})
+
+describe('values by difficulty', () => {
+  it('has one for each difficulty, in their order', () => {
+    const names = byLevel((level) => level.toUpperCase())
+
+    expect(names).toEqual({ easy: 'EASY', medium: 'MEDIUM', hard: 'HARD', extreme: 'EXTREME' })
+    expect(Object.keys(names)).toEqual([...DIFFICULTY_LEVELS])
+  })
+
+  it('makes a new value for each', () => {
+    const lists = byLevel(() => [])
+
+    expect(lists.easy).not.toBe(lists.hard)
   })
 })

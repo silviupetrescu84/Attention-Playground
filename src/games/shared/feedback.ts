@@ -1,4 +1,6 @@
-import type { CssVariables } from './canvas-style'
+import { CARD_COLORS, traceEllipse, type CssValues, type CssVariables } from './canvas-style'
+import type { GamePoint } from './game-canvas'
+import { clamp } from './numbers'
 
 /**
  * Feedback on a choice, shown on the thing chosen while it is still on
@@ -13,7 +15,20 @@ export const FEEDBACK_COLORS = {
   wrongHue: '--canvas-wrong-hue',
 } as const satisfies CssVariables
 
+/** What a bubble that can be chosen is drawn with: a card's colours, and the hues. */
+export const BUBBLE_COLORS = {
+  ...CARD_COLORS,
+  ...FEEDBACK_COLORS,
+} as const satisfies CssVariables
+
+export type BubbleColors = CssValues<keyof typeof BUBBLE_COLORS>
+
 export const FEEDBACK_FADE_MS = 100
+
+/** The hue for a choice: green if it was right, red if it was a mistake. */
+export function hueFor(right: boolean, colors: CssValues<keyof typeof FEEDBACK_COLORS>): string {
+  return right ? colors.rightHue : colors.wrongHue
+}
 
 /** Something chosen at `atMs`, fading out where it was. */
 export interface Chosen<T> {
@@ -25,10 +40,23 @@ export interface Chosen<T> {
 
 /** How visible something chosen at `atMs` still is at `timeMs`: 1, to 0 over the fade. */
 export function fadedOutAt(atMs: number, timeMs: number): number {
-  return Math.min(1, Math.max(0, 1 - (timeMs - atMs) / FEEDBACK_FADE_MS))
+  return clamp(1 - (timeMs - atMs) / FEEDBACK_FADE_MS, 0, 1)
 }
 
 /** The chosen things still on screen at `timeMs`. */
 export function stillFading<T>(chosen: readonly Chosen<T>[], timeMs: number): Chosen<T>[] {
   return chosen.filter(({ atMs }) => timeMs < atMs + FEEDBACK_FADE_MS)
+}
+
+/** A see-through `hue` over the ellipse centred on `centre`: what was chosen, as seen. */
+export function drawHue(
+  context: CanvasRenderingContext2D,
+  centre: GamePoint,
+  radiusX: number,
+  radiusY: number,
+  hue: string,
+): void {
+  traceEllipse(context, centre, radiusX, radiusY)
+  context.fillStyle = hue
+  context.fill()
 }

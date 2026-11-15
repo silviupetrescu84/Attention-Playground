@@ -1,9 +1,18 @@
 import { describe, expect, expectTypeOf, it } from 'vitest'
+import { checkPositive } from './checks'
 import {
+  checkDifficultySteps,
+  checkSteps,
+  checkStepTable,
   createDifficulty,
+  largestIn,
+  steppedAfter,
+  valueAt,
   type DifficultySettings,
   type DifficultyStep,
   type DifficultyValues,
+  type Steps,
+  type StepTable,
 } from './difficulty'
 
 /** A speed that is harder when higher and a delay that is harder when lower. */
@@ -18,8 +27,8 @@ function difficultyWith(steps: readonly DifficultyStep[]) {
 
 describe('steps', () => {
   const difficulty = difficultyWith([
-    [10_000, 15],
-    [23_000, 28],
+    { from: 10_000, percent: 15 },
+    { from: 23_000, percent: 28 },
   ])
   const speedAt = (elapsedMs: number) => difficulty.valuesAt(elapsedMs).speed
 
@@ -49,13 +58,13 @@ describe('steps', () => {
   })
 
   it('can make the game harder from the very start', () => {
-    expect(difficultyWith([[0, 50]]).valuesAt(0).speed).toBe(150)
+    expect(difficultyWith([{ from: 0, percent: 50 }]).valuesAt(0).speed).toBe(150)
   })
 
   it('can ease off again, for a breather', () => {
     const withBreather = difficultyWith([
-      [10_000, 40],
-      [20_000, 20],
+      { from: 10_000, percent: 40 },
+      { from: 20_000, percent: 20 },
     ])
 
     expect(withBreather.valuesAt(15_000).speed).toBeCloseTo(140, 10)
@@ -73,8 +82,8 @@ describe('steps', () => {
 
 describe('settings', () => {
   const difficulty = difficultyWith([
-    [10_000, 25],
-    [20_000, 50],
+    { from: 10_000, percent: 25 },
+    { from: 20_000, percent: 50 },
   ])
 
   it('multiplies the ones that are harder when higher', () => {
@@ -97,7 +106,7 @@ describe('settings', () => {
 
   it('gives a value for every setting the game declared, and nothing else', () => {
     const many = createDifficulty({
-      steps: [[0, 100]],
+      steps: [{ from: 0, percent: 100 }],
       settings: {
         a: { start: 1, harder: 'higher' },
         b: { start: 2, harder: 'higher' },
@@ -110,7 +119,7 @@ describe('settings', () => {
 
   it('keeps a setting that starts at 0 at 0', () => {
     const zero = createDifficulty({
-      steps: [[0, 100]],
+      steps: [{ from: 0, percent: 100 }],
       settings: {
         extra: { start: 0, harder: 'higher' },
         wait: { start: 0, harder: 'lower' },
@@ -121,16 +130,18 @@ describe('settings', () => {
   })
 
   it('works without any settings', () => {
-    expect(createDifficulty({ steps: [[0, 10]], settings: {} }).valuesAt(0)).toEqual({})
+    expect(
+      createDifficulty({ steps: [{ from: 0, percent: 10 }], settings: {} }).valuesAt(0),
+    ).toEqual({})
   })
 
   it('is not changed by changing the steps or settings afterwards', () => {
-    const steps: [number, number][] = [[10_000, 10]]
+    const steps: { from: number; percent: number }[] = [{ from: 10_000, percent: 10 }]
     const changing = { speed: { start: 100, harder: 'higher' as const } }
     const copied = createDifficulty({ steps, settings: changing })
 
-    steps[0][1] = 90
-    steps.push([20_000, 200])
+    steps[0].percent = 90
+    steps.push({ from: 20_000, percent: 200 })
     changing.speed = { start: 5, harder: 'higher' }
 
     expect(copied.valuesAt(30_000).speed).toBeCloseTo(110, 10)
@@ -147,34 +158,64 @@ describe('settings', () => {
 
 describe('checks', () => {
   it.each([-1, Number.NaN, Number.POSITIVE_INFINITY])('rejects a step at %s ms', (atMs) => {
-    expect(() => difficultyWith([[atMs, 10]])).toThrow(
-      new RangeError(`Difficulty step time (ms) must be a finite number ≥ 0, got ${atMs}`),
-    )
+    expect(() =>
+      difficultyWith([
+        { from: 0, percent: 5 },
+        { from: atMs, percent: 10 },
+      ]),
+    ).toThrow(new RangeError(`Difficulty steps[1].from must be a finite number ≥ 0, got ${atMs}`))
   })
 
   it.each([-10, Number.NaN, Number.POSITIVE_INFINITY])(
     'rejects an increase of %s %',
     (increasePercent) => {
-      expect(() => difficultyWith([[10_000, increasePercent]])).toThrow(
+      expect(() => difficultyWith([{ from: 10_000, percent: increasePercent }])).toThrow(
         new RangeError(
-          `Difficulty increase (%) must be a finite number ≥ 0, got ${increasePercent}`,
+          `Difficulty steps[0].percent must be a finite number ≥ 0, got ${increasePercent}`,
         ),
       )
     },
   )
 
   it.each<[string, DifficultyStep[], string]>([
-    ['out of order', [[20_000, 10], [10_000, 20]], '10000 ms after 20000 ms'],
-    ['at the same time', [[10_000, 10], [10_000, 20]], '10000 ms after 10000 ms'],
+    [
+      'out of order',
+      [
+        { from: 20_000, percent: 10 },
+        { from: 10_000, percent: 20 },
+      ],
+      '10000 after 20000',
+    ],
+    [
+      'at the same time',
+      [
+        { from: 10_000, percent: 10 },
+        { from: 10_000, percent: 20 },
+      ],
+      '10000 after 10000',
+    ],
     [
       'out of order further down',
-      [[5_000, 5], [30_000, 10], [20_000, 20]],
-      '20000 ms after 30000 ms',
+      [
+        { from: 5_000, percent: 5 },
+        { from: 30_000, percent: 10 },
+        { from: 20_000, percent: 20 },
+      ],
+      '20000 after 30000',
     ],
   ])('rejects steps %s', (_name, steps, got) => {
     expect(() => difficultyWith(steps)).toThrow(
-      new RangeError(`Difficulty steps must be in order of time, got ${got}`),
+      new RangeError(`Difficulty steps must be in order of "from", got ${got}`),
     )
+  })
+
+  it('checks steps as a game reads them, naming them', () => {
+    expect(() => checkDifficultySteps([{ from: -1, percent: 5 }], 'game.harderByTimeMs')).toThrow(
+      new RangeError('game.harderByTimeMs[0].from must be a finite number ≥ 0, got -1'),
+    )
+    expect(() =>
+      checkDifficultySteps([{ from: 0, percent: 5 }], 'game.harderByTimeMs'),
+    ).not.toThrow()
   })
 
   it.each([-1, Number.NaN, Number.POSITIVE_INFINITY])(
@@ -187,4 +228,115 @@ describe('checks', () => {
       )
     },
   )
+})
+
+describe('settings that change in steps', () => {
+  it('go up by a step every so many, up to a limit', () => {
+    const steps = { start: 2, change: 1, every: 2, limit: 6 }
+
+    expect([0, 1, 2, 3, 4, 7, 8, 9, 50].map((count) => steppedAfter(steps, count))).toEqual([
+      2, 2, 3, 3, 4, 5, 6, 6, 6,
+    ])
+  })
+
+  it('go down by a step every so many, down to a limit', () => {
+    const steps = { start: 10_000, change: -500, every: 10, limit: 5_000 }
+
+    expect([0, 9, 10, 19, 20, 90, 100, 200].map((count) => steppedAfter(steps, count))).toEqual([
+      10_000, 10_000, 9_500, 9_500, 9_000, 5_500, 5_000, 5_000,
+    ])
+  })
+})
+
+describe('checking settings that change in steps', () => {
+  const delay: Steps = { start: 3_000, change: -100, every: 10, limit: 2_000 }
+  const check = (steps: Steps) => () => {
+    checkSteps(steps, 'game.delayMs', checkPositive)
+  }
+
+  it('accepts steps up or down towards their limit, or none', () => {
+    expect(check(delay)).not.toThrow()
+    expect(check({ start: 40, change: 10, every: 10, limit: 140 })).not.toThrow()
+    expect(check({ start: 40, change: 0, every: 1, limit: 40 })).not.toThrow()
+  })
+
+  it('checks the start and the limit with the check given, naming them', () => {
+    expect(check({ ...delay, start: 0 })).toThrow(
+      new RangeError('game.delayMs.start must be a finite number > 0, got 0'),
+    )
+    expect(check({ ...delay, limit: -5 })).toThrow(
+      new RangeError('game.delayMs.limit must be a finite number > 0, got -5'),
+    )
+  })
+
+  it.each([0, 1.5, Number.NaN])('rejects changing every %s', (every) => {
+    expect(check({ ...delay, every })).toThrow(
+      new RangeError(`game.delayMs.every must be a whole number ≥ 1, got ${every}`),
+    )
+  })
+
+  it.each([Number.NaN, Number.POSITIVE_INFINITY])('rejects a change of %s', (change) => {
+    expect(check({ ...delay, change })).toThrow(
+      new RangeError(`game.delayMs.change must be a finite number, got ${change}`),
+    )
+  })
+
+  it('rejects a limit the other way from where it goes', () => {
+    expect(check({ ...delay, limit: 4_000 })).toThrow(
+      new RangeError(
+        'game.delayMs goes down (change -100), so its limit must be ≤ its start (3000), got 4000',
+      ),
+    )
+    expect(check({ start: 40, change: 10, every: 10, limit: 30 })).toThrow(
+      new RangeError(
+        'game.delayMs goes up (change 10), so its limit must be ≥ its start (40), got 30',
+      ),
+    )
+    expect(check({ start: 40, change: 0, every: 10, limit: 30 })).toThrow(
+      new RangeError(
+        'game.delayMs goes up (change 0), so its limit must be ≥ its start (40), got 30',
+      ),
+    )
+  })
+})
+
+describe('settings that change to values from a list', () => {
+  const speed: StepTable = {
+    start: 60,
+    steps: [
+      { from: 3, value: 80 },
+      { from: 6, value: 50 },
+    ],
+  }
+
+  it('take each value from its step on, the start before any', () => {
+    expect([0, 2, 3, 5, 6, 1_000].map((at) => valueAt(speed, at))).toEqual([60, 60, 80, 80, 50, 50])
+    expect(valueAt({ start: 7, steps: [] }, 100)).toBe(7)
+  })
+
+  it('know their largest value, the start included', () => {
+    expect(largestIn(speed)).toBe(80)
+    expect(largestIn({ start: 90, steps: speed.steps })).toBe(90)
+    expect(largestIn({ start: 2, steps: [] })).toBe(2)
+  })
+
+  it('are checked: every value with the check given, each step from 0 on, in order', () => {
+    const check = (table: StepTable) => () => {
+      checkStepTable(table, 'game.speed', checkPositive)
+    }
+
+    expect(check(speed)).not.toThrow()
+    expect(check({ ...speed, start: 0 })).toThrow(
+      new RangeError('game.speed.start must be a finite number > 0, got 0'),
+    )
+    expect(check({ start: 60, steps: [{ from: 3, value: -1 }] })).toThrow(
+      new RangeError('game.speed.steps[0].value must be a finite number > 0, got -1'),
+    )
+    expect(check({ start: 60, steps: [{ from: -3, value: 1 }] })).toThrow(
+      new RangeError('game.speed.steps[0].from must be a finite number ≥ 0, got -3'),
+    )
+    expect(check({ start: 60, steps: [...speed.steps].reverse() })).toThrow(
+      new RangeError('game.speed.steps must be in order of "from", got 3 after 6'),
+    )
+  })
 })

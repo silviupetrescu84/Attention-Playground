@@ -75,16 +75,15 @@ describe('picking thoughts', () => {
     }
   })
 
-  it('moves the thought just shown away from the start of the next order', () => {
-    // Thoughts are picked from the end of a shuffled order. The first order
-    // is B C A (picked A, C, B); the next would be A C B, which would start
-    // with B again, so B goes to the other end: B A C (picked C, A, B).
-    const numbers = [0, 0, 0.5, 0.5]
+  it('keeps the thought just shown for later when the next order would start with it', () => {
+    // The first order is A B C (picked A, B, C); the next is C B A, which
+    // would start with C again, so C waits: B, C, A.
+    const numbers = [0.99, 0.99, 0, 0.99]
     const picker = createThoughtPicker(made(3), () => numbers.shift()!)
 
     const picked = Array.from({ length: 6 }, () => picker.next().text)
 
-    expect(picked).toEqual(['A', 'C', 'B', 'C', 'A', 'B'])
+    expect(picked).toEqual(['A', 'B', 'C', 'B', 'C', 'A'])
   })
 
   it('needs at least 2 thoughts', () => {

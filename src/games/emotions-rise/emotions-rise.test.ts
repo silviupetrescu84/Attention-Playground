@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { createGameLifecycle } from '../shared/game-lifecycle'
-import { createScore } from '../shared/score'
 import { bubblesAt, findPoint } from '../../test/emotions-rise/bubbles'
 import { constantRandom, seededRandom } from '../../test/random'
+import { createGameLifecycle } from '../shared/game-lifecycle'
+import { createScore } from '../shared/score'
 import emotions from './data/emotions.json'
 import type { Emotion } from './emotion-generator'
 import {
@@ -13,14 +13,14 @@ import {
   createEmotionsRise,
   DIFFICULTY_SETTINGS,
   DIFFICULTY_STEPS,
+  heightAt,
+  isInBubble,
   MAX_SPAWN_DELAY_MS,
   MAX_SPEED,
-  MIN_SPAWN_DELAY_MS,
-  heightAt,
   MIN_CENTRE_DISTANCE,
   MIN_SIDEWAYS_DISTANCE,
+  MIN_SPAWN_DELAY_MS,
   MIN_SPEED,
-  isInBubble,
   minSidewaysGap,
   pickSpawnX,
   positionAt,
@@ -48,7 +48,7 @@ function setup(random: () => number = seededRandom(1), options: ExtraOptions = {
 }
 
 /** Long enough to play through every difficulty step, then a while at the hardest. */
-const WHOLE_RAMP_MS = DIFFICULTY_STEPS.at(-1)![0] + 50_000
+const WHOLE_RAMP_MS = DIFFICULTY_STEPS.at(-1)!.from + 50_000
 
 /** Never gets harder: the game keeps its starting values. */
 const noRamp: ExtraOptions = { difficultySteps: [] }
@@ -78,11 +78,11 @@ describe('settings', () => {
     expect(MIN_CENTRE_DISTANCE).toBe(50)
     expect([SWAY_AMPLITUDE, SWAY_WAVELENGTH]).toEqual([5, 100])
     expect(DIFFICULTY_STEPS).toEqual([
-      [20_000, 10],
-      [40_000, 25],
-      [60_000, 45],
-      [80_000, 70],
-      [100_000, 110],
+      { from: 20_000, percent: 10 },
+      { from: 40_000, percent: 25 },
+      { from: 60_000, percent: 45 },
+      { from: 80_000, percent: 70 },
+      { from: 100_000, percent: 110 },
     ])
   })
 
@@ -449,7 +449,7 @@ describe('getting harder', () => {
       const where = `bubble ${i}, at ${spawnedAtMs} ms`
       expect(speed, where).toBeGreaterThanOrEqual(40 * multiplier - 1e-9)
       expect(speed, where).toBeLessThanOrEqual(80 * multiplier + 1e-9)
-      const next = bubbles[i + 1]
+      const next = bubbles.at(i + 1)
       if (!next) continue
       // The delay is chosen when this bubble appears, with the difficulty then.
       const delay = next.spawnedAtMs - spawnedAtMs
@@ -508,8 +508,8 @@ describe('getting harder', () => {
     // ×2 from 1 s and ×3 from 2 s: 40, 80, 120 px/s; delays 700, 350, 233 ms.
     const { game } = setup(constantRandom(0), {
       difficultySteps: [
-        [1_000, 100],
-        [2_000, 200],
+        { from: 1_000, percent: 100 },
+        { from: 2_000, percent: 200 },
       ],
     })
     game.start()
@@ -707,7 +707,10 @@ describe('tapping', () => {
 
   /** A point covered by exactly one bubble, of the given type. */
   function pointOnlyOn(bubbles: readonly Bubble[], type: 'good' | 'bad') {
-    const point = findPoint(bubbles, (under) => under.length === 1 && under[0].emotion.type === type)
+    const point = findPoint(
+      bubbles,
+      (under) => under.length === 1 && under[0].emotion.type === type,
+    )
     if (!point) throw new Error(`no point covered only by a ${type} bubble`)
     return { x: point.x, y: point.y, bubble: point.under[0] }
   }

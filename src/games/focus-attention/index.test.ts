@@ -4,10 +4,8 @@ import { cssCanvasFont, cssVariables, useCssVariables } from '../../test/css-var
 import { useFakeCanvasContexts, type FakeContext } from '../../test/fake-canvas-context'
 import { FakeFrames } from '../../test/fake-frames'
 import { stubImages } from '../../test/fake-image'
-import { loadedFonts, mountForTest } from '../../test/mounted-game'
+import { loadedFonts, mountForTest, mountWaitingForFont } from '../../test/mounted-game'
 import { seededRandom } from '../../test/random'
-import { mountGame } from '../shared/game-shell'
-import type { FontLoader } from '../shared/load-font'
 import { fitFontSize, fontAt } from '../shared/text'
 import data from './data/focus-attention.json'
 import { BUTTON_TEXT_FIT, WORD_TEXT_FIT } from './draw'
@@ -56,7 +54,7 @@ function target() {
 function hueOn(word: string) {
   const drawing = context().lastDrawing()
   const at = drawing.findIndex((call) => call.name === 'fillText' && call.args[0] === word)
-  const before = drawing[at - 1]
+  const before = at > 0 ? drawing.at(at - 1) : undefined
   return before?.name === 'fill' ? before.fillStyle : undefined
 }
 
@@ -81,21 +79,10 @@ function untilTarget(
 
 describe('loading', () => {
   it('loads the game font and both images before Start can be pressed', async () => {
-    let finishLoading = (_: { status: string }[]) => {}
-    const fonts: FontLoader & { load: ReturnType<typeof vi.fn> } = {
-      load: vi.fn(() => new Promise<{ status: string }[]>((resolve) => (finishLoading = resolve))),
-    }
     const images = stubImages()
-    const container = document.createElement('main')
-    document.body.replaceChildren(container)
     vi.resetModules()
     const { focusAttentionGame: freshGame } = await import('./index')
-    mountGame(container, {
-      signal: new AbortController().signal,
-      game: freshGame({ fonts }),
-      scheduler: new FakeFrames(),
-    })
-    const start = container.querySelector<HTMLButtonElement>('.game-hud__start')!
+    const { fonts, start, finishLoading } = mountWaitingForFont((fonts) => freshGame({ fonts }))
 
     expect(fonts.load).toHaveBeenCalledExactlyOnceWith(
       expect.stringContaining(cssCanvasFont.family),
@@ -103,7 +90,7 @@ describe('loading', () => {
     expect(images).toHaveLength(2)
     expect(start.disabled).toBe(true)
 
-    finishLoading([{ status: 'loaded' }])
+    finishLoading()
     await vi.waitFor(() => expect(start.disabled).toBe(false))
   })
 
@@ -123,7 +110,9 @@ describe('loading', () => {
     expect(session.lifecycle.state).toBe('playing')
     expect(context().callsTo('drawImage')).toEqual([])
     // The projector's orb and the bubble, as circles.
-    expect(context().lastDrawing().filter((call) => call.name === 'arc')).toHaveLength(2)
+    const drawing = context().lastDrawing()
+    expect(drawing.filter((call) => call.name === 'arc')).toHaveLength(1)
+    expect(drawing.filter((call) => call.name === 'ellipse')).toHaveLength(1)
   })
 })
 
@@ -157,7 +146,10 @@ describe('Focus Attention', () => {
     const drawing = context().lastDrawing()
     expect(drawing.filter((call) => call.name === 'drawImage')).toHaveLength(2)
     expect(
-      drawing.filter((call) => call.name === 'fillText').map((call) => call.args[0]).slice(1),
+      drawing
+        .filter((call) => call.name === 'fillText')
+        .map((call) => call.args[0])
+        .slice(1),
     ).toEqual(labels)
   })
 
@@ -188,7 +180,9 @@ describe('Focus Attention', () => {
       WORD_TEXT_FIT,
     )
     const labelSize = fitFontSize(context().asContext(), cssCanvasFont, labels, BUTTON_TEXT_FIT)
-    for (const call of context().lastDrawing().filter((c) => c.name === 'fillText')) {
+    for (const call of context()
+      .lastDrawing()
+      .filter((c) => c.name === 'fillText')) {
       const isLabel = labels.includes(String(call.args[0]))
       expect(call.font).toBe(fontAt(cssCanvasFont, isLabel ? labelSize : wordSize))
     }
@@ -281,8 +275,7 @@ describe('Focus Attention', () => {
       'Anti-values focused on',
       'Reached the projector',
     ])
-    const [valuesFocused, valuesLeft, antiValuesLeft, antiValuesFocused, reached] =
-      summaryValues()
+    const [valuesFocused, valuesLeft, antiValuesLeft, antiValuesFocused, reached] = summaryValues()
     expect(valuesLeft + antiValuesFocused + reached).toBe(10)
     expect(valuesFocused + antiValuesLeft).toBeGreaterThan(0)
     expect(session.score.value).toBe(valuesFocused + antiValuesLeft)
@@ -308,9 +301,17 @@ describe('Focus Attention', () => {
     click('.game-hud__pause')
 
     click('.game-hud__overlay--paused .game-hud__restart')
-    expect(context().lastDrawing().map((call) => call.name)).toEqual(['clearRect'])
+    expect(
+      context()
+        .lastDrawing()
+        .map((call) => call.name),
+    ).toEqual(['clearRect'])
 
     click('.game-hud__start')
-    expect(context().lastDrawing().filter((call) => call.name === 'fillText')).toHaveLength(3)
+    expect(
+      context()
+        .lastDrawing()
+        .filter((call) => call.name === 'fillText'),
+    ).toHaveLength(3)
   })
 })
