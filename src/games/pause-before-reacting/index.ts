@@ -40,8 +40,8 @@ export function preloadPauseBeforeReacting(fonts?: FontLoader): Promise<HTMLImag
 
 /** How to play, shown with the Start button. */
 export const INSTRUCTIONS: readonly string[] = [
-  'Pausing before reacting is the most important skill in life.',
-  'It doesn’t matter what happens, it matters if you react to it',
+    'Situations will appear in your life, some of them are worth reacting to, some are not',
+    'It doesn’t matter what happens, it matters if you react to it',
 ]
 
 export function pauseBeforeReactingGame({

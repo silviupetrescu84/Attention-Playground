@@ -142,8 +142,8 @@ describe('Remember Gratitude', () => {
     const card = container.querySelector<HTMLElement>('.game-hud__instructions')!
 
     expect(INSTRUCTIONS).toEqual([
-      'Remember the things to be grateful for',
-      'Once they turn around, tap them, then tap Done',
+      'Sometimes remembering the things to be grateful for is tough',
+      'Choose the ones worth remembering, let the others go',
     ])
     expect([...card.querySelectorAll('p')].map((p) => p.textContent)).toEqual(INSTRUCTIONS)
   })

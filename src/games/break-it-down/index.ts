@@ -78,8 +78,8 @@ export async function preloadBreakItDown(fonts?: FontLoader): Promise<void> {
 
 /** How to play, shown with the Start button. */
 export const INSTRUCTIONS: readonly string[] = [
-  'Big goals are reached through small correct actions.',
-  'Distractions make the goals seem bigger.',
+   'Big goals are reached through small actions and they get closer and closer',
+    'Distractions make the goals seem to fade away',
 ]
 
 export function breakItDownGame({

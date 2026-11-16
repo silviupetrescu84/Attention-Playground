@@ -153,8 +153,8 @@ describe('Stay in the Zone', () => {
     const card = container.querySelector<HTMLElement>('.game-hud__instructions')!
 
     expect(INSTRUCTIONS).toEqual([
+      'Getting in the zone is half the battle, staying in it is the other half',
       'Hold anywhere to make the ball rise, let go to let it fall',
-      'Keep it in the green zone until its white ring runs out',
     ])
     expect([...card.querySelectorAll('p')].map((p) => p.textContent)).toEqual(INSTRUCTIONS)
   })

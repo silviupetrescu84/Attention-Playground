@@ -23,8 +23,8 @@ export function preloadStayInTheZone(): Promise<HTMLImageElement> {
 
 /** How to play, shown with the Start button. */
 export const INSTRUCTIONS: readonly string[] = [
+  'Getting in the zone is half the battle, staying in it is the other half',
   'Hold anywhere to make the ball rise, let go to let it fall',
-  'Keep it in the green zone until its white ring runs out',
 ]
 
 export function stayInTheZoneGame({

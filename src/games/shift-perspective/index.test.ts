@@ -114,7 +114,7 @@ describe('Shift Perspective', () => {
 
     expect(card.closest('[hidden]')).toBeNull()
     expect(paragraphs()).toEqual([
-      'It doesn’t matter what happens, it matters how you react to it',
+      'Things happen in life, but it matters how you react to it',
       'Read what happened, choose the reaction that does you good',
     ])
 

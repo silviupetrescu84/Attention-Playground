@@ -97,8 +97,8 @@ describe('Align the Actions', () => {
 
     expect(card.closest('[hidden]')).toBeNull()
     expect(paragraphs()).toEqual([
-      'Big goals or ways of living are defined by the actions we do',
-      'Choose the action that aligns with the stated goal. Stay the course until it’s fulfilled',
+        'Life goals or ways of living are defined by the actions we do',
+        'Choose the action that aligns with the goal or way of life. Stay the course until it’s fulfilled',
     ])
 
     click('.game-hud__start')

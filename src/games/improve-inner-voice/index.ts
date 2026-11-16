@@ -51,7 +51,10 @@ export function preloadImproveInnerVoice(fonts?: FontLoader): Promise<HTMLImageE
 }
 
 /** How to play, shown with the Start button. */
-export const INSTRUCTIONS: readonly string[] = ['Internalize only what helps you']
+export const INSTRUCTIONS: readonly string[] = [
+  'Internalize only what helps you',
+  'Catch the good words, let the bad ones fall away'
+]
 
 export function improveInnerVoiceGame({
   random = Math.random,

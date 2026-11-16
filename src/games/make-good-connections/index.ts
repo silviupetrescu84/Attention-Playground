@@ -19,9 +19,8 @@ export interface MakeGoodConnectionsGameOptions {
 
 /** How to play, shown with the Start button. */
 export const INSTRUCTIONS: readonly string[] = [
-  'Tap the dots one after another to connect them all',
-  'Go around the walls, never through them',
-  'Tap the last dot again to take it back',
+  'Make connections by tapping one dot and then the next',
+  'Sometimes connections are blocked by obstacles so make them in the right order',
 ]
 
 /** Make Good Connections draws no text and no images: it has nothing to load. */

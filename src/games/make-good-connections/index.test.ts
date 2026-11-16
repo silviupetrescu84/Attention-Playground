@@ -82,9 +82,8 @@ describe('Make Good Connections', () => {
     const card = container.querySelector<HTMLElement>('.game-hud__instructions')!
 
     expect(INSTRUCTIONS).toEqual([
-      'Tap the dots one after another to connect them all',
-      'Go around the walls, never through them',
-      'Tap the last dot again to take it back',
+      'Make connections by tapping one dot and then the next',
+      'Sometimes connections are blocked by obstacles so make them in the right order',
     ])
     expect([...card.querySelectorAll('p')].map((p) => p.textContent)).toEqual(INSTRUCTIONS)
   })

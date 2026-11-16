@@ -47,8 +47,8 @@ export function preloadRememberGratitude(fonts?: FontLoader): Promise<HTMLImageE
 
 /** How to play, shown with the Start button. */
 export const INSTRUCTIONS: readonly string[] = [
-  'Remember the things to be grateful for',
-  'Once they turn around, tap them, then tap Done',
+  'Sometimes remembering the things to be grateful for is tough',
+  'Choose the ones worth remembering, let the others go',
 ]
 
 export function rememberGratitudeGame({

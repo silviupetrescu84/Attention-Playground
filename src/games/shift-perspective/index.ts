@@ -51,7 +51,7 @@ export function preloadShiftPerspective(fonts?: FontLoader): Promise<HTMLImageEl
 
 /** How to play, shown with the Start button. */
 export const INSTRUCTIONS: readonly string[] = [
-  'It doesn’t matter what happens, it matters how you react to it',
+  'Things happen in life, but it matters how you react to it',
   'Read what happened, choose the reaction that does you good',
 ]
 

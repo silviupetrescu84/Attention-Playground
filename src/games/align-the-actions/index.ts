@@ -42,8 +42,8 @@ export function preloadAlignTheActions(fonts?: FontLoader): Promise<boolean> {
 
 /** How to play, shown with the Start button. */
 export const INSTRUCTIONS: readonly string[] = [
-  'Big goals or ways of living are defined by the actions we do',
-  'Choose the action that aligns with the stated goal. Stay the course until it’s fulfilled',
+  'Life goals or ways of living are defined by the actions we do',
+  'Choose the action that aligns with the goal or way of life. Stay the course until it’s fulfilled',
 ]
 
 export function alignTheActionsGame({

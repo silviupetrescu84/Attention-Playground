@@ -166,7 +166,10 @@ describe('Improve Inner Voice', () => {
     const { container } = await setup()
     const card = container.querySelector<HTMLElement>('.game-hud__instructions')!
 
-    expect(INSTRUCTIONS).toEqual(['Internalize only what helps you'])
+    expect(INSTRUCTIONS).toEqual([
+      'Internalize only what helps you',
+      'Catch the good words, let the bad ones fall away',
+    ])
     expect([...card.querySelectorAll('p')].map((p) => p.textContent)).toEqual(INSTRUCTIONS)
   })
 

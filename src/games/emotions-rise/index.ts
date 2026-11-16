@@ -37,7 +37,7 @@ export function preloadEmotionsRise(fonts?: FontLoader): Promise<HTMLImageElemen
 
 /** How to play, shown with the Start button. */
 export const INSTRUCTIONS: readonly string[] = [
-  'Emotions rise but sometimes they are good, sometimes they are bad but all the same',
+  'Emotions rise inside and sometimes they are easy to missinterpret',
   'Choose the good ones, let the bad ones fade away',
   'Don’t let good emotions fade away',
 ]
