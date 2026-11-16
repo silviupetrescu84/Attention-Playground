@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import type { GamePoint } from './game-canvas'
-import { distanceToEllipse, ellipseTouchesBox, isInEllipse } from './geometry'
+import {
+  distanceBetweenSegments,
+  distanceToEllipse,
+  distanceToSegment,
+  ellipseTouchesBox,
+  isInBox,
+  isInEllipse,
+  segmentsCross,
+} from './geometry'
 
 const centre = { x: 200, y: 400 }
 
@@ -105,5 +113,85 @@ describe('ellipseTouchesBox', () => {
   it('is true when the ellipse is inside the box, or the box inside the ellipse', () => {
     expect(ellipseTouchesBox(centre, 50, 25, box(100, 300, 200, 200))).toBe(true)
     expect(ellipseTouchesBox(centre, 50, 25, box(195, 395, 10, 10))).toBe(true)
+  })
+})
+
+describe('isInBox', () => {
+  const box = { left: 10, right: 30, top: 100, bottom: 140 }
+
+  it('is true inside the box and on its edges', () => {
+    const inside = [
+      { x: 20, y: 120 },
+      { x: 10, y: 100 },
+      { x: 30, y: 140 },
+    ]
+    expect(inside.map((point) => isInBox(point, box))).toEqual([true, true, true])
+  })
+
+  it('is false anywhere outside it', () => {
+    const outside = [
+      { x: 9, y: 120 },
+      { x: 31, y: 120 },
+      { x: 20, y: 99 },
+      { x: 20, y: 141 },
+    ]
+    expect(outside.map((point) => isInBox(point, box))).toEqual([false, false, false, false])
+  })
+})
+
+describe('distanceToSegment', () => {
+  const a = { x: 0, y: 0 }
+  const b = { x: 100, y: 0 }
+
+  it('is the distance straight across to the segment, beside it', () => {
+    expect(distanceToSegment({ x: 40, y: 30 }, a, b)).toBe(30)
+    expect(distanceToSegment({ x: 40, y: 0 }, a, b)).toBe(0)
+  })
+
+  it('is the distance to the nearer end, beyond it', () => {
+    expect(distanceToSegment({ x: -30, y: 40 }, a, b)).toBe(50)
+    expect(distanceToSegment({ x: 130, y: -40 }, a, b)).toBe(50)
+  })
+
+  it('is the distance to the point, for a segment of no length', () => {
+    expect(distanceToSegment({ x: 3, y: 4 }, a, a)).toBe(5)
+  })
+})
+
+describe('segmentsCross', () => {
+  const a = { x: 0, y: 0 }
+  const b = { x: 100, y: 100 }
+
+  it('is true when each goes from one side of the other to the other side', () => {
+    expect(segmentsCross(a, b, { x: 0, y: 100 }, { x: 100, y: 0 })).toBe(true)
+  })
+
+  it('is false for segments apart, only touching, or in line', () => {
+    expect(segmentsCross(a, b, { x: 60, y: 0 }, { x: 100, y: 0 })).toBe(false)
+    expect(segmentsCross(a, b, { x: 100, y: 100 }, { x: 200, y: 0 })).toBe(false)
+    expect(segmentsCross(a, b, { x: 50, y: 50 }, { x: 200, y: 0 })).toBe(false)
+    expect(segmentsCross(a, b, { x: 50, y: 50 }, { x: 150, y: 150 })).toBe(false)
+  })
+
+  it('is false when one would cross the other only if it were longer', () => {
+    expect(segmentsCross(a, b, { x: 0, y: 100 }, { x: 40, y: 60 })).toBe(false)
+  })
+})
+
+describe('distanceBetweenSegments', () => {
+  const a = { x: 0, y: 0 }
+  const b = { x: 100, y: 0 }
+
+  it('is 0 for segments that cross', () => {
+    expect(distanceBetweenSegments(a, b, { x: 50, y: -10 }, { x: 50, y: 10 })).toBe(0)
+  })
+
+  it('is the gap at their closest, from an end of one to the other', () => {
+    expect(distanceBetweenSegments(a, b, { x: 50, y: 20 }, { x: 50, y: 60 })).toBe(20)
+    expect(distanceBetweenSegments(a, b, { x: 130, y: 40 }, { x: 200, y: 40 })).toBe(50)
+  })
+
+  it('is the gap between parallel segments side by side', () => {
+    expect(distanceBetweenSegments(a, b, { x: 20, y: 7 }, { x: 80, y: 7 })).toBe(7)
   })
 })

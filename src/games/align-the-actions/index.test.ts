@@ -13,7 +13,7 @@ import {
   SPAWN_Y,
   START_LANE,
 } from './align-the-actions'
-import data from './data/align_the_actions_goals.json'
+import data from './data/align-the-actions.json'
 import { GOAL_TEXT_FIT } from './draw'
 import { goalsFrom, type ActionKind } from './goals'
 import { alignTheActionsGame, mistakeMessage } from './index'
@@ -166,6 +166,21 @@ describe('Align the Actions', () => {
     expect(yOf()).toBeCloseTo(before + ROW_SPEED.start * 2, 6)
   })
 
+  it('moves them at the pace chosen before Start: 15% slower at Slow', async () => {
+    const { click, frames, choosePace } = await setup()
+    choosePace('slow')
+    click('.game-hud__start')
+    const yOf = () =>
+      context()
+        .lastDrawing()
+        .find((call) => call.name === 'roundRect')!.args[1] as number
+    const before = yOf()
+
+    frames.frames(40, 50)
+
+    expect(yOf()).toBeCloseTo(before + ROW_SPEED.start * 0.85 * 2, 6)
+  })
+
   it('shows one row on its way at a time; the one chosen from moves on down, tinted', async () => {
     const { click, frames } = await setup(5)
     click('.game-hud__start')
@@ -267,7 +282,7 @@ describe('Align the Actions', () => {
   })
 
   it('ends with the 10th mistake on Easy, with what was chosen matching the score', async () => {
-    const { click, frames, tapAt, session, container, summaryValues } = await setup(4)
+    const { click, frames, tapAt, session, container, summaryValues, timesScored } = await setup(4)
     click('.game-hud__start')
     const random = seededRandom(40)
     for (let i = 0; i < 6_000 && session.lifecycle.state === 'playing'; i++) {
@@ -283,11 +298,12 @@ describe('Align the Actions', () => {
       'Aligned actions chosen',
       'Actions against the goal chosen',
       'Actions for another goal chosen',
+      'Best combo',
     ])
     const [aligned, against, otherGoal] = values
     expect(against + otherGoal).toBe(10)
     expect(aligned).toBeGreaterThan(0)
-    expect(session.score.value).toBe(aligned)
+    expect(timesScored()).toBe(aligned)
   })
 
   it('ends with the first mistake on Extreme, and says what it was', async () => {
@@ -311,7 +327,7 @@ describe('Align the Actions', () => {
   })
 
   it('chooses nothing after the mistake that ends the round, even in one long frame', async () => {
-    const { click, frames, session, summaryValues } = await setup(6)
+    const { click, frames, session, summaryValues, timesScored } = await setup(6)
     for (let i = 0; i < 3; i++) click('.game-hud__difficulty')
     click('.game-hud__start')
 
@@ -321,7 +337,7 @@ describe('Align the Actions', () => {
     const [aligned, against, otherGoal] = summaryValues()
     expect(against + otherGoal).toBe(1)
     expect(session.mistakes.count).toBe(1)
-    expect(session.score.value).toBe(aligned)
+    expect(timesScored()).toBe(aligned)
   })
 
   it('clears the board on restart and starts fresh on the next Start', async () => {

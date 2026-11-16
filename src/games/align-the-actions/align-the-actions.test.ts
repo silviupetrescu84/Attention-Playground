@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { seededRandom } from '../../test/random'
 import { GAME_BAR_HEIGHT } from '../shared/game-hud'
 import { createGameLifecycle } from '../shared/game-lifecycle'
+import type { Pace } from '../shared/pace'
 import { createScore } from '../shared/score'
 import {
   ACTION_SIZE,
@@ -24,7 +25,7 @@ import {
   type Mistake,
   type Row,
 } from './align-the-actions'
-import data from './data/align_the_actions_goals.json'
+import data from './data/align-the-actions.json'
 import { goalsFrom, type Action, type ActionKind, type Goal } from './goals'
 
 const goals = goalsFrom(data)
@@ -469,5 +470,17 @@ describe('a new round', () => {
     expect(game.goal).toBeUndefined()
     expect(game.circleLane).toBe(START_LANE)
     expect(game.stats).toEqual({ aligned: 0, against: 0, otherGoal: 0 })
+  })
+})
+
+describe('pace', () => {
+  it('moves rows 15% slower at Slow, and 15% faster at Fast', () => {
+    const speeds = (['normal', 'slow', 'fast'] as const).map((pace: Pace) => {
+      const { game } = setup()
+      game.start(pace)
+      return game.rows[0].speed
+    })
+
+    expect(speeds).toEqual([60, expect.closeTo(51, 9), expect.closeTo(69, 9)])
   })
 })

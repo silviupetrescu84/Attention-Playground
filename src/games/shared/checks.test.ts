@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { checkAtLeast, checkNotNegative, checkPositive, checkWholeNumber } from './checks'
+import {
+  checkAtLeast,
+  checkAtMost,
+  checkNotNegative,
+  checkPositive,
+  checkWholeNumber,
+} from './checks'
 
 const notFinite = [Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]
 
@@ -63,6 +69,18 @@ describe('checkAtLeast', () => {
   it.each([59, Number.NaN])('rejects %s, naming both', (value) => {
     expect(() => checkAtLeast(value, 'Top speed', 60, 'the starting speed')).toThrow(
       new RangeError(`Top speed must be ≥ the starting speed (60), got ${value}`),
+    )
+  })
+})
+
+describe('checkAtMost', () => {
+  it.each([100, 600])('accepts %s, not above the other', (value) => {
+    expect(() => checkAtMost(value, 'Zone height', 600, 'the space for zones')).not.toThrow()
+  })
+
+  it.each([601, Number.NaN])('rejects %s, naming both', (value) => {
+    expect(() => checkAtMost(value, 'Zone height', 600, 'the space for zones')).toThrow(
+      new RangeError(`Zone height must be ≤ the space for zones (600), got ${value}`),
     )
   })
 })

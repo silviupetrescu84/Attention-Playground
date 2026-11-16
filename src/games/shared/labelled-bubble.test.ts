@@ -63,4 +63,23 @@ describe('a labelled bubble', () => {
     expect(context.callsTo('fill')[0].fillStyle).toBe('card fill')
     expect(context.callsTo('fillText')).toHaveLength(2)
   })
+
+  it('draws no text while it has none: hidden', () => {
+    const context = createFakeContext()
+
+    drawLabelledBubble(
+      context.asContext(),
+      image,
+      { ...bubble, text: undefined, hue: 'red hue' },
+      font,
+      colors,
+    )
+
+    expect(context.calls.map((call) => call.name)).toEqual([
+      'drawImage',
+      'beginPath',
+      'ellipse',
+      'fill',
+    ])
+  })
 })

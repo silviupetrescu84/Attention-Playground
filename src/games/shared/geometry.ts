@@ -92,3 +92,57 @@ export function ellipseTouchesBox(
   const closestY = clamp(centre.y, box.top, box.bottom)
   return isInEllipse({ x: closestX, y: closestY }, centre, radiusX, radiusY)
 }
+
+/** Whether `point` is inside `box`, or on its edge. */
+export function isInBox({ x, y }: GamePoint, { left, right, top, bottom }: Box): boolean {
+  return x >= left && x <= right && y >= top && y <= bottom
+}
+
+/** How far `point` is from the line segment from `a` to `b` (0 on it). */
+export function distanceToSegment(point: GamePoint, a: GamePoint, b: GamePoint): number {
+  const dx = b.x - a.x
+  const dy = b.y - a.y
+  const lengthSquared = dx * dx + dy * dy
+  // Where along the segment the closest point is: 0 at `a`, 1 at `b`.
+  const along =
+    lengthSquared === 0
+      ? 0
+      : clamp(((point.x - a.x) * dx + (point.y - a.y) * dy) / lengthSquared, 0, 1)
+  return Math.hypot(point.x - a.x - along * dx, point.y - a.y - along * dy)
+}
+
+/** Which side of the line through `a` and `b` `point` is on: positive, negative, or 0 on it. */
+function sideOf(point: GamePoint, a: GamePoint, b: GamePoint): number {
+  return (b.x - a.x) * (point.y - a.y) - (b.y - a.y) * (point.x - a.x)
+}
+
+/**
+ * Whether the segments `a`–`b` and `c`–`d` cross: each goes from one side of
+ * the other to the other side. Segments only touching, or in line, do not.
+ */
+export function segmentsCross(a: GamePoint, b: GamePoint, c: GamePoint, d: GamePoint): boolean {
+  return (
+    Math.sign(sideOf(a, c, d)) * Math.sign(sideOf(b, c, d)) < 0 &&
+    Math.sign(sideOf(c, a, b)) * Math.sign(sideOf(d, a, b)) < 0
+  )
+}
+
+/** How far apart the segments `a`–`b` and `c`–`d` are at their closest (0 if they cross). */
+export function distanceBetweenSegments(
+  a: GamePoint,
+  b: GamePoint,
+  c: GamePoint,
+  d: GamePoint,
+): number {
+  if (segmentsCross(a, b, c, d)) {
+    return 0
+  }
+
+  // Apart, the closest points are at an end of one of them.
+  return Math.min(
+    distanceToSegment(a, c, d),
+    distanceToSegment(b, c, d),
+    distanceToSegment(c, a, b),
+    distanceToSegment(d, a, b),
+  )
+}

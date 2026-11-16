@@ -3,16 +3,22 @@ import breakItDownIcon from '../assets/game-icons/break-it-down.png'
 import emotionsRiseIcon from '../assets/game-icons/emotions-rise.png'
 import focusAttentionIcon from '../assets/game-icons/focus-attention.png'
 import improveInnerVoiceIcon from '../assets/game-icons/improve-inner-voice.png'
+import makeGoodConnectionsIcon from '../assets/game-icons/make-good-connections.png'
 import pauseBeforeReactingIcon from '../assets/game-icons/pause-before-reacting.png'
+import rememberGratitudeIcon from '../assets/game-icons/remember-gratitude.png'
 import shiftPerspectiveIcon from '../assets/game-icons/shift-perspective.png'
+import stayInTheZoneIcon from '../assets/game-icons/stay-in-the-zone.png'
 import { alignTheActionsGame, preloadAlignTheActions } from './align-the-actions'
 import { breakItDownGame, preloadBreakItDown } from './break-it-down'
 import { emotionsRiseGame, preloadEmotionsRise } from './emotions-rise'
 import { focusAttentionGame, preloadFocusAttention } from './focus-attention'
 import { improveInnerVoiceGame, preloadImproveInnerVoice } from './improve-inner-voice'
+import { makeGoodConnectionsGame } from './make-good-connections'
 import { pauseBeforeReactingGame, preloadPauseBeforeReacting } from './pause-before-reacting'
+import { preloadRememberGratitude, rememberGratitudeGame } from './remember-gratitude'
 import type { GameDefinition } from './shared/game-shell'
 import { preloadShiftPerspective, shiftPerspectiveGame } from './shift-perspective'
+import { preloadStayInTheZone, stayInTheZoneGame } from './stay-in-the-zone'
 
 /**
  * Every game in the playground, in the order shown on the home screen. The
@@ -83,6 +89,27 @@ export const games: readonly CatalogGame[] = [
     icon: improveInnerVoiceIcon,
     create: () => improveInnerVoiceGame(),
     preload: () => preloadImproveInnerVoice(),
+  },
+  {
+    id: 'stay-in-the-zone',
+    name: 'Stay in the Zone',
+    icon: stayInTheZoneIcon,
+    create: () => stayInTheZoneGame(),
+    preload: () => preloadStayInTheZone(),
+  },
+  {
+    id: 'remember-gratitude',
+    name: 'Remember Gratitude',
+    icon: rememberGratitudeIcon,
+    create: () => rememberGratitudeGame(),
+    preload: () => preloadRememberGratitude(),
+  },
+  {
+    id: 'make-good-connections',
+    name: 'Make Good Connections',
+    icon: makeGoodConnectionsIcon,
+    // Nothing to load: it draws no text and no images.
+    create: () => makeGoodConnectionsGame(),
   },
 ]
 

@@ -1,7 +1,7 @@
 import { DIFFICULTY } from '../../config/difficulty'
-import { checkAtLeast, checkNotNegative, checkPositive } from '../shared/checks'
 import { GAME_HEIGHT, GAME_WIDTH } from '../shared/game-canvas'
 import type { Box } from '../shared/geometry'
+import { checkCappedSpeedUp, distanceIn, spedUp, type CappedSpeedUp } from '../shared/motion'
 import { clamp } from '../shared/numbers'
 
 /**
@@ -23,17 +23,14 @@ export const PAD_HEIGHT = 28
 export const PAD_BOTTOM_GAP = 24
 export const PAD_TOP = GAME_HEIGHT - PAD_BOTTOM_GAP - PAD_HEIGHT
 
-const { padSpeed } = DIFFICULTY.improveInnerVoice
+/** How the pad speeds up, in game px per second (see config/difficulty.json). */
+export const PAD_SPEED: CappedSpeedUp = DIFFICULTY.improveInnerVoice.padSpeed
+checkCappedSpeedUp(PAD_SPEED, 'improveInnerVoice.padSpeed')
 
-/** Speeds in game px per second (see config/difficulty.json)… */
-export const PAD_START_SPEED = padSpeed.start
-export const PAD_MAX_SPEED = padSpeed.max
-/** …and how much faster it gets every second. */
-export const PAD_ACCELERATION = padSpeed.accelerationPerS
-
-checkPositive(PAD_START_SPEED, 'improveInnerVoice.padSpeed.start')
-checkAtLeast(PAD_MAX_SPEED, 'improveInnerVoice.padSpeed.max', PAD_START_SPEED, 'its start')
-checkNotNegative(PAD_ACCELERATION, 'improveInnerVoice.padSpeed.accelerationPerS')
+export const PAD_START_SPEED = PAD_SPEED.start
+export const PAD_MAX_SPEED = PAD_SPEED.max
+/** How much faster it gets every second. */
+export const PAD_ACCELERATION = PAD_SPEED.accelerationPerS
 
 /** Where the pad's centre can be, for all of it to stay on the canvas. */
 const LEFTMOST = PAD_WIDTH / 2
@@ -94,20 +91,16 @@ export function createPad(): Pad {
       }
 
       const towards = Math.sign(target - x)
-      const seconds = deltaMs / 1_000
       // Setting off (or turning back): from the start speed; going on: faster.
-      speed =
-        towards === direction
-          ? Math.min(PAD_MAX_SPEED, speed + PAD_ACCELERATION * seconds)
-          : PAD_START_SPEED
+      speed = towards === direction ? spedUp(PAD_SPEED, speed, deltaMs) : PAD_START_SPEED
       direction = towards
 
-      const distance = Math.abs(target - x)
-      if (speed * seconds >= distance) {
+      const step = distanceIn(speed, deltaMs)
+      if (step >= Math.abs(target - x)) {
         x = target
         stop()
       } else {
-        x += towards * speed * seconds
+        x += towards * step
       }
     },
   }

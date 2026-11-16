@@ -2,6 +2,7 @@ import { DIFFICULTY } from '../../config/difficulty'
 import { checkWholeNumber } from './checks'
 import { isNewRound, type GameLifecycle } from './game-lifecycle'
 import { createListeners } from './listeners'
+import { nextChoice, recordOf } from './records'
 
 /**
  * The difficulty the player picks before a round, and the mistakes they
@@ -27,9 +28,7 @@ export type DifficultyLevel = (typeof DIFFICULTY_LEVELS)[number]
 export function byLevel<Value>(
   valueFor: (level: DifficultyLevel) => Value,
 ): Record<DifficultyLevel, Value> {
-  const entries = DIFFICULTY_LEVELS.map((level) => [level, valueFor(level)])
-  // Object.fromEntries loses the levels' type; these are exactly DIFFICULTY_LEVELS.
-  return Object.fromEntries(entries) as Record<DifficultyLevel, Value>
+  return recordOf(DIFFICULTY_LEVELS, valueFor)
 }
 
 /** The mistake that fails (ends) the round, at each difficulty. */
@@ -93,8 +92,7 @@ export function createMistakes({ lifecycle }: MistakesOptions): Mistakes {
         throw new Error(`Cannot change the difficulty of a game that is ${lifecycle.state}`)
       }
 
-      const next = (DIFFICULTY_LEVELS.indexOf(level) + 1) % DIFFICULTY_LEVELS.length
-      level = DIFFICULTY_LEVELS[next]
+      level = nextChoice(DIFFICULTY_LEVELS, level)
     },
     add() {
       if (lifecycle.state !== 'playing') {

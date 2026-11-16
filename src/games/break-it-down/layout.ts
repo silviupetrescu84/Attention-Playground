@@ -2,8 +2,8 @@ import { GREEN_BUBBLE_BODY, LARGE_OVAL } from '../shared/artwork'
 import { GAME_WIDTH, type GamePoint } from '../shared/game-canvas'
 import { PLAY_CENTRE } from '../shared/game-hud'
 import { distanceToEllipse } from '../shared/geometry'
-import { findRandomSpot, gapBetweenOvals, playAreaFor } from '../shared/placing'
-import { shuffled, type Random } from '../shared/random'
+import { gapBetweenOvals, playAreaFor, randomLayout } from '../shared/placing'
+import type { Random } from '../shared/random'
 import { TIME_RING_WIDTH } from '../shared/time-ring'
 
 /**
@@ -102,47 +102,16 @@ function fits(spot: GamePoint, placed: readonly GamePoint[], goalRadius: number,
   )
 }
 
-function randomLayout(
-  count: number,
-  goalRadius: number,
-  spread: number,
-  random: Random,
-): GamePoint[] | undefined {
-  const placed: GamePoint[] = []
-
-  while (placed.length < count) {
-    const spot = findRandomSpot(AREA, random, PLACE_TRIES, (candidate) =>
-      fits(candidate, placed, goalRadius, spread),
-    )
-
-    if (!spot) {
-      return undefined
-    }
-
-    placed.push(spot)
-  }
-
-  return placed
-}
-
 /**
  * Random places for `count` ovals around a goal that reaches `goalRadius`
  * from the centre, ring included (see the rules at the top).
  */
 export function placeOptions(count: number, goalRadius: number, random: Random): GamePoint[] {
-  if (count > FALLBACK_SPOTS.length) {
-    throw new RangeError(`Cannot place more than ${FALLBACK_SPOTS.length} ovals, got ${count}`)
-  }
-
-  for (const spread of [SPREAD, 0]) {
-    for (let i = 0; i < LAYOUT_TRIES; i++) {
-      const placed = randomLayout(count, goalRadius, spread, random)
-
-      if (placed) {
-        return placed
-      }
-    }
-  }
-
-  return shuffled(random, FALLBACK_SPOTS).slice(0, count)
+  return randomLayout(count, random, {
+    area: AREA,
+    rules: [SPREAD, 0].map((spread) => (spot, placed) => fits(spot, placed, goalRadius, spread)),
+    layoutTries: LAYOUT_TRIES,
+    placeTries: PLACE_TRIES,
+    fallback: FALLBACK_SPOTS,
+  })
 }

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
-import goalsData from './games/align-the-actions/data/align_the_actions_goals.json'
+import goalsData from './games/align-the-actions/data/align-the-actions.json'
 import { goalsFrom } from './games/align-the-actions/goals'
 import emotions from './games/emotions-rise/data/emotions.json'
 import focusData from './games/focus-attention/data/focus-attention.json'
@@ -139,6 +139,9 @@ describe('app start', () => {
     ['/games/break-it-down', 'Break It Down'],
     ['/games/pause-before-reacting', 'Pause Before Reacting'],
     ['/games/improve-inner-voice', 'Improve Inner Voice'],
+    ['/games/stay-in-the-zone', 'Stay in the Zone'],
+    ['/games/remember-gratitude', 'Remember Gratitude'],
+    ['/games/make-good-connections', 'Make Good Connections'],
   ])('opens %s directly on the %s screen', async (pathname, gameName) => {
     await startApp(pathname)
 
@@ -304,6 +307,9 @@ describe('games', () => {
     '/games/break-it-down',
     '/games/pause-before-reacting',
     '/games/improve-inner-voice',
+    '/games/stay-in-the-zone',
+    '/games/remember-gratitude',
+    '/games/make-good-connections',
   ])('%s first shows a Start button', async (pathname) => {
     const { app } = await startApp(pathname)
     const start = app.querySelector<HTMLElement>('.game-hud__start')
@@ -385,11 +391,25 @@ describe('games', () => {
     expect(texts.slice(1)).toEqual(['Focus', 'Change attention'])
     expect(app.querySelector<HTMLElement>('.game-hud__pause')!.hidden).toBe(false)
   })
+
+  it('plays Stay in the Zone on its screen', async () => {
+    const { app } = await startApp('/games/stay-in-the-zone')
+    const start = app.querySelector<HTMLButtonElement>('.game-hud__start')!
+    await vi.waitFor(() => expect(start.disabled).toBe(false))
+
+    start.click()
+
+    // The ball, at the bottom; its first zone comes 1 s later.
+    const drawn = contexts.at(-1)!.lastDrawing()
+    expect(drawn.map((call) => call.name)).toEqual(['clearRect', 'drawImage'])
+    expect(app.querySelector<HTMLElement>('.game-hud__pause')!.hidden).toBe(false)
+  })
 })
 
 describe('high scores', () => {
   it("shows each game's own high scores, kept in the browser", async () => {
-    const saved = (name: string, score: number) => JSON.stringify({ easy: [{ name, score }] })
+    const saved = (name: string, score: number) =>
+      JSON.stringify({ easy: { slow: [{ name, score }] } })
     localStorage.setItem(highScoresKey('emotions-rise'), saved('Ana', 12))
     localStorage.setItem(highScoresKey('focus-attention'), saved('Bo', 3))
     const { app } = await startApp('/games/emotions-rise')

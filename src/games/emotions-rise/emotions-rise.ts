@@ -17,6 +17,8 @@ import {
   type GoodOrBadMistake,
   type GoodOrBadStats,
 } from '../shared/good-or-bad'
+import { distanceIn } from '../shared/motion'
+import { AS_SET, checkPaces, pacingFor, type Pace, type PacePercents } from '../shared/pace'
 import { randomBetween, type Random } from '../shared/random'
 import type { Score } from '../shared/score'
 import { passDeadlines, type Due } from '../shared/timed-turns'
@@ -46,7 +48,8 @@ import { createEmotionGenerator, type Emotion, type EmotionGenerator } from './e
  * from the difficulty at the moment it appears, and keeps its speed until it
  * leaves. Because speeds and how often bubbles appear grow
  * by the same factor, about as many bubbles are on screen at once all round;
- * they just come and go faster.
+ * they just come and go faster. At the pace chosen (see the shared pace),
+ * every speed and delay is that much lower or longer, at the same times.
  *
  * Tapping a good emotion: +1. A bad one that escapes at the top: +1.
  * Tapping a bad emotion, or letting a good one escape, scores nothing and is
@@ -77,6 +80,11 @@ const HALF_WIDTH = BUBBLE_WIDTH / 2
 const HALF_HEIGHT = BUBBLE_HEIGHT / 2
 const HIT_RADIUS_X = BUBBLE_HIT_WIDTH / 2
 const HIT_RADIUS_Y = BUBBLE_HIT_HEIGHT / 2
+
+/** How much slower each pace is than the settings here (see config/difficulty.json and the shared pace). */
+export const PACE_PERCENTS: PacePercents = DIFFICULTY.emotionsRise.paces
+checkPaces(PACE_PERCENTS, 'emotionsRise.paces')
+
 const { speed, spawnDelayMs, harderByTimeMs } = DIFFICULTY.emotionsRise
 export const MIN_SPEED = speed.min
 export const MAX_SPEED = speed.max
@@ -145,7 +153,7 @@ interface Centre {
 
 /** Where `bubble`'s centre is (its height) at the round's time `timeMs`. */
 export function heightAt(bubble: Bubble, timeMs: number): number {
-  return SPAWN_Y - (bubble.speed * (timeMs - bubble.spawnedAtMs)) / 1000
+  return SPAWN_Y - distanceIn(bubble.speed, timeMs - bubble.spawnedAtMs)
 }
 
 /**
@@ -232,8 +240,8 @@ export interface EmotionsRise {
   readonly stats: GoodOrBadStats
   /** Removes all bubbles. */
   clear(): void
-  /** Starts a round: the first emotion appears straight away. */
-  start(): void
+  /** Starts a round at `pace` (Normal if none): the first emotion appears straight away. */
+  start(pace?: Pace): void
   /** Moves everything to the round's time `elapsedMs`. */
   update(elapsedMs: number): void
   /** Scores every bubble under `point`, which then fades out. */
@@ -257,6 +265,7 @@ export function createEmotionsRise({
   /** The last bubble that appeared (even if it has since been tapped). */
   let previous: Bubble | undefined
   let nextSpawn: Due = { deadlineMs: 0 }
+  let pacing = AS_SET
   const tally = createGoodOrBadTally({ score, points: POINTS, onMistake })
 
   /** Counts `emotion`, tapped or escaped. */
@@ -271,13 +280,13 @@ export function createEmotionsRise({
       emotion: generator.next(),
       x,
       y: SPAWN_Y,
-      speed: randomBetween(random, now.minSpeed, now.maxSpeed),
+      speed: pacing.speed(randomBetween(random, now.minSpeed, now.maxSpeed)),
       spawnedAtMs: atMs,
       sway: startSway(x),
     }
     bubbles.push(bubble)
     previous = bubble
-    const delayMs = randomBetween(random, now.minSpawnDelayMs, now.maxSpawnDelayMs)
+    const delayMs = pacing.time(randomBetween(random, now.minSpawnDelayMs, now.maxSpawnDelayMs))
     nextSpawn = { deadlineMs: atMs + delayMs }
   }
 
@@ -311,8 +320,9 @@ export function createEmotionsRise({
       return tally.stats
     },
     clear,
-    start() {
+    start(pace: Pace = 'normal') {
       clear()
+      pacing = pacingFor(pace, PACE_PERCENTS)
       generator = createEmotionGenerator({ ...emotions, random })
       spawn(0)
     },

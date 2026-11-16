@@ -2,7 +2,15 @@ import { describe, expect, it, vi } from 'vitest'
 import { seededRandom } from '../../test/random'
 import { GAME_HEIGHT, GAME_WIDTH, type GamePoint } from './game-canvas'
 import { GAME_BAR_HEIGHT } from './game-hud'
-import { findRandomSpot, gapBetweenOvals, playAreaFor, randomPointIn } from './placing'
+import { isInBox } from './geometry'
+import {
+  findRandomSpot,
+  gapBetweenOvals,
+  playAreaFor,
+  randomLayout,
+  randomPointIn,
+  type SpotRule,
+} from './placing'
 
 const size = { width: 168, height: 92.4 }
 
@@ -80,5 +88,54 @@ describe('random spots', () => {
 
     expect(findRandomSpot(area, seededRandom(3), 20, fits)).toBeUndefined()
     expect(fits).toHaveBeenCalledTimes(20)
+  })
+})
+
+describe('randomLayout', () => {
+  const area = { left: 0, right: 100, top: 0, bottom: 100 }
+  const fallback = [
+    { x: 1, y: 1 },
+    { x: 2, y: 2 },
+    { x: 3, y: 3 },
+  ]
+  const options = { area, layoutTries: 5, placeTries: 10, fallback }
+  /** At least `distance` from every spot placed before. */
+  const apart =
+    (distance: number): SpotRule =>
+    (spot, placed) =>
+      placed.every((other) => Math.hypot(spot.x - other.x, spot.y - other.y) >= distance)
+
+  it('places every spot in the area, keeping the rule', () => {
+    const spots = randomLayout(3, seededRandom(1), { ...options, rules: [apart(30)] })
+
+    expect(spots).toHaveLength(3)
+    for (const [i, spot] of spots.entries()) {
+      expect(isInBox(spot, area)).toBe(true)
+      expect(apart(30)(spot, spots.slice(0, i))).toBe(true)
+    }
+  })
+
+  it('keeps the strictest rule it can, then the next', () => {
+    // Nowhere in the area is 200 apart from anything else.
+    const spots = randomLayout(3, seededRandom(2), { ...options, rules: [apart(200), apart(30)] })
+
+    expect(spots).toHaveLength(3)
+    expect(spots.every((spot, i) => apart(30)(spot, spots.slice(0, i)))).toBe(true)
+  })
+
+  it('falls back on some of the places that always fit when no rule can be kept', () => {
+    const spots = randomLayout(2, seededRandom(3), { ...options, rules: [apart(200)] })
+
+    expect(spots).toHaveLength(2)
+    expect(new Set(spots).size).toBe(2)
+    for (const spot of spots) {
+      expect(fallback).toContain(spot)
+    }
+  })
+
+  it('cannot place more than the places that always fit', () => {
+    expect(() => randomLayout(4, seededRandom(4), { ...options, rules: [apart(0)] })).toThrow(
+      new RangeError('Cannot place more than 3 ovals, got 4'),
+    )
   })
 })

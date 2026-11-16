@@ -1,0 +1,9 @@
+/* Colours Stay in the Zone draws on the canvas with (read by draw.ts). */
+:root {
+  /* The zone: the good green, see-through, so the background shows through it… */
+  --stay-zone: color-mix(in srgb, var(--color-good) 30%, transparent);
+  /* …and the ring in its middle that shows its time left: the same green, solid, so darker. */
+  --stay-zone-ring: var(--color-good);
+  /* The ring around the ball that shows the time it still needs in the zone. */
+  --stay-ball-ring: #fff;
+}

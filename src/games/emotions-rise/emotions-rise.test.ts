@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { bubblesAt, findPoint } from '../../test/emotions-rise/bubbles'
 import { constantRandom, seededRandom } from '../../test/random'
 import { createGameLifecycle } from '../shared/game-lifecycle'
+import type { Pace } from '../shared/pace'
 import { createScore } from '../shared/score'
 import emotions from './data/emotions.json'
 import type { Emotion } from './emotion-generator'
@@ -1073,5 +1074,41 @@ describe('escaping', () => {
     expect(game.bubbles).toContain(first)
     game.update(21_926)
     expect(game.bubbles).not.toContain(first)
+  })
+})
+
+describe('pace', () => {
+  /** A round at `pace`, always at the lowest speed and shortest delay, played for `ms`. */
+  function playedAt(pace: Pace, ms: number) {
+    const { game } = setup(constantRandom(0))
+    game.start(pace)
+    game.update(ms)
+    return game.bubbles
+  }
+
+  it('makes emotions rise 15% slower and come 15% less often at Slow, the other way at Fast', () => {
+    const [normal, slow, fast] = (['normal', 'slow', 'fast'] as const).map((pace) =>
+      playedAt(pace, 1_000),
+    )
+
+    expect([normal[0].speed, slow[0].speed, fast[0].speed]).toEqual([
+      40,
+      expect.closeTo(34, 9),
+      expect.closeTo(46, 9),
+    ])
+    expect([normal[1].spawnedAtMs, slow[1].spawnedAtMs, fast[1].spawnedAtMs]).toEqual([
+      700,
+      expect.closeTo(805, 9),
+      expect.closeTo(595, 9),
+    ])
+  })
+
+  it('gets harder at the same times, from speeds 15% lower', () => {
+    const late = (bubbles: readonly Bubble[]) =>
+      bubbles.find((bubble) => bubble.spawnedAtMs >= 20_000)!
+
+    // 10% harder from 20 s on: 40 × 1.1, and 15% lower at Slow.
+    expect(late(playedAt('normal', 21_000)).speed).toBeCloseTo(44, 9)
+    expect(late(playedAt('slow', 21_000)).speed).toBeCloseTo(44 * 0.85, 9)
   })
 })

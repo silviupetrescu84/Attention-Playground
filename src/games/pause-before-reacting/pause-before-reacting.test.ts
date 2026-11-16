@@ -6,14 +6,15 @@ import { GAME_HEIGHT, GAME_WIDTH, type GamePoint } from '../shared/game-canvas'
 import { GAME_BAR_HEIGHT } from '../shared/game-hud'
 import { createGameLifecycle } from '../shared/game-lifecycle'
 import type { GoodOrBadMistake } from '../shared/good-or-bad'
+import type { Pace } from '../shared/pace'
 import { gapBetweenOvals, playAreaFor } from '../shared/placing'
 import { createScore } from '../shared/score'
+import { FADE_MS } from '../shared/timed-turns'
 import { MAX_SAME_TYPE_IN_A_ROW } from '../shared/word-picker'
 import data from './data/pause-before-reacting.json'
 import {
   createPauseBeforeReacting,
   EDGE_GAP,
-  FADE_MS,
   isOnSituation,
   MOST_ON_SCREEN,
   PLACE_TRIES,
@@ -455,5 +456,18 @@ describe('the round ending', () => {
     game.update(60_000)
 
     expect(game.stats.goodMissed + game.stats.badLetGo).toBeGreaterThan(0)
+  })
+})
+
+describe('pace', () => {
+  it('brings situations 15% less often at Slow, and 15% more often at Fast', () => {
+    const second = (['normal', 'slow', 'fast'] as const).map((pace: Pace) => {
+      const { game } = setup()
+      game.start(pace)
+      game.update(4_000)
+      return game.situations[1].shownAtMs
+    })
+
+    expect(second).toEqual([3_000, expect.closeTo(3_450, 9), expect.closeTo(2_550, 9)])
   })
 })

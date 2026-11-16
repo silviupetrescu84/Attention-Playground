@@ -227,8 +227,9 @@ describe('high scores', () => {
     name.dispatchEvent(new Event('input'))
     container.querySelector<HTMLFormElement>('.game-hud__name-form')!.requestSubmit()
 
-    expect(session.highScores.best('hard')).toEqual({ name: 'Ana', score: 5 })
-    expect(parseHighScores(storage.getItem(highScoresKey('test-game'))).hard).toEqual([
+    // At the pace a game starts on: Slow.
+    expect(session.highScores.best('hard', 'slow')).toEqual({ name: 'Ana', score: 5 })
+    expect(parseHighScores(storage.getItem(highScoresKey('test-game'))).hard.slow).toEqual([
       { name: 'Ana', score: 5 },
     ])
   })
@@ -246,7 +247,8 @@ describe('high scores', () => {
 
   it('shows the high scores saved before the game was opened', () => {
     const storage = new FakeStorage()
-    const saved = { easy: [{ name: 'Bo', score: 8 }] }
+    // At the pace a game starts on: Slow.
+    const saved = { easy: { slow: [{ name: 'Bo', score: 8 }] } }
     storage.setItem(highScoresKey('test-game'), JSON.stringify(saved))
     const { container, button } = setup({}, storage)
 
@@ -568,16 +570,39 @@ describe('summary', () => {
     expect(summary).toHaveBeenCalledOnce()
     const list = container.querySelector<HTMLElement>('.game-hud__summary')!
     expect(list.hidden).toBe(false)
-    expect(list.textContent).toBe('Tapped4')
+    expect(list.textContent).toBe('Tapped4Best comboX1')
   })
 
-  it('shows no summary for games without one', () => {
+  it('shows only the best combo for games without a summary of their own', () => {
     const { session, button, container } = setup()
     button('.game-hud__start').click()
 
     session.lifecycle.finish()
 
-    expect(container.querySelector<HTMLElement>('.game-hud__summary')!.hidden).toBe(true)
+    expect(container.querySelector('.game-hud__summary')!.textContent).toBe('Best comboX1')
+  })
+
+  it('ends the summary with the best combo of the round, even if a mistake ended it', () => {
+    const { session, button, container } = setup()
+    button('.game-hud__start').click()
+    // 12 good things in a row: X3, then a mistake.
+    for (let i = 0; i < 12; i++) session.score.add(1)
+    session.mistakes.add()
+
+    session.lifecycle.finish()
+
+    const lines = [...container.querySelectorAll('.game-hud__summary dd')]
+    expect(lines.at(-1)?.textContent).toBe('X3')
+    expect(session.combo.multiplier).toBe(1)
+  })
+
+  it('gives the game a score multiplied by the combo', () => {
+    const { session, button } = setup()
+    button('.game-hud__start').click()
+
+    for (let i = 0; i < 6; i++) session.score.add(1)
+
+    expect(session.score.value).toBe(5 + 2)
   })
 })
 

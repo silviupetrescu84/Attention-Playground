@@ -18,7 +18,7 @@ export interface Goal {
   readonly against: readonly string[]
 }
 
-/** The shape of `data/align_the_actions_goals.json`. */
+/** The shape of `data/align-the-actions.json`. */
 export interface GoalsData {
   readonly categories: readonly {
     readonly goals: readonly {

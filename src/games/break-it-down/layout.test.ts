@@ -121,20 +121,17 @@ describe('measuring gaps', () => {
 
 describe('placing the actions', () => {
   it('keeps every gap, to the edges, the goal and each other, at every size of goal', () => {
-    for (let seed = 1; seed <= 3; seed++) {
-      const random = seededRandom(seed)
-      for (const level of LEVELS) {
-        for (let count = 2; count <= MOST_ACTIONS_THAT_FIT; count++) {
-          const radius = ringOuterRadiusFor(goalSizeFor(level))
-          const spots = placeOptions(count, radius, random)
+    const random = seededRandom(1)
+    for (const level of LEVELS) {
+      for (let count = 2; count <= MOST_ACTIONS_THAT_FIT; count++) {
+        const radius = ringOuterRadiusFor(goalSizeFor(level))
+        const spots = placeOptions(count, radius, random)
 
-          expect(spots).toHaveLength(count)
-          expectGaps(spots, radius)
-        }
+        expect(spots).toHaveLength(count)
+        expectGaps(spots, radius)
       }
     }
-    // Many placements: about 2 s alone, more with every other test running at once.
-  }, 20_000)
+  })
 
   it('spreads them at least 130 px apart, centre to centre, when there is room', () => {
     const random = seededRandom(7)

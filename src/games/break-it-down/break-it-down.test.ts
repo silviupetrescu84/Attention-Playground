@@ -3,11 +3,12 @@ import { seededRandom } from '../../test/random'
 import { LARGE_OVAL } from '../shared/artwork'
 import { steppedAfter } from '../shared/difficulty'
 import { createGameLifecycle } from '../shared/game-lifecycle'
+import type { Pace } from '../shared/pace'
 import { gapBetweenOvals } from '../shared/placing'
 import { createScore } from '../shared/score'
+import { FADE_MS } from '../shared/timed-turns'
 import {
   createBreakItDown,
-  FADE_MS,
   goalOpacityAt,
   goalSizeAt,
   isOnOption,
@@ -653,5 +654,26 @@ describe('randomness', () => {
     game.start()
 
     expect(game.turn!.options).toHaveLength(2)
+  })
+})
+
+describe('pace', () => {
+  it('gives 15% longer to read and to choose at Slow, and 15% less at Fast', () => {
+    const turns = (['normal', 'slow', 'fast'] as const).map((pace: Pace) => {
+      const { game } = setup()
+      game.start(pace)
+      return game.turn!
+    })
+
+    expect(turns.map((turn) => turn.shownAtMs)).toEqual([
+      3_000,
+      expect.closeTo(3_450, 9),
+      expect.closeTo(2_550, 9),
+    ])
+    expect(turns.map((turn) => turn.timeLimitMs)).toEqual([
+      10_000,
+      expect.closeTo(11_500, 9),
+      expect.closeTo(8_500, 9),
+    ])
   })
 })

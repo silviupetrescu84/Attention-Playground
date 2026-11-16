@@ -27,6 +27,24 @@
   --canvas-wrong-hue: color-mix(in srgb, var(--color-bad) 20%, transparent);
   /* The shadow under buttons, on the page and drawn on the canvas (see pill.ts). */
   --button-shadow: color-mix(in srgb, var(--color-ink) 25%, transparent);
+  /*
+   * Buttons drawn on the canvas, like the app's own (Start, Restart): ink blue
+   * with white text, lighter when pressed (see canvas-button.ts).
+   */
+  --canvas-button-fill: var(--color-ink);
+  --canvas-button-text: #fff;
+  --canvas-button-pressed: color-mix(in srgb, var(--color-ink) 80%, white);
+
+  /*
+   * The combo's multiplier before the score (game-hud.ts): soft, pleasant
+   * colours that warm up as it goes up, with ink text on each. X1 is a light
+   * ink, then green, yellow, orange and, at X5 (the most), red.
+   */
+  --combo-x1: color-mix(in srgb, var(--color-ink) 12%, white);
+  --combo-x2: #8fd6a3;
+  --combo-x3: #f7dc6f;
+  --combo-x4: #f5b27a;
+  --combo-x5: #f19a94;
 }
 
 /* Centred in the space kept free below the canvas (set by game-canvas.ts). */
@@ -113,13 +131,46 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 12px 0 16px;
-  font-weight: 800;
+  /*
+   * The canvas font, bundled with the app: condensed, and the same on every
+   * device, so the combo, score, mistakes and time always fit on one line.
+   */
+  font-family: var(--canvas-font-family);
+  font-weight: var(--canvas-font-weight);
+  white-space: nowrap;
 }
 
+.game-hud__left,
 .game-hud__right {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+/* The combo's multiplier before the score: a small pill, in the colour of its multiplier. */
+.game-hud__combo {
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: var(--color-ink);
+  background: var(--combo-x1);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.game-hud__combo[data-multiplier='2'] {
+  background: var(--combo-x2);
+}
+
+.game-hud__combo[data-multiplier='3'] {
+  background: var(--combo-x3);
+}
+
+.game-hud__combo[data-multiplier='4'] {
+  background: var(--combo-x4);
+}
+
+.game-hud__combo[data-multiplier='5'] {
+  background: var(--combo-x5);
 }
 
 .game-hud__time {
@@ -163,10 +214,14 @@
   pointer-events: auto;
 }
 
-/* The Start button a third of the way down the canvas, the rest under it. */
+/*
+ * The Start button a little over a quarter of the way down the canvas, the
+ * rest under it: room for the longest instructions below the difficulty and
+ * pace buttons.
+ */
 .game-hud__overlay--start {
   justify-content: flex-start;
-  padding-top: calc(var(--game-height) * 0.33);
+  padding-top: calc(var(--game-height) * 0.28);
 }
 
 /*
@@ -276,6 +331,7 @@
 
 /* Lighter than Start, which stays the main action. */
 .game-hud .game-hud__difficulty,
+.game-hud .game-hud__pace,
 .game-hud .game-hud__high-scores-open {
   padding: 10px 28px;
   color: var(--color-ink);

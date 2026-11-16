@@ -11,9 +11,10 @@ import {
 } from '../shared/difficulty'
 import type { GamePoint } from '../shared/game-canvas'
 import { PLAY_CENTRE } from '../shared/game-hud'
+import { AS_SET, checkPaces, pacingFor, type Pace, type PacePercents } from '../shared/pace'
 import { randomItem, shuffled, type Random } from '../shared/random'
 import type { Score } from '../shared/score'
-import { fadeAt, passDeadlines, type TimedTurn } from '../shared/timed-turns'
+import { FADE_MS, fadeAt, passDeadlines, type TimedTurn } from '../shared/timed-turns'
 import { createThoughtPicker, type Thought, type ThoughtPicker } from './thoughts'
 
 /**
@@ -35,7 +36,8 @@ import { createThoughtPicker, type Thought, type ThoughtPicker } from './thought
  *
  * The game gets harder as more thoughts are shown: more choices (CHOICES),
  * and less time to choose (TIME_LIMIT). Both, and READING_MS, are set in
- * config/difficulty.json. The choices sit at the corners of a regular shape
+ * config/difficulty.json; both times are longer or shorter at the pace
+ * chosen (see the shared pace). The choices sit at the corners of a regular shape
  * with one corner straight up: above and below, a triangle, N E S W, a
  * pentagon, a hexagon (at most MOST_CHOICES_THAT_FIT).
  *
@@ -45,6 +47,10 @@ import { createThoughtPicker, type Thought, type ThoughtPicker } from './thought
 
 /** The most choices that fit around the thought, each clear of the others. */
 export const MOST_CHOICES_THAT_FIT = 6
+
+/** How much slower each pace is than the settings here (see config/difficulty.json and the shared pace). */
+export const PACE_PERCENTS: PacePercents = DIFFICULTY.shiftPerspective.paces
+checkPaces(PACE_PERCENTS, 'shiftPerspective.paces')
 
 const { choicesByThoughts, timeToChooseMsByThoughts, readingMs } = DIFFICULTY.shiftPerspective
 
@@ -78,9 +84,6 @@ export const POINTS = {
 /** How long the thought is shown alone, from when it starts to fade in, before the choices come. */
 export const READING_MS = readingMs
 checkNotNegative(READING_MS, 'shiftPerspective.readingMs')
-
-/** How long a thought and its choices take to fade in, and to fade out. */
-export const FADE_MS = 100
 
 /** Where the thought is: the middle of the canvas below the score bar. */
 export const CENTRE: GamePoint = PLAY_CENTRE
@@ -141,13 +144,13 @@ export interface Turn extends TimedTurn {
  */
 export function thoughtOpacityAt(turn: Turn, timeMs: number): number {
   const { shownAtMs, endedAtMs } = turn
-  return fadeAt({ fromMs: shownAtMs, endedAtMs, inMs: FADE_MS, outMs: FADE_MS }, timeMs)
+  return fadeAt({ fromMs: shownAtMs, endedAtMs }, timeMs)
 }
 
 /** How visible `turn`'s choices are at the round's time `timeMs`: 0 to 1. */
 export function choicesOpacityAt(turn: Turn, timeMs: number): number {
   const { choicesAtMs, endedAtMs } = turn
-  return fadeAt({ fromMs: choicesAtMs, endedAtMs, inMs: FADE_MS, outMs: FADE_MS }, timeMs)
+  return fadeAt({ fromMs: choicesAtMs, endedAtMs }, timeMs)
 }
 
 /** A mistake the player can make: choosing a bad way to see the thought, or nothing in time. */
@@ -179,8 +182,8 @@ export interface ShiftPerspective {
   readonly stats: ShiftPerspectiveStats
   /** Removes everything. */
   clear(): void
-  /** Starts a round: the first thought starts to fade in straight away. */
-  start(): void
+  /** Starts a round at `pace` (Normal if none): the first thought starts to fade in straight away. */
+  start(pace?: Pace): void
   /** Moves everything to the round's time `elapsedMs`. */
   update(elapsedMs: number): void
   /** Chooses the choice tapped, if any, at the time of the last update. */
@@ -207,6 +210,7 @@ export function createShiftPerspective({
   let turn: Turn | undefined
   let previous: Turn | undefined
   let thoughtsShown = 0
+  let pacing = AS_SET
   let timeMs = 0
   const noStats: ShiftPerspectiveStats = { good: 0, bad: 0, tooSlow: 0 }
   let stats = noStats
@@ -216,7 +220,7 @@ export function createShiftPerspective({
   function show(atMs: number) {
     const thought = picker.next()
     const count = choicesAfter(thoughtsShown)
-    const timeLimitMs = timeLimitAfter(thoughtsShown)
+    const timeLimitMs = pacing.time(timeLimitAfter(thoughtsShown))
     thoughtsShown++
 
     const texts = [
@@ -226,7 +230,7 @@ export function createShiftPerspective({
         .map((text) => ({ text, good: false })),
     ]
     const positions = choicePositions(count)
-    const choicesAtMs = atMs + READING_MS
+    const choicesAtMs = atMs + pacing.time(READING_MS)
     const readyAtMs = choicesAtMs + FADE_MS
 
     turn = {
@@ -287,8 +291,9 @@ export function createShiftPerspective({
       return stats
     },
     clear,
-    start() {
+    start(pace: Pace = 'normal') {
       clear()
+      pacing = pacingFor(pace, PACE_PERCENTS)
       picker = createThoughtPicker(thoughts, random)
       show(0)
     },

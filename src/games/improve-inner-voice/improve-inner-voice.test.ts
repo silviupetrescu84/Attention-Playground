@@ -4,15 +4,16 @@ import { steppedAfter } from '../shared/difficulty'
 import { GAME_BAR_HEIGHT } from '../shared/game-hud'
 import { createGameLifecycle } from '../shared/game-lifecycle'
 import type { GoodOrBadMistake } from '../shared/good-or-bad'
+import type { Pace } from '../shared/pace'
 import type { Random } from '../shared/random'
 import { createScore } from '../shared/score'
+import { FADE_MS } from '../shared/timed-turns'
 import { MAX_SAME_TYPE_IN_A_ROW } from '../shared/word-picker'
 import data from './data/improve-inner-voice.json'
 import {
   COLUMNS,
   columnsAfter,
   createImproveInnerVoice,
-  FADE_MS,
   FALL_SPEED,
   MIN_COLUMN_GAP,
   padTouches,
@@ -503,5 +504,37 @@ describe('the round ending', () => {
     expect(
       game.stats.goodMissed + game.stats.badLetGo + game.stats.goodTapped + game.stats.badTapped,
     ).toBeGreaterThan(0)
+  })
+})
+
+describe('pace', () => {
+  /** A round at `pace`, the pad heading right, played for 4 s. */
+  function playedAt(pace: Pace) {
+    const { game } = setup()
+    game.start(pace)
+    game.drag({ x: 400, y: 700 })
+    game.update(4_000)
+    return game
+  }
+
+  it('makes words fall 15% slower and come 15% less often at Slow, the other way at Fast', () => {
+    const [normal, slow, fast] = (['normal', 'slow', 'fast'] as const).map(playedAt)
+
+    expect([normal.words[0].speed, slow.words[0].speed, fast.words[0].speed]).toEqual([
+      40,
+      expect.closeTo(34, 9),
+      expect.closeTo(46, 9),
+    ])
+    expect([normal.words[1].shownAtMs, slow.words[1].shownAtMs, fast.words[1].shownAtMs]).toEqual([
+      3_000,
+      expect.closeTo(3_450, 9),
+      expect.closeTo(2_550, 9),
+    ])
+  })
+
+  it('moves the pad the same at every pace', () => {
+    const [normal, slow, fast] = (['normal', 'slow', 'fast'] as const).map(playedAt)
+
+    expect([slow.pad.x, fast.pad.x]).toEqual([normal.pad.x, normal.pad.x])
   })
 })

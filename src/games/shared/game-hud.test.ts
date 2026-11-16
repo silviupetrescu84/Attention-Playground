@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest'
+import { cssVariables } from '../../test/css-variables'
 import { FakeStorage } from '../../test/fake-storage'
+import { createCombo } from './combo'
 import { findElement } from './dom'
 import { GAME_HEIGHT, GAME_WIDTH } from './game-canvas'
 import { createGameHud, formatSeconds, GAME_BAR_HEIGHT, PLAY_CENTRE } from './game-hud'
@@ -9,9 +11,14 @@ import type { GameLoop } from './game-loop'
 import gameCss from './game.css?raw'
 import { createHighScores, highScoresKey, PLAYER_NAME_KEY, type HighScore } from './high-scores'
 import { createMistakes } from './mistakes'
+import { createPaceChoice } from './pace'
 import { createScore } from './score'
 
-function setup(storage = new FakeStorage()) {
+/**
+ * A HUD with everything it shows. The pace is Normal, chosen with the pace
+ * button, unless `atFirstPace` (then Slow, as a game starts).
+ */
+function setup(storage = new FakeStorage(), { atFirstPace = false } = {}) {
   const screen = new AbortController()
   const lifecycle = createGameLifecycle({ signal: screen.signal })
   const loop = { elapsedMs: 0 } satisfies GameLoop
@@ -19,19 +26,30 @@ function setup(storage = new FakeStorage()) {
   lifecycle.subscribe((change) => {
     if (isNewRound(change)) loop.elapsedMs = 0
   })
-  const score = createScore({ lifecycle })
   const mistakes = createMistakes({ lifecycle })
-  const highScores = createHighScores({ gameId: 'test-game', lifecycle, score, mistakes, storage })
+  const combo = createCombo({ lifecycle, mistakes })
+  const score = createScore({ lifecycle, combo })
+  const pace = createPaceChoice({ lifecycle })
+  const highScores = createHighScores({
+    gameId: 'test-game',
+    lifecycle,
+    score,
+    mistakes,
+    pace,
+    storage,
+  })
   const stage = document.createElement('div')
-  const hud = createGameHud(stage, { lifecycle, loop, score, mistakes, highScores })
+  const hud = createGameHud(stage, { lifecycle, loop, score, combo, mistakes, pace, highScores })
 
   const visible = (element: Element) => !element.closest('[hidden]')
   const ui = {
     score: findElement(hud.element, '.game-hud__score', HTMLElement),
+    combo: findElement(hud.element, '.game-hud__combo', HTMLElement),
     time: findElement(hud.element, '.game-hud__time', HTMLElement),
     pause: findElement(hud.element, '.game-hud__pause', HTMLButtonElement),
     start: findElement(hud.element, '.game-hud__start', HTMLButtonElement),
     difficulty: findElement(hud.element, '.game-hud__difficulty', HTMLButtonElement),
+    pace: findElement(hud.element, '.game-hud__pace', HTMLButtonElement),
     failOn: findElement(hud.element, '.game-hud__fail-on', HTMLElement),
     mistakes: findElement(hud.element, '.game-hud__mistakes', HTMLElement),
     startOverlay: findElement(hud.element, '.game-hud__overlay--start', HTMLElement),
@@ -63,6 +81,8 @@ function setup(storage = new FakeStorage()) {
     back: findElement(hud.element, '.game-hud__back', HTMLButtonElement),
   }
 
+  while (!atFirstPace && pace.pace !== 'normal') ui.pace.click()
+
   /** Which of the big pieces are visible. */
   function shown() {
     return {
@@ -75,7 +95,21 @@ function setup(storage = new FakeStorage()) {
     }
   }
 
-  return { screen, lifecycle, loop, score, mistakes, highScores, stage, hud, ui, shown, visible }
+  return {
+    screen,
+    lifecycle,
+    loop,
+    score,
+    combo,
+    mistakes,
+    pace,
+    highScores,
+    stage,
+    hud,
+    ui,
+    shown,
+    visible,
+  }
 }
 
 describe('formatSeconds', () => {
@@ -180,7 +214,40 @@ describe('game HUD', () => {
     expect(ui.start.nextElementSibling).toBe(ui.difficulty)
   })
 
-  it('shows under the difficulty how many mistakes fail the round', () => {
+  it('shows the pace, Slow at first, under the difficulty', () => {
+    const { ui } = setup(undefined, { atFirstPace: true })
+
+    expect(ui.pace.textContent).toBe('Pace: Slow')
+    expect(ui.difficulty.nextElementSibling).toBe(ui.pace)
+  })
+
+  it('picks the next pace with each press: Slow, Normal, Fast, and Slow again', () => {
+    const { ui, pace } = setup(undefined, { atFirstPace: true })
+    const shown = [ui.pace.textContent]
+
+    for (let i = 0; i < 3; i++) {
+      ui.pace.click()
+      shown.push(ui.pace.textContent)
+    }
+
+    expect(shown).toEqual(['Pace: Slow', 'Pace: Normal', 'Pace: Fast', 'Pace: Slow'])
+    expect(pace.pace).toBe('slow')
+  })
+
+  it('keeps the pace chosen for the next rounds, and only lets it change before one', () => {
+    const { ui, lifecycle, pace } = setup()
+    ui.pace.click()
+
+    lifecycle.start()
+    expect(ui.pace.closest('[hidden]')).not.toBeNull()
+    expect(() => pace.next()).toThrow('Cannot change the pace of a game that is playing')
+    lifecycle.pause()
+    lifecycle.restart()
+
+    expect(ui.pace.textContent).toBe('Pace: Fast')
+  })
+
+  it('shows under the pace how many mistakes fail the round', () => {
     const { ui } = setup()
     const failOn = [ui.failOn.textContent]
 
@@ -189,7 +256,7 @@ describe('game HUD', () => {
       failOn.push(ui.failOn.textContent)
     }
 
-    expect(ui.difficulty.nextElementSibling).toBe(ui.failOn)
+    expect(ui.pace.nextElementSibling).toBe(ui.failOn)
     expect(failOn).toEqual([
       'Fail on 10 mistakes',
       'Fail on 6 mistakes',
@@ -217,7 +284,8 @@ describe('game HUD', () => {
   it('shows "Mistakes: x" in the top bar, as they happen and back to 0 for a new round', () => {
     const { lifecycle, mistakes, ui } = setup()
     expect(ui.mistakes.textContent).toBe('Mistakes: 0')
-    expect(ui.mistakes.parentElement).toBe(ui.score.parentElement)
+    expect(ui.mistakes.parentElement).toBe(ui.bar)
+    expect(ui.bar.contains(ui.score)).toBe(true)
     ui.start.click()
 
     mistakes.add()
@@ -390,10 +458,11 @@ describe('game HUD', () => {
 
     expect(seen()).toBe(true)
     expect(paragraphs()).toEqual(['Choose the good ones.', 'Let the bad ones go.'])
-    // Start, the difficulty, what it fails on and the high scores, then the instructions.
+    // Start, the difficulty and pace, what it fails on and the high scores, then the instructions.
     expect([...ui.startOverlay.children]).toEqual([
       ui.start,
       ui.difficulty,
+      ui.pace,
       ui.failOn,
       ui.highScoresOpen,
       ui.instructions,
@@ -435,11 +504,11 @@ describe('game HUD', () => {
     expect(ui.instructions.textContent).toBe('<img src=x onerror=alert(1)>')
   })
 
-  it('puts the Start button a third of the way down, and the rest under it', () => {
+  it('puts the Start button 28% of the way down, and the rest under it', () => {
     const rule = /\.game-hud__overlay--start\s*\{([^}]*)\}/.exec(gameCss)![1]
 
     expect(rule).toMatch(/justify-content: flex-start;/)
-    expect(rule).toMatch(/padding-top: calc\(var\(--game-height\) \* 0\.33\);/)
+    expect(rule).toMatch(/padding-top: calc\(var\(--game-height\) \* 0\.28\);/)
   })
 
   it('writes the instructions on the same white card, in the same font, as the summary', () => {
@@ -576,9 +645,13 @@ describe('game HUD', () => {
 })
 
 /** A storage with `easy` (and `other` difficulties') high scores saved for the HUD's game. */
+/** A storage with `saved` high scores for each difficulty, at the Normal pace. */
 function storageWith(saved: Partial<Record<string, HighScore[]>>, playerName?: string) {
   const storage = new FakeStorage()
-  storage.setItem(highScoresKey('test-game'), JSON.stringify(saved))
+  const atNormal = Object.fromEntries(
+    Object.entries(saved).map(([level, kept]) => [level, { normal: kept }]),
+  )
+  storage.setItem(highScoresKey('test-game'), JSON.stringify(atNormal))
   if (playerName !== undefined) storage.setItem(PLAYER_NAME_KEY, playerName)
   return storage
 }
@@ -601,6 +674,62 @@ function typeName(ui: ReturnType<typeof setup>['ui'], name: string) {
 function clickSave(ui: ReturnType<typeof setup>['ui']) {
   ui.nameForm.requestSubmit(ui.save)
 }
+
+describe('the combo', () => {
+  it('shows X1 before the score, from the start', () => {
+    const { ui } = setup()
+
+    expect(ui.combo.textContent).toBe('X1')
+    expect(ui.combo.dataset.multiplier).toBe('1')
+    expect(ui.combo.nextElementSibling).toBe(ui.score)
+  })
+
+  it('colours each multiplier softly, warming up to X5: light ink, green, yellow, orange, red', () => {
+    const rule = /\.game-hud__combo \{([^}]*)\}/.exec(gameCss)![1]
+    expect(rule).toContain('color: var(--color-ink);')
+    expect(rule).toContain('background: var(--combo-x1);')
+    for (const multiplier of [2, 3, 4, 5]) {
+      expect(gameCss).toContain(
+        `.game-hud__combo[data-multiplier='${multiplier}'] {\n  background: var(--combo-x${multiplier});`,
+      )
+    }
+    expect([1, 2, 3, 4, 5].map((multiplier) => cssVariables.get(`--combo-x${multiplier}`))).toEqual(
+      [
+        'color-mix(in srgb, var(--color-ink) 12%, white)',
+        '#8fd6a3',
+        '#f7dc6f',
+        '#f5b27a',
+        '#f19a94',
+      ],
+    )
+  })
+
+  it('shows the multiplier as it goes up, and the points it adds', () => {
+    const { lifecycle, score, ui } = setup()
+    lifecycle.start()
+
+    for (let i = 0; i < 5; i++) score.add(1)
+    expect([ui.combo.textContent, ui.score.textContent]).toEqual(['X2', 'Score: 5'])
+    score.add(1)
+
+    expect([ui.combo.textContent, ui.score.textContent]).toEqual(['X2', 'Score: 7'])
+    expect(ui.combo.dataset.multiplier).toBe('2')
+  })
+
+  it('goes back to X1 after a mistake, and for a new round', () => {
+    const { lifecycle, score, mistakes, ui } = setup()
+    lifecycle.start()
+    for (let i = 0; i < 5; i++) score.add(1)
+
+    mistakes.add()
+    expect(ui.combo.textContent).toBe('X1')
+
+    for (let i = 0; i < 5; i++) score.add(1)
+    lifecycle.pause()
+    lifecycle.restart()
+    expect(ui.combo.textContent).toBe('X1')
+  })
+})
 
 describe('high scores screen', () => {
   /** The high scores shown, as [rank, name, score]. */
@@ -694,7 +823,7 @@ describe('high scores screen', () => {
     )
 
     ui.highScoresOpen.click()
-    expect(ui.highScoresLevel.textContent).toBe('Easy')
+    expect(ui.highScoresLevel.textContent).toBe('Easy · Normal')
     expect(listed(ui)).toEqual([
       ['1', 'Bo', '12'],
       ['2', 'Ana', '4'],
@@ -704,8 +833,33 @@ describe('high scores screen', () => {
     ui.difficulty.click()
     ui.difficulty.click()
     ui.highScoresOpen.click()
-    expect(ui.highScoresLevel.textContent).toBe('Hard')
+    expect(ui.highScoresLevel.textContent).toBe('Hard · Normal')
     expect(listed(ui)).toEqual([['1', 'Cy', '3']])
+  })
+
+  it('shows the high scores of the pace chosen, naming it with the difficulty', () => {
+    const storage = new FakeStorage()
+    const saved = {
+      easy: { normal: [{ name: 'Ana', score: 4 }], slow: [{ name: 'Bo', score: 9 }] },
+    }
+    storage.setItem(highScoresKey('test-game'), JSON.stringify(saved))
+    const { ui } = setup(storage)
+
+    ui.highScoresOpen.click()
+    expect(ui.highScoresLevel.textContent).toBe('Easy · Normal')
+    expect(listed(ui)).toEqual([['1', 'Ana', '4']])
+
+    ui.back.click()
+    ui.pace.click()
+    ui.highScoresOpen.click()
+    expect(ui.highScoresLevel.textContent).toBe('Easy · Fast')
+    expect(ui.noHighScores.hidden).toBe(false)
+
+    ui.back.click()
+    ui.pace.click()
+    ui.highScoresOpen.click()
+    expect(ui.highScoresLevel.textContent).toBe('Easy · Slow')
+    expect(listed(ui)).toEqual([['1', 'Bo', '9']])
   })
 
   it('shows the 10 best', () => {
@@ -779,6 +933,15 @@ describe('high scores screen', () => {
 })
 
 describe('saving a high score at game over', () => {
+  it('compares a round with the high scores of its own difficulty and pace only', () => {
+    const played = setup(storageWith({ easy: [{ name: 'Ana', score: 12 }] }))
+    played.ui.pace.click()
+
+    playRound(played, 1)
+
+    expect(played.ui.roundResult.textContent).toBe('New best score!')
+  })
+
   it('asks for a name under the final score when the round beat every high score', () => {
     const played = setup()
     const { ui, visible } = played
@@ -828,11 +991,11 @@ describe('saving a high score at game over', () => {
     typeName(ui, '  Bo  ')
     clickSave(ui)
 
-    expect(highScores.table.easy).toEqual([
+    expect(highScores.table.easy.normal).toEqual([
       { name: 'Ana', score: 9 },
       { name: 'Bo', score: 4 },
     ])
-    expect(ui.roundResult.textContent).toBe('Saved: #2 on Easy')
+    expect(ui.roundResult.textContent).toBe('Saved: #2 on Easy · Normal')
     expect(visible(ui.nameForm)).toBe(false)
     // The form is gone: Restart is next.
     expect(document.activeElement).toBe(ui.finishedRestart)
@@ -863,7 +1026,7 @@ describe('saving a high score at game over', () => {
 
     expect(() => ui.nameForm.requestSubmit()).not.toThrow()
 
-    expect(highScores.table.easy).toHaveLength(1)
+    expect(highScores.table.easy.normal).toHaveLength(1)
   })
 
   it('suggests the name just saved for the next high score', () => {
@@ -887,7 +1050,7 @@ describe('saving a high score at game over', () => {
     ui.finishedRestart.click()
     playRound(played, 0)
 
-    expect(highScores.table.easy).toEqual([])
+    expect(highScores.table.easy.normal).toEqual([])
     expect(visible(ui.nameForm)).toBe(false)
     expect(visible(ui.roundResult)).toBe(false)
   })
@@ -930,7 +1093,7 @@ describe('saving a high score at game over', () => {
     playRound(played, 3)
     storage.setItem(
       highScoresKey('test-game'),
-      JSON.stringify({ easy: [...full, { name: 'Other tab', score: 10 }] }),
+      JSON.stringify({ easy: { normal: [...full, { name: 'Other tab', score: 10 }] } }),
     )
 
     typeName(ui, 'Ana')

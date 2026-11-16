@@ -13,9 +13,11 @@ import {
   type GoodOrBadMistake,
   type GoodOrBadStats,
 } from '../shared/good-or-bad'
+import { distanceIn } from '../shared/motion'
+import { AS_SET, checkPaces, pacingFor, type Pace, type PacePercents } from '../shared/pace'
 import { randomItem, type Random } from '../shared/random'
 import type { Score } from '../shared/score'
-import { fadeAt } from '../shared/timed-turns'
+import { FADE_MS, fadeAt } from '../shared/timed-turns'
 import { createWordPicker, type Word, type WordLists, type WordPicker } from '../shared/word-picker'
 import { createEmpowerment } from './empowerment'
 import { createPad, type Pad } from './pad'
@@ -30,7 +32,9 @@ import { createPad, type Pad } from './pad'
  * (see the shared word picker). Each comes down in one of 7 COLUMNS, from
  * 1/8 of the way across to 7/8 (so it is all on the canvas), at least 2
  * columns from the one before. It falls at FALL_SPEED, faster as more have
- * come, keeping the speed it started with.
+ * come, keeping the speed it started with. At the pace chosen (see the
+ * shared pace), words fall that much slower or faster and come that much
+ * less or more often; the pad goes at its own speed at every pace.
  *
  * The player moves a pad along the bottom (see pad.ts). The moment the pad
  * touches a word, the word stops and fades out over 0.1 s, with a green or
@@ -63,6 +67,10 @@ export const MIN_COLUMN_GAP = 2
 /** Where a word's centre starts: the word just below the score bar. */
 export const START_Y = GAME_BAR_HEIGHT + WORD_OVAL.height / 2
 
+/** How much slower each pace is than the settings here (see config/difficulty.json and the shared pace). */
+export const PACE_PERCENTS: PacePercents = DIFFICULTY.improveInnerVoice.paces
+checkPaces(PACE_PERCENTS, 'improveInnerVoice.paces')
+
 const { spawnDelayMsByWords, fallSpeedByWords } = DIFFICULTY.improveInnerVoice
 
 /** The time from one word to the next, by how many have come (see config/difficulty.json). */
@@ -72,9 +80,6 @@ checkSteps(SPAWN_DELAY, 'improveInnerVoice.spawnDelayMsByWords', checkPositive)
 /** How fast a word falls, in px per second, by how many came before it. */
 export const FALL_SPEED: Steps = fallSpeedByWords
 checkSteps(FALL_SPEED, 'improveInnerVoice.fallSpeedByWords', checkPositive)
-
-/** How long a word takes to fade in, and to fade out once caught. */
-export const FADE_MS = 100
 
 /** Everything moves on in steps of at most this much. */
 export const STEP_MS = 10
@@ -106,7 +111,7 @@ export interface FallingWord extends GamePoint {
 /** How visible `falling` is at the round's time `timeMs`: 0 to 1. */
 export function wordOpacityAt(falling: FallingWord, timeMs: number): number {
   const { shownAtMs, endedAtMs } = falling
-  return fadeAt({ fromMs: shownAtMs, endedAtMs, inMs: FADE_MS, outMs: FADE_MS }, timeMs)
+  return fadeAt({ fromMs: shownAtMs, endedAtMs }, timeMs)
 }
 
 /** Whether the pad, where it is, touches `falling`'s oval as seen. */
@@ -142,8 +147,8 @@ export interface ImproveInnerVoice {
   readonly stats: GoodOrBadStats
   /** Removes everything, and puts the pad back in the middle. */
   clear(): void
-  /** Starts a round: the first word starts to fall straight away. */
-  start(): void
+  /** Starts a round at `pace` (Normal if none): the first word starts to fall straight away. */
+  start(pace?: Pace): void
   /** Moves everything to the round's time `elapsedMs`. */
   update(elapsedMs: number): void
   /** The player's finger is at `point` (`undefined`: lifted): the pad heads there. */
@@ -168,6 +173,7 @@ export function createImproveInnerVoice({
   /** When the next word comes; undefined before the round starts. */
   let nextAtMs: number | undefined
   let shown = 0
+  let pacing = AS_SET
   let lastColumn: number | undefined
   let timeMs = 0
   const empowerment = createEmpowerment()
@@ -199,13 +205,13 @@ export function createImproveInnerVoice({
       column,
       x: COLUMNS[column],
       y: START_Y,
-      speed: steppedAfter(FALL_SPEED, shown),
+      speed: pacing.speed(steppedAfter(FALL_SPEED, shown)),
       shownAtMs: atMs,
       endedAtMs: undefined,
       end: undefined,
     })
     shown++
-    nextAtMs = atMs + steppedAfter(SPAWN_DELAY, shown)
+    nextAtMs = atMs + pacing.time(steppedAfter(SPAWN_DELAY, shown))
   }
 
   /** Ends `word` at `atMs`, caught or fallen off, and counts it. */
@@ -224,7 +230,7 @@ export function createImproveInnerVoice({
     pad.move(deltaMs)
 
     for (const word of falling.filter(({ endedAtMs }) => endedAtMs === undefined)) {
-      word.y += (word.speed * deltaMs) / 1_000
+      word.y += distanceIn(word.speed, deltaMs)
 
       if (padTouches(pad, word)) {
         end(word, 'tapped', atMs)
@@ -268,8 +274,9 @@ export function createImproveInnerVoice({
       return tally.stats
     },
     clear,
-    start() {
+    start(pace: Pace = 'normal') {
       clear()
+      pacing = pacingFor(pace, PACE_PERCENTS)
       picker = newPicker()
       show(0)
     },

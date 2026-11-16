@@ -3,6 +3,8 @@ import { checkPositive } from '../shared/checks'
 import { checkStepTable, valueAt, type StepTable } from '../shared/difficulty'
 import { GAME_HEIGHT, GAME_WIDTH, type GamePoint } from '../shared/game-canvas'
 import { GAME_BAR_HEIGHT } from '../shared/game-hud'
+import { distanceIn, timeToGo } from '../shared/motion'
+import { AS_SET, checkPaces, pacingFor, type Pace, type PacePercents } from '../shared/pace'
 import type { Random } from '../shared/random'
 import type { Score } from '../shared/score'
 import {
@@ -33,8 +35,8 @@ import {
  * from at the circle, its goal still at the top, and no next row.
  *
  * The game gets harder as more goals are shown (one per row): rows move
- * faster (ROW_SPEED, set in config/difficulty.json). A row keeps its speed
- * until it leaves.
+ * faster (ROW_SPEED, set in config/difficulty.json; lower or higher at the
+ * pace chosen, see the shared pace). A row keeps its speed until it leaves.
  */
 
 export const LANE_COUNT = 4
@@ -53,6 +55,10 @@ export const CIRCLE_RADIUS = 42
 export const CHECK_Y = GAME_HEIGHT - 60
 /** The lane the circle starts a round in: the leftmost. */
 export const START_LANE = 0
+
+/** How much slower each pace is than the settings here (see config/difficulty.json and the shared pace). */
+export const PACE_PERCENTS: PacePercents = DIFFICULTY.alignTheActions.paces
+checkPaces(PACE_PERCENTS, 'alignTheActions.paces')
 
 /** How fast rows move, in px/s, by how many goals have been shown. */
 export const ROW_SPEED: StepTable = DIFFICULTY.alignTheActions.rowSpeedByGoals
@@ -89,7 +95,7 @@ export interface Row extends ActionSet {
 
 /** When `row`'s centre reaches the circle's, in the round's time. */
 function arrivalMs({ spawnedAtMs, speed }: Row): number {
-  return spawnedAtMs + ((CHECK_Y - SPAWN_Y) / speed) * 1_000
+  return spawnedAtMs + timeToGo(CHECK_Y - SPAWN_Y, speed)
 }
 
 /** Choosing an action that is not aligned with the row's goal. */
@@ -120,8 +126,8 @@ export interface AlignTheActions {
   readonly stats: AlignTheActionsStats
   /** Removes all rows and puts the circle back. */
   clear(): void
-  /** Starts a round: the first row comes out straight away. */
-  start(): void
+  /** Starts a round at `pace` (Normal if none): the first row comes out straight away. */
+  start(pace?: Pace): void
   /** Moves everything to the round's time `elapsedMs`. */
   update(elapsedMs: number): void
   /** Moves the circle to the lane tapped. */
@@ -139,6 +145,7 @@ export function createAlignTheActions({
   let rows: Row[] = []
   let generator: ActionSetGenerator
   let goalsShown = 0
+  let pacing = AS_SET
   let circleLane = START_LANE
   const noStats: AlignTheActionsStats = { aligned: 0, against: 0, otherGoal: 0 }
   let stats = noStats
@@ -146,7 +153,7 @@ export function createAlignTheActions({
   let stopped = false
 
   function spawn(atMs: number) {
-    const speed = speedAfter(goalsShown)
+    const speed = pacing.speed(speedAfter(goalsShown))
     rows.push({ ...generator.next(), spawnedAtMs: atMs, speed, y: SPAWN_Y, chosenLane: undefined })
     goalsShown++
   }
@@ -165,7 +172,7 @@ export function createAlignTheActions({
 
   function moveTo(timeMs: number) {
     for (const row of rows) {
-      row.y = SPAWN_Y + (row.speed * (timeMs - row.spawnedAtMs)) / 1_000
+      row.y = SPAWN_Y + distanceIn(row.speed, timeMs - row.spawnedAtMs)
     }
   }
 
@@ -191,8 +198,9 @@ export function createAlignTheActions({
       return stats
     },
     clear,
-    start() {
+    start(pace: Pace = 'normal') {
       clear()
+      pacing = pacingFor(pace, PACE_PERCENTS)
       generator = createActionSetGenerator({ goals, random })
       spawn(0)
     },

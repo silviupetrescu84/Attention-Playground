@@ -1,7 +1,7 @@
 import { GAME_HEIGHT, GAME_WIDTH, type GamePoint } from './game-canvas'
 import { GAME_BAR_HEIGHT } from './game-hud'
 import { distanceToEllipse, type Box } from './geometry'
-import { randomBetween, type Random } from './random'
+import { randomBetween, shuffled, type Random } from './random'
 
 /**
  * Putting ovals at random places on the canvas, apart from each other,
@@ -60,4 +60,69 @@ export function findRandomSpot(
   }
 
   return undefined
+}
+
+/** Whether `spot` may take a place in a layout, given the spots `placed` so far. */
+export type SpotRule = (spot: GamePoint, placed: readonly GamePoint[]) => boolean
+
+export interface LayoutOptions {
+  /** Where the spots may be. */
+  readonly area: Box
+  /** The rules a layout must keep, strictest first: each is tried before the next. */
+  readonly rules: readonly SpotRule[]
+  /** Tries at laying out every spot, for each rule… */
+  readonly layoutTries: number
+  /** …and random places tried for each spot, in each try. */
+  readonly placeTries: number
+  /** Places that always fit, some of them taken at random when no try works. */
+  readonly fallback: readonly GamePoint[]
+}
+
+/** `count` spots at random in `area`, one after another, each keeping `rule`; undefined if stuck. */
+function tryLayout(
+  count: number,
+  rule: SpotRule,
+  random: Random,
+  { area, placeTries }: LayoutOptions,
+): GamePoint[] | undefined {
+  const placed: GamePoint[] = []
+
+  while (placed.length < count) {
+    const spot = findRandomSpot(area, random, placeTries, (candidate) => rule(candidate, placed))
+
+    if (!spot) {
+      return undefined
+    }
+
+    placed.push(spot)
+  }
+
+  return placed
+}
+
+/**
+ * Random places for `count` ovals (or anything), shared by the minigames
+ * that scatter several at once (Break It Down, Remember Gratitude): the first
+ * layout found keeping the strictest rule, or else the next rule… or, if none
+ * is found, `count` of the fallback places, at random. Throws if there are
+ * fewer fallback places than `count`.
+ */
+export function randomLayout(count: number, random: Random, options: LayoutOptions): GamePoint[] {
+  const { rules, layoutTries, fallback } = options
+
+  if (count > fallback.length) {
+    throw new RangeError(`Cannot place more than ${fallback.length} ovals, got ${count}`)
+  }
+
+  for (const rule of rules) {
+    for (let i = 0; i < layoutTries; i++) {
+      const placed = tryLayout(count, rule, random, options)
+
+      if (placed) {
+        return placed
+      }
+    }
+  }
+
+  return shuffled(random, fallback).slice(0, count)
 }

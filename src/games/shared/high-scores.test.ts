@@ -18,7 +18,8 @@ import {
   type HighScoreTable,
   type ScoreStorage,
 } from './high-scores'
-import { createMistakes, type DifficultyLevel } from './mistakes'
+import { byLevel, createMistakes, type DifficultyLevel } from './mistakes'
+import { createPaceChoice, type Pace } from './pace'
 import { createScore } from './score'
 
 afterEach(() => {
@@ -31,12 +32,28 @@ function entries(scores: number[]): HighScore[] {
   return scores.map((score, i) => ({ name: `Player ${i + 1}`, score }))
 }
 
-function table(scores: Partial<Record<DifficultyLevel, HighScore[]>>): HighScoreTable {
-  return { ...emptyHighScores(), ...scores }
+/** A table with `scores` for some difficulties, at `pace`, and none anywhere else. */
+function table(
+  scores: Partial<Record<DifficultyLevel, HighScore[]>>,
+  pace: Pace = 'normal',
+): HighScoreTable {
+  const empty = emptyHighScores()
+  return byLevel((level) => ({ ...empty[level], [pace]: scores[level] ?? [] }))
 }
 
-function saveTable(storage: ScoreStorage, saved: unknown, gameId = 'emotions-rise') {
-  storage.setItem(highScoresKey(gameId), JSON.stringify(saved))
+/** What is saved for `byLevel`'s high scores, each at `pace`: { easy: { normal: […] } }. */
+function atPace(levels: Readonly<Record<string, unknown>>, pace: Pace = 'normal') {
+  return Object.fromEntries(
+    Object.entries(levels).map(([level, kept]) => [level, { [pace]: kept }]),
+  )
+}
+
+function saveTable(
+  storage: ScoreStorage,
+  levels: Readonly<Record<string, unknown>>,
+  gameId = 'emotions-rise',
+) {
+  storage.setItem(highScoresKey(gameId), JSON.stringify(atPace(levels)))
 }
 
 interface SetupOptions {
@@ -55,11 +72,15 @@ function setup({
   const lifecycle = createGameLifecycle({ signal: screen.signal })
   const score = createScore({ lifecycle })
   const mistakes = createMistakes({ lifecycle })
+  const pace = createPaceChoice({ lifecycle })
+  // At Normal unless a test chooses another pace (the game starts at Slow).
+  while (pace.pace !== 'normal') pace.next()
   const highScores = createHighScores({
     gameId,
     lifecycle,
     score,
     mistakes,
+    pace,
     ...(useDefaultStorage ? {} : { storage }),
   })
   const listener = vi.fn()
@@ -91,6 +112,11 @@ function setup({
     while (mistakes.level !== level) mistakes.nextLevel()
   }
 
+  function choosePace(chosen: Pace) {
+    backToStart()
+    while (pace.pace !== chosen) pace.next()
+  }
+
   return {
     screen,
     lifecycle,
@@ -101,12 +127,14 @@ function setup({
     playRound,
     playAndSave,
     chooseLevel,
+    choosePace,
   }
 }
 
 describe('high scores key', () => {
   it('is different for each game', () => {
-    expect(highScoresKey('emotions-rise')).toBe('attention-playground:high-scores:v2:emotions-rise')
+    // v3: by difficulty and pace (v2 kept them by difficulty only, and is left behind).
+    expect(highScoresKey('emotions-rise')).toBe('attention-playground:high-scores:v3:emotions-rise')
     expect(highScoresKey('focus-attention')).not.toBe(highScoresKey('emotions-rise'))
   })
 })
@@ -132,26 +160,29 @@ describe('names', () => {
 })
 
 describe('reading saved high scores', () => {
-  it('has none at any difficulty when nothing is saved', () => {
-    expect(parseHighScores(null)).toEqual({ easy: [], medium: [], hard: [], extreme: [] })
+  it('has none at any difficulty or pace when nothing is saved', () => {
+    const none = { normal: [], slow: [], fast: [] }
+
+    expect(parseHighScores(null)).toEqual({ easy: none, medium: none, hard: none, extreme: none })
+    expect(emptyHighScores()).toEqual(parseHighScores(null))
   })
 
-  it('reads the high scores of each difficulty, best first, keeping the best 10', () => {
+  it('reads the high scores of each difficulty and pace, best first, keeping the best 10', () => {
     const easy = entries([3, 9, 1, 7, 5, 8, 2, 12, 4, 6, 10, 11])
-    const saved = JSON.stringify({ easy, hard: [{ name: 'Ana', score: 4 }] })
+    const saved = JSON.stringify(atPace({ easy, hard: [{ name: 'Ana', score: 4 }] }))
 
     const read = parseHighScores(saved)
 
     expect(HIGH_SCORES_KEPT).toBe(10)
-    expect(read.easy.map((entry) => entry.score)).toEqual([12, 11, 10, 9, 8, 7, 6, 5, 4, 3])
-    expect(read.easy[0]).toEqual({ name: 'Player 8', score: 12 })
-    expect(read).toMatchObject({ medium: [], hard: [{ name: 'Ana', score: 4 }], extreme: [] })
+    expect(read.easy.normal.map((entry) => entry.score)).toEqual([12, 11, 10, 9, 8, 7, 6, 5, 4, 3])
+    expect(read.easy.normal[0]).toEqual({ name: 'Player 8', score: 12 })
+    expect(read).toEqual(table({ easy: [...read.easy.normal], hard: [{ name: 'Ana', score: 4 }] }))
   })
 
   it('keeps equal scores in the order they were saved', () => {
-    const saved = JSON.stringify({ easy: entries([5, 7, 5, 5]) })
+    const saved = JSON.stringify(atPace({ easy: entries([5, 7, 5, 5]) }))
 
-    expect(parseHighScores(saved).easy.map((entry) => entry.name)).toEqual([
+    expect(parseHighScores(saved).easy.normal.map((entry) => entry.name)).toEqual([
       'Player 2',
       'Player 1',
       'Player 3',
@@ -168,51 +199,61 @@ describe('reading saved high scores', () => {
 
   it('leaves out anything that is not a high score, and keeps the rest', () => {
     const saved = JSON.stringify({
-      easy: [
-        { name: 'Ana', score: 4 },
-        { name: 'Bo', score: 0 },
-        { name: 'Cy', score: 0.5 },
-        { name: 'Di', score: -3 },
-        { name: 'Ed', score: '7' },
-        { name: '   ', score: 8 },
-        { name: 42, score: 9 },
-        { score: 10 },
-        { name: 'Fay' },
-        7,
-        null,
-        'Gus',
-        { name: '  Hal   Lee ', score: 1.5 },
-      ],
+      easy: {
+        slow: [
+          { name: 'Ana', score: 4 },
+          { name: 'Bo', score: 0 },
+          { name: 'Cy', score: 0.5 },
+          { name: 'Di', score: -3 },
+          { name: 'Ed', score: '7' },
+          { name: '   ', score: 8 },
+          { name: 42, score: 9 },
+          { score: 10 },
+          { name: 'Fay' },
+          7,
+          null,
+          'Gus',
+          { name: '  Hal   Lee ', score: 1.5 },
+        ],
+        unknownPace: [{ name: 'Mo', score: 100 }],
+      },
       medium: 'lots',
-      hard: { 0: { name: 'Ivy', score: 10 } },
-      extreme: [
-        { name: 'Jo', score: null },
-        { name: 'Kim', score: 6 },
-      ],
-      unknownLevel: [{ name: 'Lu', score: 100 }],
+      hard: { fast: { 0: { name: 'Ivy', score: 10 } }, normal: 'lots' },
+      extreme: {
+        fast: [
+          { name: 'Jo', score: null },
+          { name: 'Kim', score: 6 },
+        ],
+      },
+      unknownLevel: { normal: [{ name: 'Lu', score: 100 }] },
     })
 
-    expect(parseHighScores(saved)).toEqual({
-      easy: [
-        { name: 'Ana', score: 4 },
-        { name: 'Hal Lee', score: 1.5 },
-      ],
-      medium: [],
-      hard: [],
-      extreme: [{ name: 'Kim', score: 6 }],
-    })
+    const read = parseHighScores(saved)
+    expect(read.easy.slow).toEqual([
+      { name: 'Ana', score: 4 },
+      { name: 'Hal Lee', score: 1.5 },
+    ])
+    expect(read.extreme.fast).toEqual([{ name: 'Kim', score: 6 }])
+    expect({
+      ...read,
+      easy: { ...read.easy, slow: [] },
+      extreme: { ...read.extreme, fast: [] },
+    }).toEqual(emptyHighScores())
   })
 
   it('leaves out a score too big to be a number (read as Infinity)', () => {
-    const saved = '{"easy": [{"name": "Jo", "score": 1e400}, {"name": "Kim", "score": 6}]}'
+    const saved =
+      '{"easy": {"normal": [{"name": "Jo", "score": 1e400}, {"name": "Kim", "score": 6}]}}'
 
-    expect(parseHighScores(saved).easy).toEqual([{ name: 'Kim', score: 6 }])
+    expect(parseHighScores(saved).easy.normal).toEqual([{ name: 'Kim', score: 6 }])
   })
 
   it('reads scores saved as names and scores only, cutting names that are too long', () => {
-    const saved = JSON.stringify({ easy: [{ name: 'x'.repeat(40), score: 3, extra: true }] })
+    const saved = JSON.stringify(
+      atPace({ easy: [{ name: 'x'.repeat(40), score: 3, extra: true }] }),
+    )
 
-    expect(parseHighScores(saved).easy).toEqual([{ name: 'x'.repeat(16), score: 3 }])
+    expect(parseHighScores(saved).easy.normal).toEqual([{ name: 'x'.repeat(16), score: 3 }])
   })
 })
 
@@ -244,13 +285,13 @@ describe('where a score goes among the high scores', () => {
 
 describe('adding a high score', () => {
   it('puts it where it goes, and tells where', () => {
-    const added = addHighScore(table({ medium: entries([9, 5, 2]) }), 'medium', {
+    const added = addHighScore(table({ medium: entries([9, 5, 2]) }), 'medium', 'normal', {
       name: 'Sam',
       score: 6,
     })
 
     expect(added.rank).toBe(1)
-    expect(added.table.medium.map((entry) => entry.name)).toEqual([
+    expect(added.table.medium.normal.map((entry) => entry.name)).toEqual([
       'Player 1',
       'Sam',
       'Player 2',
@@ -261,10 +302,10 @@ describe('adding a high score', () => {
   it('pushes the lowest out when 10 are kept', () => {
     const full = entries([20, 18, 16, 14, 12, 10, 8, 6, 4, 2])
 
-    const added = addHighScore(table({ easy: full }), 'easy', { name: 'Sam', score: 7 })
+    const added = addHighScore(table({ easy: full }), 'easy', 'normal', { name: 'Sam', score: 7 })
 
     expect(added.rank).toBe(7)
-    expect(added.table.easy.map((entry) => entry.score)).toEqual([
+    expect(added.table.easy.normal.map((entry) => entry.score)).toEqual([
       20, 18, 16, 14, 12, 10, 8, 7, 6, 4,
     ])
   })
@@ -272,20 +313,22 @@ describe('adding a high score', () => {
   it.each([0, 2])('leaves the table as it was when the score does not make it: %i', (score) => {
     const before = table({ easy: entries([20, 18, 16, 14, 12, 10, 8, 6, 4, 2]) })
 
-    const added = addHighScore(before, 'easy', { name: 'Sam', score })
+    const added = addHighScore(before, 'easy', 'normal', { name: 'Sam', score })
 
     expect(added.rank).toBeUndefined()
     expect(added.table).toBe(before)
   })
 
-  it('only changes its own difficulty, and leaves the table given as it was', () => {
+  it('only changes its own difficulty and pace, and leaves the table given as it was', () => {
     const before = table({ easy: entries([3]), hard: entries([7]) })
 
-    const added = addHighScore(before, 'hard', { name: 'Sam', score: 9 })
+    const added = addHighScore(before, 'hard', 'normal', { name: 'Sam', score: 9 })
+    const slower = addHighScore(before, 'hard', 'slow', { name: 'Sam', score: 9 })
 
     expect(added.table).toEqual(
       table({ easy: entries([3]), hard: [{ name: 'Sam', score: 9 }, ...entries([7])] }),
     )
+    expect(slower.table.hard).toEqual({ ...before.hard, slow: [{ name: 'Sam', score: 9 }] })
     expect(before).toEqual(table({ easy: entries([3]), hard: entries([7]) }))
   })
 })
@@ -306,8 +349,8 @@ describe('high scores of a game', () => {
         ],
       }),
     )
-    expect(highScores.best('easy')).toEqual({ name: 'Player 2', score: 9 })
-    expect(highScores.best('medium')).toBeUndefined()
+    expect(highScores.best('easy', 'normal')).toEqual({ name: 'Player 2', score: 9 })
+    expect(highScores.best('medium', 'normal')).toBeUndefined()
     expect(highScores.lastRound).toBeUndefined()
   })
 
@@ -319,6 +362,7 @@ describe('high scores of a game', () => {
 
     expect(highScores.lastRound).toEqual({
       level: 'easy',
+      pace: 'normal',
       score: 5,
       rank: 0,
       newBest: true,
@@ -350,6 +394,7 @@ describe('high scores of a game', () => {
     expect(parseHighScores(storage.getItem(highScoresKey('emotions-rise')))).toEqual(expected)
     expect(highScores.lastRound).toEqual({
       level: 'hard',
+      pace: 'normal',
       score: 3,
       rank: 0,
       newBest: true,
@@ -358,6 +403,30 @@ describe('high scores of a game', () => {
     expect(canSave(highScores.lastRound)).toBe(false)
     // Each round over, and each one saved.
     expect(listener.mock.calls.length).toBeGreaterThanOrEqual(6)
+  })
+
+  it('keeps the high scores of each pace apart, at each difficulty', () => {
+    const storage = new FakeStorage()
+    const { highScores, playAndSave, playRound, choosePace } = setup({ storage })
+
+    playAndSave(5, 'Ana')
+    choosePace('slow')
+    playAndSave(3, 'Bo')
+    choosePace('fast')
+    playRound(1)
+
+    expect(highScores.table.easy).toEqual({
+      normal: [{ name: 'Ana', score: 5 }],
+      slow: [{ name: 'Bo', score: 3 }],
+      fast: [],
+    })
+    expect([
+      highScores.best('easy', 'normal')?.name,
+      highScores.best('easy', 'slow')?.name,
+    ]).toEqual(['Ana', 'Bo'])
+    // The best at its own pace, however high the others.
+    expect(highScores.lastRound).toMatchObject({ pace: 'fast', rank: 0, newBest: true })
+    expect(setup({ storage }).highScores.table.easy.slow).toEqual([{ name: 'Bo', score: 3 }])
   })
 
   it('tells when a round beats every high score before it, and not when it only equals one', () => {
@@ -387,6 +456,7 @@ describe('high scores of a game', () => {
 
     expect(highScores.lastRound).toEqual({
       level: 'easy',
+      pace: 'normal',
       score: points,
       rank: undefined,
       newBest: false,
@@ -413,7 +483,7 @@ describe('high scores of a game', () => {
     playAndSave(4)
 
     expect(() => highScores.save('Sam')).toThrow('There is no high score to save')
-    expect(highScores.table.easy).toHaveLength(1)
+    expect(highScores.table.easy.normal).toHaveLength(1)
   })
 
   it('does not save before any round is over', () => {
@@ -436,7 +506,7 @@ describe('high scores of a game', () => {
 
     const { highScores } = setup({ storage })
 
-    expect(highScores.best('easy')).toEqual({ name: 'Ana', score: 6 })
+    expect(highScores.best('easy', 'normal')).toEqual({ name: 'Ana', score: 6 })
   })
 
   it('keeps each game’s high scores apart', () => {
@@ -446,8 +516,8 @@ describe('high scores of a game', () => {
     const other = setup({ gameId: 'shift-perspective', storage })
     other.playAndSave(2)
 
-    expect(other.highScores.table.easy.map((entry) => entry.score)).toEqual([2])
-    expect(setup({ storage }).highScores.table.easy.map((entry) => entry.score)).toEqual([6])
+    expect(other.highScores.table.easy.normal.map((entry) => entry.score)).toEqual([2])
+    expect(setup({ storage }).highScores.table.easy.normal.map((entry) => entry.score)).toEqual([6])
   })
 
   it('counts the score the round ended on, not points added after', () => {
@@ -457,7 +527,7 @@ describe('high scores of a game', () => {
     score.add(10)
     highScores.save('Sam')
 
-    expect(highScores.table.easy).toEqual([{ name: 'Sam', score: 4 }])
+    expect(highScores.table.easy.normal).toEqual([{ name: 'Sam', score: 4 }])
   })
 
   it('forgets a round not saved once the player moves on', () => {
@@ -512,9 +582,11 @@ describe('high scores of a game', () => {
     thisTab.highScores.save('This')
 
     const saved = ['Other', 'Other again', 'This']
-    expect(thisTab.highScores.table.easy.map((entry) => entry.name)).toEqual(saved)
+    expect(thisTab.highScores.table.easy.normal.map((entry) => entry.name)).toEqual(saved)
     expect(thisTab.highScores.lastRound?.rank).toBe(2)
-    expect(setup({ storage }).highScores.table.easy.map((entry) => entry.name)).toEqual(saved)
+    expect(setup({ storage }).highScores.table.easy.normal.map((entry) => entry.name)).toEqual(
+      saved,
+    )
   })
 
   it('tells when another tab pushed the round out of the 10 before it was saved', () => {
@@ -585,7 +657,7 @@ describe('high scores when the browser will not store them', () => {
     playAndSave(4, 'Ana')
     playAndSave(6, 'Bo')
 
-    expect(highScores.table.easy).toEqual([
+    expect(highScores.table.easy.normal).toEqual([
       { name: 'Bo', score: 6 },
       { name: 'Ana', score: 4 },
     ])
@@ -604,7 +676,7 @@ describe('high scores when the browser will not store them', () => {
 
     expect(() => playAndSave(4)).not.toThrow()
 
-    expect(highScores.table.easy).toEqual([{ name: 'Sam', score: 4 }])
+    expect(highScores.table.easy.normal).toEqual([{ name: 'Sam', score: 4 }])
     expect(highScores.lastRound).toMatchObject({ rank: 0, savedAs: 'Sam' })
     expect(warn).toHaveBeenCalledWith(
       'Could not save the high scores; they are kept until you leave the game',
@@ -620,7 +692,7 @@ describe('high scores when the browser will not store them', () => {
     playAndSave(4)
     playAndSave(1)
 
-    expect(highScores.table.easy.map((entry) => entry.score)).toEqual([4, 1])
+    expect(highScores.table.easy.normal.map((entry) => entry.score)).toEqual([4, 1])
     expect(highScores.playerName).toBe('Sam')
   })
 })
@@ -633,9 +705,9 @@ describe('where high scores are kept', () => {
 
     playAndSave(5)
 
-    expect(parseHighScores(localStorage.getItem(highScoresKey('emotions-rise'))).easy).toEqual([
-      { name: 'Sam', score: 5 },
-    ])
+    expect(
+      parseHighScores(localStorage.getItem(highScoresKey('emotions-rise'))).easy.normal,
+    ).toEqual([{ name: 'Sam', score: 5 }])
   })
 
   it('is nowhere (but the game goes on) when the browser blocks localStorage', () => {
@@ -648,6 +720,6 @@ describe('where high scores are kept', () => {
 
     playAndSave(5)
 
-    expect(highScores.table.easy).toEqual([{ name: 'Sam', score: 5 }])
+    expect(highScores.table.easy.normal).toEqual([{ name: 'Sam', score: 5 }])
   })
 })

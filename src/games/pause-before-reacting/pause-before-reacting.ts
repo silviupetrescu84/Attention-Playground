@@ -11,10 +11,11 @@ import {
   type GoodOrBadMistake,
   type GoodOrBadStats,
 } from '../shared/good-or-bad'
+import { AS_SET, checkPaces, pacingFor, type Pace, type PacePercents } from '../shared/pace'
 import { findRandomSpot, gapBetweenOvals, playAreaFor, randomPointIn } from '../shared/placing'
 import type { Random } from '../shared/random'
 import type { Score } from '../shared/score'
-import { fadeAt, passDeadlines, type Due } from '../shared/timed-turns'
+import { FADE_MS, fadeAt, passDeadlines, type Due } from '../shared/timed-turns'
 import { createWordPicker, type Word, type WordLists, type WordPicker } from '../shared/word-picker'
 
 /**
@@ -22,7 +23,8 @@ import { createWordPicker, type Word, type WordLists, type WordPicker } from '..
  *
  * Situations appear one after another, each in an oval at a random place on
  * the canvas: the first as soon as the round starts, then one every
- * SPAWN_DELAY, shorter as more are shown.
+ * SPAWN_DELAY, shorter as more are shown (longer or shorter at the pace
+ * chosen, see the shared pace).
  * Each is good or bad, at random, but never more than 4 of a kind in a row
  * (see the shared word picker). Each fades in over 0.1 s and stays until
  * tapped, or until the screen is full: when a new one comes and
@@ -41,6 +43,10 @@ import { createWordPicker, type Word, type WordLists, type WordPicker } from '..
  * When a mistake ends the round, everything stops as it is.
  */
 
+/** How much slower each pace is than the settings here (see config/difficulty.json and the shared pace). */
+export const PACE_PERCENTS: PacePercents = DIFFICULTY.pauseBeforeReacting.paces
+checkPaces(PACE_PERCENTS, 'pauseBeforeReacting.paces')
+
 const { spawnDelayMsBySituations, mostOnScreen } = DIFFICULTY.pauseBeforeReacting
 
 /** The time from one situation to the next, by how many have been shown (see config/difficulty.json). */
@@ -50,9 +56,6 @@ checkSteps(SPAWN_DELAY, 'pauseBeforeReacting.spawnDelayMsBySituations', checkPos
 /** The most situations on screen at once. */
 export const MOST_ON_SCREEN = mostOnScreen
 checkWholeNumber(MOST_ON_SCREEN, 'pauseBeforeReacting.mostOnScreen', 1)
-
-/** How long a situation takes to fade in, and to fade out. */
-export const FADE_MS = 100
 
 /** A situation does not come back while among the last this many of its kind. */
 export const RECENT_TO_AVOID = 10
@@ -85,7 +88,7 @@ export interface Situation extends GamePoint {
 /** How visible `situation` is at the round's time `timeMs`: 0 to 1. */
 export function situationOpacityAt(situation: Situation, timeMs: number): number {
   const { shownAtMs, endedAtMs } = situation
-  return fadeAt({ fromMs: shownAtMs, endedAtMs, inMs: FADE_MS, outMs: FADE_MS }, timeMs)
+  return fadeAt({ fromMs: shownAtMs, endedAtMs }, timeMs)
 }
 
 /** Whether `situation` is still on screen at `timeMs`: not ended, or still fading out. */
@@ -151,8 +154,8 @@ export interface PauseBeforeReacting {
   readonly stats: GoodOrBadStats
   /** Removes everything. */
   clear(): void
-  /** Starts a round: the first situation starts to fade in straight away. */
-  start(): void
+  /** Starts a round at `pace` (Normal if none): the first situation starts to fade in straight away. */
+  start(pace?: Pace): void
   /** Moves everything to the round's time `elapsedMs`. */
   update(elapsedMs: number): void
   /** Taps the situation under `point`, if any, at the time of the last update. */
@@ -182,6 +185,7 @@ export function createPauseBeforeReacting({
   /** When the next situation comes; undefined before the round starts. */
   let next: Due | undefined
   let shown = 0
+  let pacing = AS_SET
   let timeMs = 0
   const tally = createGoodOrBadTally({ score, points: POINTS, onMistake })
   /** Set when the round is stopped, even in the middle of an update or tap. */
@@ -220,7 +224,7 @@ export function createPauseBeforeReacting({
     const word = picker.next()
     situations.push({ word, ...spot, shownAtMs: atMs, endedAtMs: undefined, end: undefined })
     shown++
-    next = { deadlineMs: atMs + steppedAfter(SPAWN_DELAY, shown) }
+    next = { deadlineMs: atMs + pacing.time(steppedAfter(SPAWN_DELAY, shown)) }
   }
 
   function clear() {
@@ -243,8 +247,9 @@ export function createPauseBeforeReacting({
       return tally.stats
     },
     clear,
-    start() {
+    start(pace: Pace = 'normal') {
       clear()
+      pacing = pacingFor(pace, PACE_PERCENTS)
       picker = newPicker()
       show(0)
     },

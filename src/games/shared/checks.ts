@@ -44,3 +44,10 @@ export function checkAtLeast(value: number, name: string, min: number, minName: 
     throw new RangeError(`${name} must be ≥ ${minName} (${min}), got ${value}`)
   }
 }
+
+/** Throws unless `value` is at most `max`, named `maxName`. */
+export function checkAtMost(value: number, name: string, max: number, maxName: string): void {
+  if (!(value <= max)) {
+    throw new RangeError(`${name} must be ≤ ${maxName} (${max}), got ${value}`)
+  }
+}

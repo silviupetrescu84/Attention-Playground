@@ -4,8 +4,4 @@
   --focus-projector: #fecc1e;
   /* …and its beam: the same yellow, half see-through. */
   --focus-beam: color-mix(in srgb, var(--focus-projector) 50%, transparent);
-  /* Buttons like the app's own (Start, Restart): ink blue with white text, lighter when pressed. */
-  --focus-button-fill: var(--color-ink);
-  --focus-button-text: #fff;
-  --focus-button-pressed: color-mix(in srgb, var(--color-ink) 80%, white);
 }

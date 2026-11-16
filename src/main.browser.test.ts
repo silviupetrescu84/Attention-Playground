@@ -84,6 +84,11 @@ describe.each(games.map((game) => game.name))('%s', (name) => {
       expect.closeTo(canvas.height, 0),
     ])
     expect(isInside(box('.game-hud__start'), canvas)).toBe(true)
+    // Everything under it too, the instructions last (when the game has any).
+    const instructions = find('.game-hud__instructions')
+    if (!instructions.hidden) {
+      expect(isInside(instructions.getBoundingClientRect(), canvas)).toBe(true)
+    }
     // The Home button above the canvas, in the space kept for it.
     const home = box('.home-link')
     expect(home.bottom).toBeLessThanOrEqual(canvas.top)
@@ -107,10 +112,89 @@ describe.each(games.map((game) => game.name))('%s', (name) => {
 
     await goHome()
   })
+})
 
+// The same shared bar in every game: checked once.
+describe('the score bar', () => {
+  it('fits the combo, the score, the mistakes and the time side by side, however large', async () => {
+    await page.viewport(1024, 900)
+    await open(games[0].name)
+    await userEvent.click(page.getByRole('button', { name: 'Start' }))
+    // The widest each can be: the top combo, a score of 5 digits, the most mistakes, 999 s.
+    find('.game-hud__combo').textContent = 'X5'
+    find('.game-hud__score').textContent = 'Score: 99999'
+    find('.game-hud__mistakes').textContent = 'Mistakes: 10'
+    find('.game-hud__time').textContent = '999'
+    await document.fonts.ready
+
+    const bar = box('.game-hud__bar')
+    const parts = ['.game-hud__left', '.game-hud__mistakes', '.game-hud__right'].map(box)
+    for (const part of parts) {
+      expect(isInside(part, bar)).toBe(true)
+    }
+    expect(parts[0].right).toBeLessThanOrEqual(parts[1].left)
+    expect(parts[1].right).toBeLessThanOrEqual(parts[2].left)
+    expect(isInside(box('.game-hud__combo'), parts[0])).toBe(true)
+    // Each on one line: no taller than a line of the bar's text.
+    const lineHeight = box('.game-hud__time').height
+    for (const text of ['.game-hud__score', '.game-hud__mistakes']) {
+      expect(box(text).height, text).toBeLessThanOrEqual(lineHeight + 1)
+    }
+
+    await userEvent.click(page.getByRole('button', { name: 'Pause' }))
+    await userEvent.click(page.getByRole('button', { name: 'Restart' }))
+    await goHome()
+  })
+})
+
+/** The red, green and blue (0 to 1) of a computed CSS colour: `rgb(…)` or `color(srgb …)`. */
+function channels(color: string): number[] {
+  const numbers = color
+    .match(/[\d.]+/g)!
+    .map(Number)
+    .slice(0, 3)
+  return color.startsWith('rgb') ? numbers.map((n) => n / 255) : numbers
+}
+
+/** How much brighter the lighter of two colours is than the darker (WCAG contrast ratio, 1 to 21). */
+function contrast(a: string, b: string): number {
+  const luminance = (color: string) => {
+    const [r, g, bl] = channels(color).map((c) =>
+      c <= 0.039_28 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4,
+    )
+    return 0.2126 * r + 0.7152 * g + 0.0722 * bl
+  }
+  const [dark, light] = [luminance(a), luminance(b)].sort((x, y) => x - y)
+  return (light + 0.05) / (dark + 0.05)
+}
+
+describe('the combo', () => {
+  it('shows each multiplier in its own colour, its text easy to read on each', async () => {
+    await page.viewport(1024, 900)
+    await open(games[0].name)
+    const combo = find('.game-hud__combo')
+
+    const colours = [1, 2, 3, 4, 5].map((multiplier) => {
+      combo.dataset.multiplier = String(multiplier)
+      const { backgroundColor, color } = getComputedStyle(combo)
+      return { backgroundColor, color }
+    })
+
+    expect(new Set(colours.map(({ backgroundColor }) => backgroundColor)).size).toBe(5)
+    for (const { backgroundColor, color } of colours) {
+      // WCAG AA for text: at least 4.5 to 1.
+      expect(contrast(backgroundColor, color), backgroundColor).toBeGreaterThanOrEqual(4.5)
+    }
+
+    await goHome()
+  })
+})
+
+// The same shared screen in every game: checked once.
+describe('the high scores screen', () => {
   it('shows the high scores over the whole game, and goes back to Start', async () => {
     await page.viewport(1024, 900)
-    await open(name)
+    await open(games[0].name)
 
     await userEvent.click(page.getByRole('button', { name: 'High scores' }))
     const canvas = box('.game-canvas')

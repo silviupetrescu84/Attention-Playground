@@ -1,15 +1,17 @@
 import { isNewRound, type GameLifecycle } from './game-lifecycle'
 import { createListeners } from './listeners'
 import { byLevel, type DifficultyLevel, type Mistakes } from './mistakes'
+import { byPace, type Pace, type PaceChoice } from './pace'
 import type { Score } from './score'
 
 /**
- * Each game's high scores, kept for each difficulty in the browser
+ * Each game's high scores, kept for each difficulty and pace in the browser
  * (localStorage), shared by every minigame.
  *
- * Each difficulty keeps its HIGH_SCORES_KEPT best scores, best first, each
- * with the name of the player who made it. When a round is over (game over)
- * with a score that makes its difficulty's high scores, the player may save
+ * Each difficulty, at each pace, keeps its HIGH_SCORES_KEPT best scores, best
+ * first, each with the name of the player who made it. When a round is over
+ * (game over) with a score that makes the high scores of its difficulty and
+ * pace, the player may save
  * it under their name; it counts once they do. A score must be at least
  * MIN_HIGH_SCORE. Rounds left unfinished (restarted from the pause menu, or
  * left for another screen) never count.
@@ -39,22 +41,27 @@ export interface HighScore {
   readonly score: number
 }
 
-/** The high scores of each difficulty, best first. */
-export type HighScoreTable = Readonly<Record<DifficultyLevel, readonly HighScore[]>>
+/** The high scores of each difficulty at each pace, best first. */
+export type HighScoreTable = Readonly<
+  Record<DifficultyLevel, Readonly<Record<Pace, readonly HighScore[]>>>
+>
 
 /** The parts of `localStorage` the scores need (lets tests pass fakes). */
 export type ScoreStorage = Pick<Storage, 'getItem' | 'setItem'>
 
-/** Where a game's high scores are stored. */
+/**
+ * Where a game's high scores are stored: v3, by difficulty and pace (scores
+ * kept by difficulty only, before paces, are left behind).
+ */
 export function highScoresKey(gameId: string): string {
-  return `attention-playground:high-scores:v2:${gameId}`
+  return `attention-playground:high-scores:v3:${gameId}`
 }
 
 /** Where the last name saved is stored (the same for every game). */
 export const PLAYER_NAME_KEY = 'attention-playground:player-name'
 
 export function emptyHighScores(): HighScoreTable {
-  return byLevel(() => [])
+  return byLevel(() => byPace(() => []))
 }
 
 /** Whether `value` is an object whose fields can be read (not null, nor a list). */
@@ -105,14 +112,21 @@ function readHighScores(value: unknown): HighScore[] {
     .slice(0, HIGH_SCORES_KEPT)
 }
 
+/** `value` if it is an object whose fields can be read, or else an empty one. */
+function recordOr(value: unknown): Readonly<Record<string, unknown>> {
+  return isRecord(value) ? value : {}
+}
+
 /**
  * Reads the table saved as `text`. Anything that is not a high score is left
- * out, and a difficulty missing (or unreadable) has none.
+ * out, and a difficulty or pace missing (or unreadable) has none.
  */
 export function parseHighScores(text: string | null): HighScoreTable {
-  const saved = text === null ? undefined : parseJson(text)
-  const levels = isRecord(saved) ? saved : {}
-  return byLevel((level) => readHighScores(levels[level]))
+  const levels = recordOr(text === null ? undefined : parseJson(text))
+  return byLevel((level) => {
+    const paces = recordOr(levels[level])
+    return byPace((pace) => readHighScores(paces[pace]))
+  })
 }
 
 /** What `text` holds as JSON, or `undefined` if it is not JSON. */
@@ -146,13 +160,17 @@ export interface AddedHighScore {
   readonly rank: number | undefined
 }
 
-/** `table` with `entry` added to `level`'s high scores (if it makes them), and where it went. */
+/**
+ * `table` with `entry` added to the high scores of `level` at `pace` (if it
+ * makes them), and where it went.
+ */
 export function addHighScore(
   table: HighScoreTable,
   level: DifficultyLevel,
+  pace: Pace,
   entry: HighScore,
 ): AddedHighScore {
-  const kept = table[level]
+  const kept = table[level][pace]
   const rank = highScoreRank(kept, entry.score)
 
   if (rank === undefined) {
@@ -160,19 +178,20 @@ export function addHighScore(
   }
 
   const scores = [...kept.slice(0, rank), entry, ...kept.slice(rank)].slice(0, HIGH_SCORES_KEPT)
-  return { table: { ...table, [level]: scores }, rank }
+  return { table: { ...table, [level]: { ...table[level], [pace]: scores } }, rank }
 }
 
 /** The round just over. */
 export interface RoundResult {
   readonly level: DifficultyLevel
+  readonly pace: Pace
   readonly score: number
   /**
    * Where it goes among the high scores (0 = best), or where it went once
    * saved; `undefined` if it does not make them.
    */
   readonly rank: number | undefined
-  /** Whether it beats every high score before it at this difficulty. */
+  /** Whether it beats every high score before it at this difficulty and pace. */
   readonly newBest: boolean
   /** The name it was saved under; `undefined` until it is saved. */
   readonly savedAs: string | undefined
@@ -187,10 +206,10 @@ export function canSave(round: RoundResult | undefined): round is UnsavedHighSco
 }
 
 export interface HighScores {
-  /** The high scores of each difficulty, best first. */
+  /** The high scores of each difficulty at each pace, best first. */
   readonly table: HighScoreTable
-  /** The best high score at `level`, or `undefined` if there is none yet. */
-  best(level: DifficultyLevel): HighScore | undefined
+  /** The best high score at `level` and `pace`, or `undefined` if there is none yet. */
+  best(level: DifficultyLevel, pace: Pace): HighScore | undefined
   /** The round just over; `undefined` once the player moves on (restart or start). */
   readonly lastRound: RoundResult | undefined
   /** The last name a score was saved under, to suggest ('' before the first). */
@@ -211,6 +230,7 @@ export interface HighScoresOptions {
   lifecycle: GameLifecycle
   score: Score
   mistakes: Mistakes
+  pace: PaceChoice
   /** Defaults to the browser's `localStorage`. */
   storage?: ScoreStorage
 }
@@ -230,6 +250,7 @@ export function createHighScores({
   lifecycle,
   score,
   mistakes,
+  pace,
   storage = browserStorage(),
 }: HighScoresOptions): HighScores {
   const key = highScoresKey(gameId)
@@ -265,14 +286,16 @@ export function createHighScores({
     }
   }
 
-  function roundOver(level: DifficultyLevel, value: number) {
+  function roundOver(level: DifficultyLevel, roundPace: Pace, value: number) {
     // Read again first, so rounds saved in another tab count.
     table = read() ?? table
-    const best = table[level].at(0)
+    const kept = table[level][roundPace]
+    const best = kept.at(0)
     lastRound = {
       level,
+      pace: roundPace,
       score: value,
-      rank: highScoreRank(table[level], value),
+      rank: highScoreRank(kept, value),
       newBest: value >= MIN_HIGH_SCORE && (best === undefined || value > best.score),
       savedAs: undefined,
     }
@@ -293,7 +316,8 @@ export function createHighScores({
     }
 
     // Read again first, so high scores saved in another tab are not lost.
-    const added = addHighScore(read() ?? table, round.level, { name: cleaned, score: round.score })
+    const entry = { name: cleaned, score: round.score }
+    const added = addHighScore(read() ?? table, round.level, round.pace, entry)
     table = added.table
     lastRound = { ...round, rank: added.rank, savedAs: cleaned }
     playerName = cleaned
@@ -307,7 +331,7 @@ export function createHighScores({
 
   lifecycle.subscribe((change) => {
     if (change.state === 'finished') {
-      roundOver(mistakes.level, score.value)
+      roundOver(mistakes.level, pace.pace, score.value)
     } else if (isNewRound(change) && lastRound) {
       lastRound = undefined
       listeners.notify()
@@ -318,7 +342,7 @@ export function createHighScores({
     get table() {
       return table
     },
-    best: (level) => table[level][0],
+    best: (level, roundPace) => table[level][roundPace][0],
     get lastRound() {
       return lastRound
     },

@@ -86,7 +86,7 @@ export function breakItDownGame({
   random = Math.random,
   fonts,
 }: BreakItDownGameOptions = {}): GameDefinition {
-  return ({ canvas, score, mistakes, status }) => {
+  return ({ canvas, score, mistakes, status, pace }) => {
     const game = createBreakItDown({
       goals,
       distractions,
@@ -129,7 +129,8 @@ export function breakItDownGame({
           goal: chooseTextStyle(canvas.context, font, allGoals, GOAL_TEXT),
           option: chooseTextStyle(canvas.context, font, allOptions, LARGE_OVAL_TEXT),
         })
-        game.start()
+        // At the pace chosen for this round.
+        game.start(pace.pace)
         draw()
       },
       frame({ elapsedMs }) {

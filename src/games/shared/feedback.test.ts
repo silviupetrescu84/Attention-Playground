@@ -1,14 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { cssVariables } from '../../test/css-variables'
 import { createFakeContext } from '../../test/fake-canvas-context'
-import {
-  drawHue,
-  fadedOutAt,
-  FEEDBACK_COLORS,
-  FEEDBACK_FADE_MS,
-  hueFor,
-  stillFading,
-} from './feedback'
+import { drawHue, fadedOutAt, FEEDBACK_COLORS, hueFor, stillFading } from './feedback'
+import { FADE_MS } from './timed-turns'
 
 describe('feedback', () => {
   it('tints green for right and red for a mistake, at 20%', () => {
@@ -25,7 +19,7 @@ describe('feedback', () => {
   })
 
   it('fades the thing chosen out over 0.1 s', () => {
-    expect(FEEDBACK_FADE_MS).toBe(100)
+    expect(FADE_MS).toBe(100)
     expect([1_000, 1_025, 1_050, 1_100, 2_000].map((t) => fadedOutAt(1_000, t))).toEqual([
       1, 0.75, 0.5, 0, 0,
     ])

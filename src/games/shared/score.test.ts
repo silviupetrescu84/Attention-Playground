@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
+import { createCombo } from './combo'
 import { createGameLifecycle } from './game-lifecycle'
+import { createMistakes } from './mistakes'
 import { createScore } from './score'
 
 function setup() {
@@ -117,5 +119,57 @@ describe('score', () => {
 
     expect(() => score.add(points)).toThrow(RangeError)
     expect(score.value).toBe(0)
+  })
+})
+
+describe('score with a combo', () => {
+  function withCombo() {
+    const lifecycle = createGameLifecycle({ signal: new AbortController().signal })
+    const mistakes = createMistakes({ lifecycle })
+    const combo = createCombo({ lifecycle, mistakes })
+    const score = createScore({ lifecycle, combo })
+    lifecycle.start()
+    return { score, combo, mistakes }
+  }
+
+  it('multiplies points by the combo, from the good thing after the one that raised it', () => {
+    const { score, combo } = withCombo()
+
+    for (let i = 0; i < 5; i++) score.add(1)
+    expect([score.value, combo.multiplier]).toEqual([5, 2])
+    // The next 7 at X2, then X3.
+    for (let i = 0; i < 7; i++) score.add(1)
+    expect([score.value, combo.multiplier]).toEqual([5 + 14, 3])
+    score.add(1)
+
+    expect(score.value).toBe(5 + 14 + 3)
+  })
+
+  it('counts each addition of points as one good thing in a row', () => {
+    const { score, combo } = withCombo()
+
+    score.add(1)
+    score.add(3)
+
+    expect(combo.inARow).toBe(2)
+  })
+
+  it('does not count adding no points as a good thing', () => {
+    const { score, combo } = withCombo()
+    score.add(1)
+
+    score.add(0)
+
+    expect([score.value, combo.inARow]).toEqual([1, 1])
+  })
+
+  it('adds points at X1 again after a mistake', () => {
+    const { score, mistakes } = withCombo()
+    for (let i = 0; i < 6; i++) score.add(1)
+
+    mistakes.add()
+    score.add(1)
+
+    expect(score.value).toBe(5 + 2 + 1)
   })
 })

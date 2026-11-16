@@ -42,14 +42,13 @@ export function ovalOfWidth(width: number): BubbleSize {
  */
 export const LARGE_OVAL = ovalOfWidth(168)
 
-/** How texts are written in the large oval: inside it as seen, 8 px from its edge. */
-export const LARGE_OVAL_TEXT: TextShape = {
-  radiusX: LARGE_OVAL.radiusX,
-  radiusY: LARGE_OVAL.radiusY,
-  margin: 8,
-  minSize: 10,
-  maxSize: 24,
+/** How texts are written in an oval of `size`: inside it as seen, 8 px from its edge. */
+export function ovalTextShape({ radiusX, radiusY }: BubbleSize): TextShape {
+  return { radiusX, radiusY, margin: 8, minSize: 10, maxSize: 24 }
 }
+
+/** How texts are written in the large oval. */
+export const LARGE_OVAL_TEXT: TextShape = ovalTextShape(LARGE_OVAL)
 
 /** Loads (once) the green bubble (the words in Focus Attention; the goals in Break It Down). */
 export const loadGreenBubbleImage = createImageLoader(greenBubbleUrl, 'green-bubble.png')

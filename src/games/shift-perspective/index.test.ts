@@ -267,7 +267,7 @@ describe('Shift Perspective', () => {
   })
 
   it('ends with the 10th mistake on Easy, with what was chosen matching the score', async () => {
-    const { click, frames, tapAt, session, container, summaryValues } = await setup(4)
+    const { click, frames, tapAt, session, container, summaryValues, timesScored } = await setup(4)
     click('.game-hud__start')
     const random = seededRandom(40)
     /** What happens to each thought, decided when it is shown: good, bad or too slow. */
@@ -287,13 +287,18 @@ describe('Shift Perspective', () => {
 
     const list = container.querySelector<HTMLElement>('.game-hud__summary')!
     const labels = [...list.querySelectorAll('dt')].map((e) => e.textContent)
-    expect(labels).toEqual(['Good thoughts chosen', 'Bad thoughts chosen', 'Too slow'])
+    expect(labels).toEqual([
+      'Good thoughts chosen',
+      'Bad thoughts chosen',
+      'Too slow',
+      'Best combo',
+    ])
     const [good, bad, tooSlow] = summaryValues()
     expect(bad + tooSlow).toBe(10)
     expect(bad).toBeGreaterThan(0)
     expect(tooSlow).toBeGreaterThan(0)
     expect(good).toBeGreaterThan(0)
-    expect(session.score.value).toBe(good)
+    expect(timesScored()).toBe(good)
   })
 
   it('ends with the first mistake on Extreme, keeping that thought on screen', async () => {

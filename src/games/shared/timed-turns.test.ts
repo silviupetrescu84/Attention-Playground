@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { fadeAt, passDeadlines, timeLeftAt, type TimedTurn } from './timed-turns'
+import { FADE_MS, fadeAt, passDeadlines, timeLeftAt, type TimedTurn } from './timed-turns'
 
 describe('fadeAt', () => {
   const fade = { fromMs: 1_000, endedAtMs: undefined, inMs: 100, outMs: 300 }
@@ -12,6 +12,15 @@ describe('fadeAt', () => {
     const ended = { ...fade, endedAtMs: 5_000 }
 
     expect([5_000, 5_150, 5_300, 6_000].map((t) => fadeAt(ended, t))).toEqual([1, 0.5, 0, 0])
+  })
+
+  it('fades in and out over 0.1 s, as everything in the games, unless told otherwise', () => {
+    const plain = { fromMs: 1_000, endedAtMs: 2_000 }
+
+    expect(FADE_MS).toBe(100)
+    expect([1_000, 1_050, 1_100, 2_000, 2_050, 2_100].map((t) => fadeAt(plain, t))).toEqual([
+      0, 0.5, 1, 1, 0.5, 0,
+    ])
   })
 
   it('fades out from as far as it got when it ends while fading in', () => {

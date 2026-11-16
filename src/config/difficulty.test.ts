@@ -1,7 +1,14 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import pinned from '../test/pinned-difficulty'
 import { DIFFICULTY, type DifficultyConfig } from './difficulty'
 import real from './difficulty.json'
+
+// The first import of every game is slow (each file is transformed once),
+// more so while other test files run at the same time. Do it before the
+// tests, so the first one does not pay for it and time out (as in main.test.ts).
+beforeAll(async () => {
+  await import('../games/catalog')
+})
 
 afterEach(() => {
   vi.doUnmock('./difficulty')
@@ -41,6 +48,16 @@ describe('the difficulty', () => {
 
   it.each<[string, unknown, string]>([
     ['mistakesToFail.hard', 0, 'mistakesToFail.hard must be a whole number ≥ 1, got 0'],
+    [
+      'emotionsRise.paces.slow',
+      100,
+      'emotionsRise.paces.slow must be a number between -100 and 100, got 100',
+    ],
+    [
+      'makeGoodConnections.paces.fast',
+      -150,
+      'makeGoodConnections.paces.fast must be a number between -100 and 100, got -150',
+    ],
     ['emotionsRise.speed.min', 0, 'emotionsRise.speed.min must be a finite number > 0, got 0'],
     ['emotionsRise.speed.max', 30, 'emotionsRise.speed.max must be ≥ its min (40), got 30'],
     [
@@ -145,8 +162,89 @@ describe('the difficulty', () => {
       0,
       'improveInnerVoice.goodInARowToEmpower must be a whole number ≥ 1, got 0',
     ],
+    [
+      'stayInTheZone.riseSpeed.start',
+      0,
+      'stayInTheZone.riseSpeed.start must be a finite number > 0, got 0',
+    ],
+    [
+      'stayInTheZone.fallSpeed.accelerationPerS',
+      -1,
+      'stayInTheZone.fallSpeed.accelerationPerS must be a finite number ≥ 0, got -1',
+    ],
+    [
+      'stayInTheZone.fallSpeed.turnAccelerationPerS',
+      0,
+      'stayInTheZone.fallSpeed.turnAccelerationPerS must be a finite number > 0, got 0',
+    ],
+    [
+      'stayInTheZone.zoneHeightByZones.limit',
+      80,
+      'stayInTheZone.zoneHeightByZones.limit must be ≥ the ring in its middle (92), got 80',
+    ],
+    [
+      'stayInTheZone.zoneHeightByZones.start',
+      700,
+      'stayInTheZone.zoneHeightByZones.start must be ≤ the space zones can be in, less ZONE_SPACING ' +
+        'each way (400), got 700',
+    ],
+    [
+      'stayInTheZone.zoneTimeMsByZones.start',
+      0,
+      'stayInTheZone.zoneTimeMsByZones.start must be a finite number > 0, got 0',
+    ],
+    [
+      'stayInTheZone.timeInZoneMsByZones.every',
+      0,
+      'stayInTheZone.timeInZoneMsByZones.every must be a whole number ≥ 1, got 0',
+    ],
+    [
+      'stayInTheZone.zoneTimeMsByZones.limit',
+      1_500,
+      'stayInTheZone.zoneTimeMsByZones at its shortest must be ≥ the longest ' +
+        'stayInTheZone.timeInZoneMsByZones (2000), got 1500',
+    ],
+    [
+      'rememberGratitude.rememberMsByTurns.limit',
+      0,
+      'rememberGratitude.rememberMsByTurns.limit must be a finite number > 0, got 0',
+    ],
+    [
+      'rememberGratitude.thingsByTurns.start',
+      1,
+      'rememberGratitude.thingsByTurns.start must be a whole number from 2 to 8, got 1',
+    ],
+    [
+      'rememberGratitude.thingsByTurns.limit',
+      9,
+      'rememberGratitude.thingsByTurns.limit must be a whole number from 2 to 8, got 9',
+    ],
+    [
+      'makeGoodConnections.dotsByRounds.start',
+      1,
+      'makeGoodConnections.dotsByRounds.start must be a whole number from 2 to 8, got 1',
+    ],
+    [
+      'makeGoodConnections.dotsByRounds.steps',
+      [{ from: 1, value: 9 }],
+      'makeGoodConnections.dotsByRounds.steps[0].value must be a whole number from 2 to 8, got 9',
+    ],
+    [
+      'makeGoodConnections.timeToConnectMsByRounds.limit',
+      0,
+      'makeGoodConnections.timeToConnectMsByRounds.limit must be a finite number > 0, got 0',
+    ],
   ])('stops the app loading if %s is %j, naming it', async (path, value, message) => {
     await expect(loadGamesWith(pinnedWith(path, value))).rejects.toThrow(new RangeError(message))
+  })
+
+  it('lets each game have its own paces', async () => {
+    await loadGamesWith(pinnedWith('emotionsRise.paces.slow', 30))
+
+    const emotionsRise = await import('../games/emotions-rise/emotions-rise')
+    const alignTheActions = await import('../games/align-the-actions/align-the-actions')
+    expect(emotionsRise.PACE_PERCENTS).toEqual({ slow: 30, normal: 0, fast: -15 })
+    expect(alignTheActions.PACE_PERCENTS).toEqual({ slow: 15, normal: 0, fast: -15 })
   })
 
   it('stops the app loading if a setting is missing', async () => {

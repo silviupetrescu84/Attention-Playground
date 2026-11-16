@@ -3,21 +3,17 @@ import projectorUrl from '../../assets/focus-attention/focus-projector.png'
 import { cssVariables } from '../../test/css-variables'
 import { createFakeContext, type DrawCall } from '../../test/fake-canvas-context'
 import { stubImages } from '../../test/fake-image'
+import { PRESS_MS } from '../shared/canvas-button'
 import { BUBBLE_BORDER_WIDTH } from '../shared/canvas-style'
-import gameCss from '../shared/game.css?raw'
-import { RAISED } from '../shared/pill'
 import { fitFontSize, fontAt, wrapText, type CanvasFont } from '../shared/text'
 import data from './data/focus-attention.json'
 import {
-  BUTTON_PRESS_DEPTH,
   BUTTON_TEXT_FIT,
   drawBeam,
   drawBubble,
-  drawButton,
   drawProjector,
   drawScene,
   FOCUS_COLORS,
-  PRESS_MS,
   WORD_TEXT_FIT,
   type FocusColors,
   type SceneLook,
@@ -85,20 +81,6 @@ describe('colours', () => {
     expect(cssVariables.get('--focus-projector')).toBe('#fecc1e')
     expect(cssVariables.get('--focus-beam')).toBe(
       'color-mix(in srgb, var(--focus-projector) 50%, transparent)',
-    )
-  })
-
-  it('make the buttons look like the app’s own: ink blue, white text, the same shadow', () => {
-    const appButton = /\.game-hud \.game-hud__button \{([^}]*)\}/.exec(gameCss)![1]
-    const property = (name: string) => new RegExp(`${name}: ([^;]+);`).exec(appButton)![1]
-
-    expect(cssVariables.get('--focus-button-fill')).toBe(property('background'))
-    expect(cssVariables.get('--focus-button-text')).toBe(property('color'))
-    // Its box-shadow: 0 0.5rem 1.5rem (8 px down, blurred 24 px), in ink at 25%.
-    expect(property('box-shadow')).toBe(`0 0.5rem 1.5rem var(${FOCUS_COLORS.pillShadow})`)
-    expect(RAISED).toEqual({ offsetY: 8, blur: 24 })
-    expect(cssVariables.get('--focus-button-pressed')).toBe(
-      'color-mix(in srgb, var(--color-ink) 80%, white)',
     )
   })
 })
@@ -289,47 +271,6 @@ describe('drawing a bubble', () => {
     const [stroke] = context.callsTo('stroke')
     expect([stroke.strokeStyle, stroke.lineWidth]).toEqual(['card border', BUBBLE_BORDER_WIDTH])
     expect(context.callsTo('fillText')[0].args[0]).toBe('Greed')
-  })
-})
-
-describe('drawing a button', () => {
-  const [focus] = BUTTONS
-
-  it('draws a raised pill with its label in white in the middle, and no border', () => {
-    const context = createFakeContext()
-
-    drawButton(context.asContext(), focus, false, look)
-
-    expect(context.callsTo('roundRect')[0].args).toEqual([
-      focus.x,
-      focus.y,
-      focus.width,
-      focus.height,
-      focus.height / 2,
-    ])
-    const [fill] = context.callsTo('fill')
-    expect([fill.fillStyle, fill.shadowBlur]).toEqual(['button ink', RAISED.blur])
-    expect(context.callsTo('stroke')).toEqual([])
-    const [label] = context.callsTo('fillText')
-    expect([label.args, label.font, label.fillStyle, label.shadowBlur]).toEqual([
-      ['Focus', focus.x + focus.width / 2, focus.y + focus.height / 2],
-      fontAt(font, 18),
-      'button white',
-      0,
-    ])
-  })
-
-  it('looks pressed: pushed down, lighter, and without its shadow', () => {
-    const context = createFakeContext()
-
-    drawButton(context.asContext(), focus, true, look)
-
-    expect(context.callsTo('roundRect')[0].args[1]).toBe(focus.y + BUTTON_PRESS_DEPTH)
-    const [fill] = context.callsTo('fill')
-    expect([fill.fillStyle, fill.shadowBlur]).toEqual(['button light ink', 0])
-    expect(context.callsTo('fillText')[0].args[2]).toBe(
-      focus.y + BUTTON_PRESS_DEPTH + focus.height / 2,
-    )
   })
 })
 

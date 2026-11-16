@@ -1,3 +1,4 @@
+import { createCombo, type Combo } from './combo'
 import { createGameCanvas, type GameCanvas, type GamePoint } from './game-canvas'
 import { createGameHud, type GameHud, type SummaryItem } from './game-hud'
 import { createGameLifecycle, type GameLifecycle } from './game-lifecycle'
@@ -5,14 +6,15 @@ import { createGameLoop, type FrameScheduler, type GameFrame, type GameLoop } fr
 import { createGameStatus, type GameStatus } from './game-status'
 import { createHighScores, type HighScores, type ScoreStorage } from './high-scores'
 import { createMistakes, type Mistakes } from './mistakes'
+import { createPaceChoice, type PaceChoice } from './pace'
 import { pauseWhenAway } from './pause-when-away'
 import { createScore, type Score } from './score'
 import './game.css'
 
 /**
- * Sets up everything a minigame shares (lifecycle, auto-pause, canvas, score,
- * timer, difficulty and mistakes, best scores, Start/Pause/Restart buttons,
- * status bar and taps) and runs a game in it.
+ * Sets up everything a minigame shares (lifecycle, auto-pause, canvas, score
+ * and combo, timer, difficulty, pace and mistakes, best scores, Start/Pause/Restart
+ * buttons, status bar and taps) and runs a game in it.
  *
  * A game only provides its own rules as `GameHandlers`, and reports each
  * mistake the player makes to `mistakes`. A round goes on until the player
@@ -24,8 +26,12 @@ export interface GameSession {
   readonly lifecycle: GameLifecycle
   readonly loop: GameLoop
   readonly score: Score
+  /** Good things in a row, and what they multiply points by (see combo.ts). */
+  readonly combo: Combo
   /** The difficulty chosen, and the mistakes made this round. */
   readonly mistakes: Mistakes
+  /** The pace chosen, and how it changes the game's settings (see pace.ts). */
+  readonly pace: PaceChoice
   /** The game's best scores at each difficulty, kept in the browser. */
   readonly highScores: HighScores
   readonly canvas: GameCanvas
@@ -86,11 +92,13 @@ export function mountGame(
   const lifecycle = createGameLifecycle({ signal })
   pauseWhenAway(lifecycle)
   const canvas = createGameCanvas(container, { signal })
-  const score = createScore({ lifecycle })
   const mistakes = createMistakes({ lifecycle })
+  const pace = createPaceChoice({ lifecycle })
+  const combo = createCombo({ lifecycle, mistakes })
+  const score = createScore({ lifecycle, combo })
   // Created before the game's own rules, so a round counts with the score it
   // ended on, before the game stops.
-  const highScores = createHighScores({ gameId, lifecycle, score, mistakes, storage })
+  const highScores = createHighScores({ gameId, lifecycle, score, mistakes, pace, storage })
 
   const loop = createGameLoop({
     lifecycle,
@@ -102,13 +110,23 @@ export function mountGame(
       status.update()
     },
   })
-  const hud = createGameHud(canvas.stage, { lifecycle, loop, score, mistakes, highScores })
+  const hud = createGameHud(canvas.stage, {
+    lifecycle,
+    loop,
+    score,
+    combo,
+    mistakes,
+    pace,
+    highScores,
+  })
   const status = createGameStatus(container, { loop })
   const session: GameSession = {
     lifecycle,
     loop,
     score,
+    combo,
     mistakes,
+    pace,
     highScores,
     canvas,
     hud,
@@ -130,7 +148,9 @@ export function mountGame(
       rules.reset()
     } else if (state === 'finished') {
       rules.end?.()
-      hud.showSummary(rules.summary?.() ?? [])
+      // Every game's summary ends with the best combo of the round.
+      const bestCombo = { label: 'Best combo', value: `X${combo.best}` }
+      hud.showSummary([...(rules.summary?.() ?? []), bestCombo])
     }
   })
 

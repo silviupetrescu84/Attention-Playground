@@ -46,7 +46,7 @@ export function emotionsRiseGame({
   random = Math.random,
   fonts,
 }: EmotionsRiseGameOptions = {}): GameDefinition {
-  return ({ canvas, score, mistakes, status }) => {
+  return ({ canvas, score, mistakes, status, pace }) => {
     const game = createEmotionsRise({
       emotions: { good: emotions.positive, bad: emotions.negative },
       score,
@@ -75,7 +75,8 @@ export function emotionsRiseGame({
         // Measured now, with the font that actually loaded.
         const fontSize = fitFontSize(canvas.context, font, allEmotions, EMOTION_TEXT_FIT)
         look = { font: fontAt(font, fontSize), colors }
-        game.start()
+        // At the pace chosen for this round.
+        game.start(pace.pace)
         draw()
       },
       frame({ elapsedMs }) {

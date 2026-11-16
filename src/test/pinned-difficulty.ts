@@ -9,6 +9,7 @@ import type { DifficultyConfig } from '../config/difficulty'
 const PINNED_DIFFICULTY: DifficultyConfig = {
   mistakesToFail: { easy: 10, medium: 6, hard: 3, extreme: 1 },
   emotionsRise: {
+    paces: { slow: 15, normal: 0, fast: -15 },
     speed: { min: 40, max: 80 },
     spawnDelayMs: { min: 700, max: 1_500 },
     harderByTimeMs: [
@@ -20,6 +21,7 @@ const PINNED_DIFFICULTY: DifficultyConfig = {
     ],
   },
   alignTheActions: {
+    paces: { slow: 15, normal: 0, fast: -15 },
     rowSpeedByGoals: {
       start: 60,
       steps: [
@@ -32,6 +34,7 @@ const PINNED_DIFFICULTY: DifficultyConfig = {
     },
   },
   shiftPerspective: {
+    paces: { slow: 15, normal: 0, fast: -15 },
     readingMs: 3_000,
     choicesByThoughts: {
       start: 2,
@@ -45,6 +48,7 @@ const PINNED_DIFFICULTY: DifficultyConfig = {
     timeToChooseMsByThoughts: { start: 10_000, change: -500, every: 10, limit: 5_000 },
   },
   focusAttention: {
+    paces: { slow: 15, normal: 0, fast: -15 },
     speedByTimeMs: {
       start: 15,
       steps: [
@@ -67,19 +71,50 @@ const PINNED_DIFFICULTY: DifficultyConfig = {
     },
   },
   breakItDown: {
+    paces: { slow: 15, normal: 0, fast: -15 },
     readingMs: 3_000,
     actionsByGoals: { start: 2, change: 1, every: 2, limit: 6 },
     timeToChooseMsByGoals: { start: 10_000, change: -500, every: 2, limit: 5_000 },
   },
   pauseBeforeReacting: {
+    paces: { slow: 15, normal: 0, fast: -15 },
     mostOnScreen: 5,
     spawnDelayMsBySituations: { start: 3_000, change: -100, every: 10, limit: 2_000 },
   },
   improveInnerVoice: {
+    paces: { slow: 15, normal: 0, fast: -15 },
     spawnDelayMsByWords: { start: 3_000, change: -100, every: 10, limit: 2_000 },
     fallSpeedByWords: { start: 40, change: 10, every: 10, limit: 140 },
     padSpeed: { start: 60, max: 80, accelerationPerS: 10 },
     goodInARowToEmpower: 3,
+  },
+  stayInTheZone: {
+    paces: { slow: 15, normal: 0, fast: -15 },
+    riseSpeed: { start: 60, accelerationPerS: 40 },
+    fallSpeed: { start: 60, accelerationPerS: 40, turnAccelerationPerS: 800 },
+    zoneHeightByZones: { start: 200, change: -10, every: 3, limit: 100 },
+    zoneTimeMsByZones: { start: 10_000, change: -500, every: 10, limit: 5_000 },
+    timeInZoneMsByZones: { start: 1_000, change: 100, every: 10, limit: 2_000 },
+  },
+  rememberGratitude: {
+    paces: { slow: 15, normal: 0, fast: -15 },
+    rememberMsByTurns: { start: 5_000, change: -100, every: 15, limit: 4_000 },
+    thingsByTurns: { start: 2, change: 1, every: 3, limit: 8 },
+  },
+  makeGoodConnections: {
+    paces: { slow: 15, normal: 0, fast: -15 },
+    dotsByRounds: {
+      start: 2,
+      steps: [
+        { from: 1, value: 3 },
+        { from: 6, value: 4 },
+        { from: 11, value: 5 },
+        { from: 16, value: 6 },
+        { from: 21, value: 7 },
+        { from: 26, value: 8 },
+      ],
+    },
+    timeToConnectMsByRounds: { start: 10_000, change: -100, every: 5, limit: 7_000 },
   },
 }
 

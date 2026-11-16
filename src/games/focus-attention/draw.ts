@@ -1,4 +1,5 @@
 import projectorUrl from '../../assets/focus-attention/focus-projector.png'
+import { BUTTON_COLORS, drawButton, PRESS_MS } from '../shared/canvas-button'
 import {
   drawBubbleImage,
   type BubbleSize,
@@ -8,7 +9,6 @@ import {
 import { BUBBLE_COLORS, drawHue, fadedOutAt, hueFor, type Chosen } from '../shared/feedback'
 import { clearGameCanvas, GAME_HEIGHT, GAME_WIDTH, type GamePoint } from '../shared/game-canvas'
 import { createImageLoader } from '../shared/load-image'
-import { drawPill, FLAT, PILL_COLORS, RAISED } from '../shared/pill'
 import { drawTextBlock, fitInCircle, type CanvasFont, type TextFit } from '../shared/text'
 import {
   BUBBLE_RADIUS,
@@ -18,7 +18,6 @@ import {
   PROJECTOR_RADIUS,
   PROJECTOR_SIZE,
   type Bubble,
-  type Button,
   type Press,
 } from './focus-attention'
 import './focus-attention.css'
@@ -36,20 +35,13 @@ import './focus-attention.css'
 /** The colours the game is drawn with, from CSS (game.css and focus-attention.css). */
 export const FOCUS_COLORS = {
   ...BUBBLE_COLORS,
-  ...PILL_COLORS,
+  ...BUTTON_COLORS,
   projector: '--focus-projector',
   beam: '--focus-beam',
-  buttonFill: '--focus-button-fill',
-  buttonText: '--focus-button-text',
-  buttonPressed: '--focus-button-pressed',
 } as const satisfies CssVariables
 
 export type FocusColors = CssValues<keyof typeof FOCUS_COLORS>
 
-/** How far a pressed button goes down. */
-export const BUTTON_PRESS_DEPTH = 3
-/** How long a button shows as pressed. */
-export const PRESS_MS = 150
 /** Space kept between a word and its bubble's edge. */
 export const TEXT_MARGIN = 4
 
@@ -159,29 +151,6 @@ export function drawBubble(
   drawTextBlock(context, line, bubble.x, bubble.y, font, colors.text)
 }
 
-/**
- * A button: a raised pill with its label. While pressed it is pushed down,
- * lighter and without its shadow.
- */
-export function drawButton(
-  context: CanvasRenderingContext2D,
-  button: Button,
-  pressed: boolean,
-  { colors, font, buttonFontSize }: SceneLook,
-) {
-  const top = pressed ? button.y + BUTTON_PRESS_DEPTH : button.y
-  const box = { left: button.x, right: button.x + button.width, top, bottom: top + button.height }
-  const fill = pressed ? colors.buttonPressed : colors.buttonFill
-  const pillColors = { fill, text: colors.buttonText, shadow: colors.pillShadow }
-  drawPill(
-    context,
-    { box, label: button.label, fontSize: buttonFontSize },
-    font,
-    pillColors,
-    pressed ? FLAT : RAISED,
-  )
-}
-
 /** What the drawing shows: the game's current state. */
 export interface FocusAttentionScene {
   readonly bubbles: readonly Bubble[]
@@ -215,6 +184,7 @@ export function drawScene(
 
   const pressed = press && timeMs - press.atMs < PRESS_MS ? press.answer : undefined
   for (const button of BUTTONS) {
-    drawButton(context, button, button.answer === pressed, look)
+    const { font, buttonFontSize, colors } = look
+    drawButton(context, button, button.answer === pressed, font, buttonFontSize, colors)
   }
 }

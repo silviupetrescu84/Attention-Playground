@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { constantRandom, seededRandom } from '../../test/random'
-import { randomBetween, randomIndex, randomItem, shuffled } from './random'
+import { randomBetween, randomBetweenAvoiding, randomIndex, randomItem, shuffled } from './random'
 
 describe('randomBetween', () => {
   it('maps [0, 1) onto min … max', () => {
@@ -69,5 +69,47 @@ describe('shuffled', () => {
       expect(count).toBeGreaterThan(850)
       expect(count).toBeLessThan(1_150)
     }
+  })
+})
+
+describe('randomBetweenAvoiding', () => {
+  it('is anywhere between min and max at least the gap from what it avoids', () => {
+    const random = seededRandom(1)
+
+    for (let i = 0; i < 500; i++) {
+      const value = randomBetweenAvoiding(random, 0, 500, 200, 100)
+      expect(value).toBeGreaterThanOrEqual(0)
+      expect(value).toBeLessThanOrEqual(500)
+      expect(Math.abs(value - 200)).toBeGreaterThanOrEqual(100)
+    }
+  })
+
+  it('makes every allowed value as likely, below and above', () => {
+    // Allowed: 0 to 100 (a third), and 300 to 500 (two thirds).
+    const at = (chance: number) => randomBetweenAvoiding(() => chance, 0, 500, 200, 100)
+
+    expect([at(0), at(1 / 3 - 1e-9), at(1 / 3), at(2 / 3), at(0.999_999)]).toEqual([
+      0,
+      expect.closeTo(100, 6),
+      300,
+      400,
+      expect.closeTo(500, 3),
+    ])
+  })
+
+  it('uses only one side when the other is out of range', () => {
+    expect(randomBetweenAvoiding(() => 0, 0, 500, 50, 100)).toBe(150)
+    expect(randomBetweenAvoiding(() => 0.999_999, 0, 500, 450, 100)).toBeCloseTo(350, 3)
+  })
+
+  it('gives the one value allowed, at either end, when there is only one', () => {
+    expect(randomBetweenAvoiding(() => 0.5, 0, 200, 100, 100)).toBe(0)
+    expect(randomBetweenAvoiding(() => 0.5, 0, 150, 50, 100)).toBe(150)
+  })
+
+  it('cannot give a value when none is allowed', () => {
+    expect(() => randomBetweenAvoiding(() => 0.5, 0, 150, 75, 100)).toThrow(
+      new RangeError('Nothing from 0 to 150 is 100 from 75'),
+    )
   })
 })

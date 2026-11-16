@@ -2,7 +2,14 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import ovalUrl from '../../assets/emotions-rise/oval.png'
 import greenBubbleUrl from '../../assets/focus-attention/green-bubble.png'
 import { stubImages } from '../../test/fake-image'
-import { GREEN_BUBBLE_BODY, LARGE_OVAL, LARGE_OVAL_TEXT, ovalOfWidth, ovalSeenIn } from './artwork'
+import {
+  GREEN_BUBBLE_BODY,
+  LARGE_OVAL,
+  LARGE_OVAL_TEXT,
+  ovalOfWidth,
+  ovalSeenIn,
+  ovalTextShape,
+} from './artwork'
 
 afterEach(() => {
   vi.unstubAllGlobals()
@@ -49,6 +56,18 @@ describe('shared artwork', () => {
     expect(LARGE_OVAL_TEXT).toEqual({
       radiusX: LARGE_OVAL.radiusX,
       radiusY: LARGE_OVAL.radiusY,
+      margin: 8,
+      minSize: 10,
+      maxSize: 24,
+    })
+  })
+
+  it('writes texts in any oval the same way: as seen, 8 px from its edge, up to 24 px', () => {
+    const small = ovalOfWidth(100)
+
+    expect(ovalTextShape(small)).toEqual({
+      radiusX: small.radiusX,
+      radiusY: small.radiusY,
       margin: 8,
       minSize: 10,
       maxSize: 24,

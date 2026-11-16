@@ -1,10 +1,13 @@
 import { DIFFICULTY } from '../../config/difficulty'
 import { GREEN_BUBBLE_BODY } from '../shared/artwork'
+import { isOnButton, type CanvasButton } from '../shared/canvas-button'
 import { checkPositive } from '../shared/checks'
 import { checkStepTable, valueAt, type StepTable } from '../shared/difficulty'
 import { stillFading, type Chosen } from '../shared/feedback'
 import { GAME_HEIGHT, GAME_WIDTH, type GamePoint } from '../shared/game-canvas'
 import { GAME_BAR_HEIGHT, PLAY_CENTRE } from '../shared/game-hud'
+import { distanceIn, timeToGo } from '../shared/motion'
+import { AS_SET, checkPaces, pacingFor, type Pace, type PacePercents } from '../shared/pace'
 import type { Random } from '../shared/random'
 import type { Score } from '../shared/score'
 import { createWordPicker, type Word, type WordPicker } from '../shared/word-picker'
@@ -38,10 +41,16 @@ import { createWordPicker, type Word, type WordPicker } from '../shared/word-pic
  *
  * The game gets harder with the round's time: every bubble on screen moves
  * faster (SPEED) and bubbles come more often (SPAWN_DELAY), both set in
- * config/difficulty.json.
+ * config/difficulty.json. At the pace chosen (see the shared pace), every
+ * speed and time between bubbles is that much lower or longer, changing at
+ * the same times.
  *
  * When a mistake ends the round, everything stops where it is.
  */
+
+/** How much slower each pace is than the settings here (see config/difficulty.json and the shared pace). */
+export const PACE_PERCENTS: PacePercents = DIFFICULTY.focusAttention.paces
+checkPaces(PACE_PERCENTS, 'focusAttention.paces')
 
 const { speedByTimeMs, spawnDelayMsByTimeMs } = DIFFICULTY.focusAttention
 
@@ -63,29 +72,34 @@ export function spawnIntervalAt(timeMs: number): number {
   return valueAt(SPAWN_DELAY, timeMs)
 }
 
-/** How far a bubble moves from `fromMs` to `toMs`, following every speed change. */
-export function distanceBetween(fromMs: number, toMs: number): number {
+/**
+ * How far a bubble moves from `fromMs` to `toMs` at `pacing` (as set if
+ * none), following every speed change.
+ */
+export function distanceBetween(fromMs: number, toMs: number, pacing = AS_SET): number {
+  const pacedSpeedAt = (at: number) => pacing.speed(speedAt(at))
   let distance = 0
   let at = fromMs
 
   for (const { from: stepAtMs } of SPEED.steps) {
     if (stepAtMs > at && stepAtMs < toMs) {
-      distance += (speedAt(at) * (stepAtMs - at)) / 1_000
+      distance += distanceIn(pacedSpeedAt(at), stepAtMs - at)
       at = stepAtMs
     }
   }
 
-  return distance + (speedAt(at) * (toMs - at)) / 1_000
+  return distance + distanceIn(pacedSpeedAt(at), toMs - at)
 }
 
-/** When a bubble that starts moving at `fromMs` has moved `distance` px. */
-export function whenMoved(fromMs: number, distance: number): number {
+/** When a bubble that starts moving at `fromMs` has moved `distance` px, at `pacing`. */
+export function whenMoved(fromMs: number, distance: number, pacing = AS_SET): number {
+  const pacedSpeedAt = (at: number) => pacing.speed(speedAt(at))
   let left = distance
   let at = fromMs
 
   for (const { from: stepAtMs } of SPEED.steps) {
     if (stepAtMs > at) {
-      const canMove = (speedAt(at) * (stepAtMs - at)) / 1_000
+      const canMove = distanceIn(pacedSpeedAt(at), stepAtMs - at)
       if (left <= canMove) {
         break
       }
@@ -94,7 +108,7 @@ export function whenMoved(fromMs: number, distance: number): number {
     }
   }
 
-  return at + (left / speedAt(at)) * 1_000
+  return at + timeToGo(left, pacedSpeedAt(at))
 }
 
 export const POINTS = {
@@ -125,13 +139,9 @@ export const SPAWN_SPACING_COUNT = 3
 
 export type Answer = 'focus' | 'change'
 
-export interface Button {
+/** One of the two buttons at the bottom, for the answer it gives. */
+export interface Button extends CanvasButton {
   readonly answer: Answer
-  readonly label: string
-  readonly x: number
-  readonly y: number
-  readonly width: number
-  readonly height: number
 }
 
 const BUTTON_MARGIN = 12
@@ -156,14 +166,8 @@ export const BUTTONS: readonly Button[] = BUTTON_LABELS.map(([answer, label], i)
 }))
 
 /** The button at `point`, if any. */
-export function buttonAt({ x, y }: GamePoint): Button | undefined {
-  return BUTTONS.find(
-    (button) =>
-      x >= button.x &&
-      x <= button.x + button.width &&
-      y >= button.y &&
-      y <= button.y + button.height,
-  )
+export function buttonAt(point: GamePoint): Button | undefined {
+  return BUTTONS.find((button) => isOnButton(point, button))
 }
 
 /** Where a bubble's centre must be for it to be the target: between the bar and the buttons. */
@@ -216,10 +220,17 @@ export interface Bubble extends Word {
   y: number
 }
 
-/** Where `bubble`'s centre is at `timeMs`: on its way from where it came from to the projector. */
-export function positionAt({ start, spawnedAtMs }: Bubble, timeMs: number): GamePoint {
+/**
+ * Where `bubble`'s centre is at `timeMs`, at `pace` (Normal if none): on
+ * its way from where it came from to the projector.
+ */
+export function positionAt(
+  { start, spawnedAtMs }: Bubble,
+  timeMs: number,
+  pacing = AS_SET,
+): GamePoint {
   const length = Math.hypot(CENTRE.x - start.x, CENTRE.y - start.y)
-  const moved = Math.min(length, distanceBetween(spawnedAtMs, timeMs))
+  const moved = Math.min(length, distanceBetween(spawnedAtMs, timeMs, pacing))
   return {
     x: start.x + ((CENTRE.x - start.x) * moved) / length,
     y: start.y + ((CENTRE.y - start.y) * moved) / length,
@@ -282,8 +293,8 @@ export interface FocusAttention {
   readonly stats: FocusAttentionStats
   /** Removes everything. */
   clear(): void
-  /** Starts a round: the first bubble comes straight away. */
-  start(): void
+  /** Starts a round at `pace` (Normal if none): the first bubble comes straight away. */
+  start(pace?: Pace): void
   /** Moves everything to the round's time `elapsedMs`. */
   update(elapsedMs: number): void
   /** Presses the button tapped, if any, at the time of the last update. */
@@ -309,6 +320,7 @@ export function createFocusAttention({
   let answered: Chosen<Bubble>[] = []
   let press: Press | undefined
   let nextSpawnAtMs = 0
+  let pacing = AS_SET
   let timeMs = 0
   let started = false
   const noStats: FocusAttentionStats = {
@@ -329,20 +341,20 @@ export function createFocusAttention({
   function spawn(atMs: number) {
     const lastOnScreen = spawned
       .filter((bubble) => bubbles.includes(bubble))
-      .map((bubble) => positionAt(bubble, atMs))
+      .map((bubble) => positionAt(bubble, atMs, pacing))
     const start = pickSpawnPoint(lastOnScreen, random)
     const length = Math.hypot(CENTRE.x - start.x, CENTRE.y - start.y)
     const bubble: Bubble = {
       ...picker.next(),
       start,
       spawnedAtMs: atMs,
-      inViewAtMs: whenMoved(atMs, distanceToView(start)),
-      touchAtMs: whenMoved(atMs, length - TOUCH_DISTANCE),
+      inViewAtMs: whenMoved(atMs, distanceToView(start), pacing),
+      touchAtMs: whenMoved(atMs, length - TOUCH_DISTANCE, pacing),
       ...start,
     }
     bubbles.push(bubble)
     spawned = [...spawned, bubble].slice(-SPAWN_SPACING_COUNT)
-    nextSpawnAtMs = atMs + spawnIntervalAt(atMs)
+    nextSpawnAtMs = atMs + pacing.time(spawnIntervalAt(atMs))
   }
 
   function remove(bubble: Bubble) {
@@ -360,7 +372,7 @@ export function createFocusAttention({
 
     let closest = Infinity
     for (const bubble of bubbles.filter((candidate) => candidate.inViewAtMs <= atMs)) {
-      const { x, y } = positionAt(bubble, atMs)
+      const { x, y } = positionAt(bubble, atMs, pacing)
       const distance = Math.hypot(x - CENTRE.x, y - CENTRE.y)
       if (distance < closest) {
         closest = distance
@@ -373,7 +385,7 @@ export function createFocusAttention({
     timeMs = atMs
     answered = stillFading(answered, atMs)
     for (const bubble of bubbles) {
-      Object.assign(bubble, positionAt(bubble, atMs))
+      Object.assign(bubble, positionAt(bubble, atMs, pacing))
     }
   }
 
@@ -480,8 +492,9 @@ export function createFocusAttention({
       return stats
     },
     clear,
-    start() {
+    start(pace: Pace = 'normal') {
       clear()
+      pacing = pacingFor(pace, PACE_PERCENTS)
       picker = createWordPicker({
         good: values,
         bad: antiValues,

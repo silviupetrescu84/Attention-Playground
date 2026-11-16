@@ -57,7 +57,7 @@ export function improveInnerVoiceGame({
   random = Math.random,
   fonts,
 }: ImproveInnerVoiceGameOptions = {}): GameDefinition {
-  return ({ canvas, score, mistakes, status }) => {
+  return ({ canvas, score, mistakes, status, pace }) => {
     const game = createImproveInnerVoice({
       words,
       score,
@@ -94,7 +94,8 @@ export function improveInnerVoiceGame({
         const style = largestTextStyle(canvas.context, font, allWords, WORD_TEXT, 1)
         textOf = createWordText(canvas.context, font, style)
         padFontSize = fitFontSize(canvas.context, font, [PAD_LABEL], PAD_TEXT_FIT)
-        game.start()
+        // At the pace chosen for this round.
+        game.start(pace.pace)
         draw()
       },
       frame({ elapsedMs }) {

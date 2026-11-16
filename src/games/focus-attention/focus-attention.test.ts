@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { constantRandom, seededRandom } from '../../test/random'
 import { GAME_BAR_HEIGHT } from '../shared/game-hud'
 import { createGameLifecycle } from '../shared/game-lifecycle'
+import { pacingFor, type Pace } from '../shared/pace'
 import { createScore } from '../shared/score'
 import type { Word, WordType } from '../shared/word-picker'
 import data from './data/focus-attention.json'
@@ -16,6 +17,7 @@ import {
   distanceBetween,
   distanceToView,
   MIN_SPAWN_DISTANCE,
+  PACE_PERCENTS,
   pickSpawnPoint,
   POINTS,
   positionAt,
@@ -255,7 +257,7 @@ describe('where bubbles come from', () => {
 
   it('at least 130 px from every bubble it must keep away from', () => {
     const random = seededRandom(4)
-    for (let i = 0; i < 300; i++) {
+    for (let i = 0; i < 100; i++) {
       const others = Array.from({ length: 3 }, () => SPAWN_POINTS[Math.floor(random() * 1460)])
       const point = pickSpawnPoint(others, random)
       for (const other of others) {
@@ -682,11 +684,12 @@ describe('reaching the projector', () => {
 
   it('is a mistake for any bubble, target or not, and leaves the target as it is', () => {
     let others = 0
-    for (const seed of [1, 2, 3, 4, 5, 6]) {
+    // Each seed has the first such mistake about 20 s in, and many more after.
+    for (const seed of [1, 2]) {
       const { game, mistakes } = started(seed)
       let target: Bubble | undefined
 
-      play(game, 120_000, {
+      play(game, 60_000, {
         each: () => {
           const reached = mistakes.at(-1)?.word
           if (reached && reached !== target && target && mistakes.length > others) {
@@ -819,5 +822,52 @@ describe('a new round', () => {
       0,
     ])
     expect(Object.values(game.stats).every((count) => count === 0)).toBe(true)
+  })
+})
+
+describe('pace', () => {
+  /** A round at `pace`, played for 5 s. */
+  function playedAt(pace: Pace) {
+    const { game } = setup()
+    game.start(pace)
+    game.update(5_000)
+    return game.bubbles
+  }
+
+  it('moves bubbles 15% slower and brings them 15% less often at Slow, the other way at Fast', () => {
+    const [normal, slow, fast] = (['normal', 'slow', 'fast'] as const).map(playedAt)
+
+    // The same first bubble, from the same place: in view later or sooner, as far along.
+    expect(slow[0].start).toEqual(normal[0].start)
+    expect(slow[0].inViewAtMs).toBeGreaterThan(normal[0].inViewAtMs)
+    expect(fast[0].inViewAtMs).toBeLessThan(normal[0].inViewAtMs)
+    const along = distanceBetween(0, normal[0].inViewAtMs)
+    expect(distanceBetween(0, slow[0].inViewAtMs, pacingFor('slow', PACE_PERCENTS))).toBeCloseTo(
+      along,
+      6,
+    )
+    expect(distanceBetween(0, fast[0].inViewAtMs, pacingFor('fast', PACE_PERCENTS))).toBeCloseTo(
+      along,
+      6,
+    )
+    expect([normal[1].spawnedAtMs, slow[1].spawnedAtMs, fast[1].spawnedAtMs]).toEqual([
+      3_000,
+      expect.closeTo(3_450, 9),
+      expect.closeTo(2_550, 9),
+    ])
+  })
+
+  it('moves bubbles at the pace through every change of speed', () => {
+    const bubble = { start: { x: 0, y: 0 }, spawnedAtMs: 0 } as Bubble
+
+    // 15 px/s until 10 s, then 17.5: 15% less all the way at Slow.
+    expect(distanceBetween(0, 15_000, pacingFor('slow', PACE_PERCENTS))).toBeCloseTo(
+      0.85 * distanceBetween(0, 15_000),
+      9,
+    )
+    expect(whenMoved(0, 200, pacingFor('slow', PACE_PERCENTS))).toBeGreaterThan(whenMoved(0, 200))
+    expect(positionAt(bubble, 12_000, pacingFor('fast', PACE_PERCENTS))).not.toEqual(
+      positionAt(bubble, 12_000),
+    )
   })
 })

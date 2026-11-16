@@ -26,6 +26,12 @@ games connected to Practice of Happiness.
   helpful ones and let the unhelpful impulses pass.
 - **Improve Inner Voice**: words fall from the top; move the pad to catch the
   helpful ones and let the unhelpful ones fall.
+- **Stay in the Zone**: hold to make a ball rise, let go to let it fall; keep
+  it in the green zone until its white ring runs out.
+- **Remember Gratitude**: things appear, then turn around; tap the ones to be
+  grateful for and leave the others.
+- **Make Good Connections**: connect all the dots, one after another, without
+  going through the walls between them.
 
 ## Prerequisites
 

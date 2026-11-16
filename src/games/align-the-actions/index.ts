@@ -5,7 +5,7 @@ import type { FontLoader } from '../shared/load-font'
 import type { Random } from '../shared/random'
 import { CANVAS_FONT, fitFontSize, loadCanvasFont } from '../shared/text'
 import { createAlignTheActions, type Mistake } from './align-the-actions'
-import data from './data/align_the_actions_goals.json'
+import data from './data/align-the-actions.json'
 import { ALIGN_COLORS, createActionText, drawScene, GOAL_TEXT_FIT } from './draw'
 import { goalsFrom, type Action, type Goal } from './goals'
 
@@ -50,7 +50,7 @@ export function alignTheActionsGame({
   random = Math.random,
   fonts,
 }: AlignTheActionsGameOptions = {}): GameDefinition {
-  return ({ canvas, score, mistakes, status }) => {
+  return ({ canvas, score, mistakes, status, pace }) => {
     const game = createAlignTheActions({
       goals,
       score,
@@ -79,7 +79,8 @@ export function alignTheActionsGame({
       start() {
         // Measured now, with the font that actually loaded.
         goalFontSize = fitFontSize(canvas.context, font, goalTitles, GOAL_TEXT_FIT)
-        game.start()
+        // At the pace chosen for this round.
+        game.start(pace.pace)
         draw()
       },
       frame({ elapsedMs }) {

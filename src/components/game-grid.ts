@@ -1,7 +1,8 @@
-import { gamePath, games, TOTAL_GAMES } from '../games/catalog'
+import { gamePath, games, TOTAL_GAMES, type CatalogGame } from '../games/catalog'
 
-export function gameGrid() {
-  const gameTiles = games.map(
+/** A tile for each of `list` (every game, normally), then "Coming soon" ones up to TOTAL_GAMES. */
+export function gameGrid(list: readonly CatalogGame[] = games) {
+  const gameTiles = list.map(
     (game) => `
         <li class="game-tile">
           <a class="game-link" href="${gamePath(game)}" data-route>
@@ -13,7 +14,7 @@ export function gameGrid() {
         </li>`,
   )
   const comingSoonTiles = Array.from(
-    { length: Math.max(0, TOTAL_GAMES - games.length) },
+    { length: Math.max(0, TOTAL_GAMES - list.length) },
     () => `
         <li class="game-tile game-tile--coming-soon">
           <div class="game-cover">

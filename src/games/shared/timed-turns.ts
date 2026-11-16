@@ -7,14 +7,19 @@ import { clamp } from './numbers'
  * out, how much of the time is left, and running out of time on time.
  */
 
+/** How long things take to fade in, and to fade out, in every game. */
+export const FADE_MS = 100
+
 /** Something that fades in, and out once it ends. */
 export interface Fade {
   /** When it starts to fade in. */
   readonly fromMs: number
   /** When it ends and starts to fade out; undefined until then. */
   readonly endedAtMs: number | undefined
-  readonly inMs: number
-  readonly outMs: number
+  /** How long it takes to fade in: FADE_MS unless given. */
+  readonly inMs?: number
+  /** How long it takes to fade out: FADE_MS unless given. */
+  readonly outMs?: number
 }
 
 /**
@@ -22,7 +27,10 @@ export interface Fade {
  * `inMs`, stops fading in when it ends, and fades out over `outMs` from then,
  * starting from as far as it got.
  */
-export function fadeAt({ fromMs, endedAtMs, inMs, outMs }: Fade, timeMs: number): number {
+export function fadeAt(
+  { fromMs, endedAtMs, inMs = FADE_MS, outMs = FADE_MS }: Fade,
+  timeMs: number,
+): number {
   const fadedIn = (Math.min(timeMs, endedAtMs ?? timeMs) - fromMs) / inMs
   const fadedOut = endedAtMs === undefined ? 1 : 1 - (timeMs - endedAtMs) / outMs
   return clamp(Math.min(fadedIn, fadedOut), 0, 1)

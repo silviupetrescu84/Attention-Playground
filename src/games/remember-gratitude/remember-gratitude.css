@@ -1,0 +1,5 @@
+/* Colours Remember Gratitude draws on the canvas with (read by draw.ts). */
+:root {
+  /* The ring that runs out with the time to remember: ink, like the Done button that follows it. */
+  --gratitude-ring: var(--color-ink);
+}

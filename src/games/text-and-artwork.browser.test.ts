@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 import { expectTextsInside } from '../test/text-fit'
-import alignData from './align-the-actions/data/align_the_actions_goals.json'
+import alignData from './align-the-actions/data/align-the-actions.json'
 import { ACTION_TEXT_FIT, GOAL_TEXT_FIT } from './align-the-actions/draw'
 import { goalsFrom as alignGoalsFrom } from './align-the-actions/goals'
 import breakItDownData from './break-it-down/data/break-it-down.json'
@@ -17,7 +17,16 @@ import { PAD_LABEL, PAD_TEXT_FIT, WORD_TEXT } from './improve-inner-voice/draw'
 import { wordsFrom } from './improve-inner-voice/words'
 import pauseData from './pause-before-reacting/data/pause-before-reacting.json'
 import { situationsFrom } from './pause-before-reacting/situations'
-import { LARGE_OVAL_TEXT, loadGreenBubbleImage, loadOvalImage } from './shared/artwork'
+import gratitudeData from './remember-gratitude/data/remember-gratitude.json'
+import { DONE_TEXT_FIT } from './remember-gratitude/draw'
+import { DONE_BUTTON, MOST_THINGS, ovalFor } from './remember-gratitude/layout'
+import { thingsFrom } from './remember-gratitude/things'
+import {
+  LARGE_OVAL_TEXT,
+  loadGreenBubbleImage,
+  loadOvalImage,
+  ovalTextShape,
+} from './shared/artwork'
 import { readCssVariables } from './shared/canvas-style'
 import {
   CANVAS_FONT,
@@ -35,6 +44,8 @@ import {
 import data from './shift-perspective/data/shift-perspective.json'
 import { CHOICE_TEXT_FIT, loadBubbleImage, THOUGHT_TEXT_FIT } from './shift-perspective/draw'
 import { thoughtsFrom } from './shift-perspective/thoughts'
+import { BALL_SIZE } from './stay-in-the-zone/ball'
+import { BALL_LOOK, loadBallImage } from './stay-in-the-zone/draw'
 // The canvas font, as the games set it.
 import './shared/game.css'
 
@@ -86,6 +97,7 @@ describe('texts in the real font', () => {
     ['values and anti-values', [...focusData.values, ...focusData.antiValues], WORD_TEXT_FIT],
     ['Focus Attention buttons', BUTTONS.map((button) => button.label), BUTTON_TEXT_FIT],
     ['the Improve Inner Voice pad', [PAD_LABEL], PAD_TEXT_FIT],
+    ['the Remember Gratitude Done button', [DONE_BUTTON.label], DONE_TEXT_FIT],
   ])('fit: %s', (_kind, texts, fit) => {
     const size = fitFontSize(context, font, texts, fit)
 
@@ -112,6 +124,23 @@ describe('texts in the real font', () => {
   })
 })
 
+describe('things to remember in the real font', () => {
+  const gratitude = thingsFrom(gratitudeData)
+  const texts = [...gratitude.good, ...gratitude.bad]
+
+  // From the largest ovals (up to 5 things) to the smallest (8 things).
+  it.each(Array.from({ length: MOST_THINGS - 1 }, (_, i) => i + 2))(
+    'fit, readable, in the ovals of turns of %i',
+    (count) => {
+      const shape = ovalTextShape(ovalFor(count))
+      const { fontSize } = chooseTextStyle(context, font, texts, shape)
+
+      expect(fontSize).toBeGreaterThanOrEqual(READABLE_SIZE)
+      expectTextsInside(context, font, texts, shape)
+    },
+  )
+})
+
 describe('single words in the real font', () => {
   it('fit on one line in the small ovals of Improve Inner Voice', () => {
     const { good, bad } = wordsFrom(innerVoiceData)
@@ -135,10 +164,33 @@ describe('the artwork', () => {
     ['the green bubble', loadGreenBubbleImage, [300, 300]],
     ['the purple bubble', loadBubbleImage, [300, 300]],
     ['the projector', loadProjectorImage, [500, 500]],
+    ['the ball', loadBallImage, [1024, 1024]],
   ] as const)('loads %s at its real size', async (_name, load, size) => {
     const image = await load()
 
     expect([image.naturalWidth, image.naturalHeight]).toEqual(size)
+  })
+
+  it('draws the ball 60 px across as seen, its glow left out', async () => {
+    const image = await loadBallImage()
+    const size = 120
+    const canvas = document.createElement('canvas')
+    canvas.width = size
+    canvas.height = size
+    const drawing = canvas.getContext('2d')
+    if (!drawing) throw new Error('Canvas 2D drawing is not supported')
+    const { width, height } = BALL_LOOK
+    drawing.drawImage(image, (size - width) / 2, (size - height) / 2, width, height)
+    const { data } = drawing.getImageData(0, 0, size, size)
+    const seen = (x: number, y: number) => data[(y * size + x) * 4 + 3] > 128
+
+    // Across the middle, and down it: the pixels the ball covers, as seen.
+    const middle = size / 2
+    const across = Array.from({ length: size }, (_, x) => x).filter((x) => seen(x, middle))
+    const down = Array.from({ length: size }, (_, y) => y).filter((y) => seen(middle, y))
+
+    expect(across.length).toBeCloseTo(BALL_SIZE, -0.5)
+    expect(down.length).toBeCloseTo(BALL_SIZE, -0.5)
   })
 
   it.each(games.map((game) => [game.name, game.icon]))(

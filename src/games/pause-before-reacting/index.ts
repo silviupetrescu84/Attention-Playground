@@ -48,7 +48,7 @@ export function pauseBeforeReactingGame({
   random = Math.random,
   fonts,
 }: PauseBeforeReactingGameOptions = {}): GameDefinition {
-  return ({ canvas, score, mistakes, status }) => {
+  return ({ canvas, score, mistakes, status, pace }) => {
     const game = createPauseBeforeReacting({
       situations,
       score,
@@ -77,7 +77,8 @@ export function pauseBeforeReactingGame({
         // Measured now, with the font that actually loaded.
         const style = chooseTextStyle(canvas.context, font, allSituations, LARGE_OVAL_TEXT)
         textOf = createSituationText(canvas.context, font, style)
-        game.start()
+        // At the pace chosen for this round.
+        game.start(pace.pace)
         draw()
       },
       frame({ elapsedMs }) {

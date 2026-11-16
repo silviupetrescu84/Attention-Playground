@@ -59,7 +59,7 @@ export function shiftPerspectiveGame({
   random = Math.random,
   fonts,
 }: ShiftPerspectiveGameOptions = {}): GameDefinition {
-  return ({ canvas, score, mistakes, status }) => {
+  return ({ canvas, score, mistakes, status, pace }) => {
     const game = createShiftPerspective({
       thoughts,
       score,
@@ -93,7 +93,8 @@ export function shiftPerspectiveGame({
           thoughtFontSize: fitFontSize(canvas.context, font, allThoughts, THOUGHT_TEXT_FIT),
           choiceFontSize: fitFontSize(canvas.context, font, allChoices, CHOICE_TEXT_FIT),
         })
-        game.start()
+        // At the pace chosen for this round.
+        game.start(pace.pace)
         draw()
       },
       frame({ elapsedMs }) {

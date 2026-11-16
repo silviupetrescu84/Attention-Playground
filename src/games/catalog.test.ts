@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { gamePath, games, preloadGames, TOTAL_GAMES, type CatalogGame } from './catalog'
 
 describe('games catalog', () => {
-  it('lists the seven games in their order on the home screen', () => {
+  it('lists the ten games in their order on the home screen', () => {
     expect(games.map((game) => [game.id, game.name])).toEqual([
       ['emotions-rise', 'Emotions Rise'],
       ['align-the-actions', 'Align the Actions'],
@@ -11,6 +11,9 @@ describe('games catalog', () => {
       ['break-it-down', 'Break It Down'],
       ['pause-before-reacting', 'Pause Before Reacting'],
       ['improve-inner-voice', 'Improve Inner Voice'],
+      ['stay-in-the-zone', 'Stay in the Zone'],
+      ['remember-gratitude', 'Remember Gratitude'],
+      ['make-good-connections', 'Make Good Connections'],
     ])
   })
 
@@ -32,6 +35,9 @@ describe('games catalog', () => {
       '/games/break-it-down',
       '/games/pause-before-reacting',
       '/games/improve-inner-voice',
+      '/games/stay-in-the-zone',
+      '/games/remember-gratitude',
+      '/games/make-good-connections',
     ])
   })
 
@@ -77,9 +83,13 @@ describe('games catalog', () => {
     warn.mockRestore()
   })
 
-  it('preloads every game', () => {
-    for (const game of games) {
+  it('preloads every game that has anything to load', () => {
+    // It draws no text and no images.
+    const nothingToLoad = ['make-good-connections']
+
+    for (const game of games.filter(({ id }) => !nothingToLoad.includes(id))) {
       expect(game.preload, game.name).toBeTypeOf('function')
     }
+    expect(games.find(({ id }) => id === 'make-good-connections')?.preload).toBeUndefined()
   })
 })

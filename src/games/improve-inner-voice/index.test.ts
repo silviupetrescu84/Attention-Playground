@@ -31,22 +31,8 @@ afterEach(() => {
 /** The context of the game mounted in the test. */
 const context = () => contexts.at(-1)!
 
-async function setup(random: Random = seededRandom(1)) {
-  const mounted = await mountForTest(improveInnerVoiceGame({ random, fonts: loadedFonts }))
-  const canvas = mounted.session.canvas.element
-  /** The finger goes down at (x, y) on the game (shown at full size), moves there, or lifts. */
-  const finger = {
-    down: (x: number, y = 700) =>
-      canvas.dispatchEvent(
-        new PointerEvent('pointerdown', { clientX: x, clientY: y, pointerId: 1 }),
-      ),
-    move: (x: number, y = 700) =>
-      window.dispatchEvent(
-        new PointerEvent('pointermove', { clientX: x, clientY: y, pointerId: 1 }),
-      ),
-    up: () => window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1 })),
-  }
-  return { ...mounted, finger }
+function setup(random: Random = seededRandom(1)) {
+  return mountForTest(improveInnerVoiceGame({ random, fonts: loadedFonts }))
 }
 
 interface Drawn {
@@ -363,7 +349,9 @@ describe('Improve Inner Voice', () => {
   })
 
   it('ends with the 10th mistake on Easy, the summary matching what happened', async () => {
-    const { click, playUntilOver, session, container, summaryValues } = await setup(seededRandom(4))
+    const { click, playUntilOver, timesScored, container, summaryValues } = await setup(
+      seededRandom(4),
+    )
     click('.game-hud__start')
 
     playUntilOver()
@@ -374,10 +362,11 @@ describe('Improve Inner Voice', () => {
       'Good words missed',
       'Bad words caught',
       'Bad words let fall',
+      'Best combo',
     ])
     const [goodCaught, goodMissed, badCaught] = summaryValues()
     expect(goodMissed + badCaught).toBe(10)
-    expect(session.score.value).toBe(goodCaught)
+    expect(timesScored()).toBe(goodCaught)
   })
 
   it('ends with the first mistake on Extreme, keeping everything on screen', async () => {

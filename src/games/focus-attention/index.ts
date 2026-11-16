@@ -67,7 +67,7 @@ export function focusAttentionGame({
   random = Math.random,
   fonts,
 }: FocusAttentionGameOptions = {}): GameDefinition {
-  return ({ canvas, score, mistakes, status }) => {
+  return ({ canvas, score, mistakes, status, pace }) => {
     const game = createFocusAttention({
       values: data.values,
       antiValues: data.antiValues,
@@ -105,7 +105,8 @@ export function focusAttentionGame({
           wordFontSize: fitFontSize(canvas.context, font, allWords, WORD_TEXT_FIT),
           buttonFontSize: fitFontSize(canvas.context, font, buttonLabels, BUTTON_TEXT_FIT),
         }
-        game.start()
+        // At the pace chosen for this round.
+        game.start(pace.pace)
         draw()
       },
       frame({ elapsedMs }) {

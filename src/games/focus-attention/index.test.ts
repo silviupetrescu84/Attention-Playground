@@ -251,7 +251,7 @@ describe('Focus Attention', () => {
   })
 
   it('ends with the 10th mistake on Easy, with what happened matching the score', async () => {
-    const { click, frames, tapAt, session, container, summaryValues } = await setup(4)
+    const { click, frames, tapAt, session, container, summaryValues, timesScored } = await setup(4)
     click('.game-hud__start')
     const random = seededRandom(40)
     for (let i = 0; i < 10_000 && session.lifecycle.state === 'playing'; i++) {
@@ -274,11 +274,12 @@ describe('Focus Attention', () => {
       'Anti-values changed attention from',
       'Anti-values focused on',
       'Reached the projector',
+      'Best combo',
     ])
     const [valuesFocused, valuesLeft, antiValuesLeft, antiValuesFocused, reached] = summaryValues()
     expect(valuesLeft + antiValuesFocused + reached).toBe(10)
     expect(valuesFocused + antiValuesLeft).toBeGreaterThan(0)
-    expect(session.score.value).toBe(valuesFocused + antiValuesLeft)
+    expect(timesScored()).toBe(valuesFocused + antiValuesLeft)
   })
 
   it('ends with the first mistake on Extreme, and says what it was', async () => {

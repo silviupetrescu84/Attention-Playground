@@ -5,9 +5,10 @@ import { checkSteps, steppedAfter, type Steps } from '../shared/difficulty'
 import type { GamePoint } from '../shared/game-canvas'
 import { isInEllipse } from '../shared/geometry'
 import { clamp } from '../shared/numbers'
+import { AS_SET, checkPaces, pacingFor, type Pace, type PacePercents } from '../shared/pace'
 import { shuffled, type Random } from '../shared/random'
 import type { Score } from '../shared/score'
-import { fadeAt, passDeadlines, type TimedTurn } from '../shared/timed-turns'
+import { FADE_MS, fadeAt, passDeadlines, type TimedTurn } from '../shared/timed-turns'
 import type { Goal } from './goals'
 import {
   GOAL_STEPS,
@@ -47,12 +48,17 @@ import {
  * The game gets harder as more goals are shown, whether reached or failed:
  * more actions (OPTIONS) and less time to choose (TIME_LIMIT). Each goal
  * keeps what it starts with until it is over. The goal is shown alone for
- * READING_MS first. All three are set in config/difficulty.json.
+ * READING_MS first. All three are set in config/difficulty.json; both times
+ * are longer or shorter at the pace chosen (see the shared pace).
  *
  * Each goal is shown once, in random order, before any comes again; so is
  * each of a goal's actions, and each distraction. When a mistake ends the
  * round, everything stops as it is: the goal and its actions stay on screen.
  */
+
+/** How much slower each pace is than the settings here (see config/difficulty.json and the shared pace). */
+export const PACE_PERCENTS: PacePercents = DIFFICULTY.breakItDown.paces
+checkPaces(PACE_PERCENTS, 'breakItDown.paces')
 
 const { actionsByGoals, timeToChooseMsByGoals, readingMs } = DIFFICULTY.breakItDown
 
@@ -77,9 +83,6 @@ export const POINTS = {
 /** How long a goal is shown alone, from when it starts to fade in, before its first actions. */
 export const READING_MS = readingMs
 checkNotNegative(READING_MS, 'breakItDown.readingMs')
-
-/** How long actions take to fade in, and to fade out (and a goal to fade in). */
-export const FADE_MS = 100
 
 /** How long the goal takes to change size (and, once over, to fade out). */
 export const RESIZE_MS = 300
@@ -126,7 +129,7 @@ export interface Turn extends TimedTurn {
 
 /** How visible `goal` is at the round's time `timeMs`: 0 to 1. */
 export function goalOpacityAt({ shownAtMs, endedAtMs }: ShownGoal, timeMs: number): number {
-  return fadeAt({ fromMs: shownAtMs, endedAtMs, inMs: FADE_MS, outMs: RESIZE_MS }, timeMs)
+  return fadeAt({ fromMs: shownAtMs, endedAtMs, outMs: RESIZE_MS }, timeMs)
 }
 
 /** The size of `goal`'s bubble image at `timeMs`, easing from its last size to its new one. */
@@ -139,7 +142,7 @@ export function goalSizeAt(goal: ShownGoal, timeMs: number): number {
 
 /** How visible `turn`'s actions are at `timeMs`: 0 to 1. They stop fading in when the turn ends. */
 export function optionsOpacityAt({ shownAtMs, endedAtMs }: Turn, timeMs: number): number {
-  return fadeAt({ fromMs: shownAtMs, endedAtMs, inMs: FADE_MS, outMs: FADE_MS }, timeMs)
+  return fadeAt({ fromMs: shownAtMs, endedAtMs }, timeMs)
 }
 
 /** Whether `point` is on `option`'s oval, as seen. */
@@ -193,8 +196,8 @@ export interface BreakItDown {
   readonly stats: BreakItDownStats
   /** Removes everything. */
   clear(): void
-  /** Starts a round: the first goal starts to fade in straight away. */
-  start(): void
+  /** Starts a round at `pace` (Normal if none): the first goal starts to fade in straight away. */
+  start(pace?: Pace): void
   /** Moves everything to the round's time `elapsedMs`. */
   update(elapsedMs: number): void
   /** Chooses the action tapped, if any, at the time of the last update. */
@@ -247,6 +250,7 @@ export function createBreakItDown({
   }
 
   let dealing = newDealing()
+  let pacing = AS_SET
   let goal: ShownGoal | undefined
   let previousGoal: ShownGoal | undefined
   let turn: Turn | undefined
@@ -262,7 +266,7 @@ export function createBreakItDown({
       goal: next,
       shownAtMs: atMs,
       options: steppedAfter(OPTIONS, dealing.goalsShown),
-      timeLimitMs: steppedAfter(TIME_LIMIT, dealing.goalsShown),
+      timeLimitMs: pacing.time(steppedAfter(TIME_LIMIT, dealing.goalsShown)),
       level: 0,
       fromSize: goalSizeFor(0),
       resizedAtMs: atMs,
@@ -272,7 +276,7 @@ export function createBreakItDown({
     goal = shown
     dealing.goalsShown++
     dealing.lastAction = undefined
-    showTurn(shown, atMs + READING_MS)
+    showTurn(shown, atMs + pacing.time(READING_MS))
   }
 
   function actionsOf(shown: Goal): Deck<string> {
@@ -389,8 +393,9 @@ export function createBreakItDown({
       return stats
     },
     clear,
-    start() {
+    start(pace: Pace = 'normal') {
       clear()
+      pacing = pacingFor(pace, PACE_PERCENTS)
       dealing = newDealing()
       showGoal(0)
     },

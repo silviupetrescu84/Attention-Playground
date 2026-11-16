@@ -371,7 +371,7 @@ describe('Emotions Rise', () => {
   )
 
   it('shows what happened to the emotions at the end, matching the score', async () => {
-    const { click, frames, session, tapAt, container, playUntilOver, summaryValues } =
+    const { click, frames, session, tapAt, container, playUntilOver, summaryValues, timesScored } =
       await setup(4)
     click('.game-hud__start')
     // Tap one emotion every 2 seconds, so others escape.
@@ -391,13 +391,14 @@ describe('Emotions Rise', () => {
       'Good emotions missed',
       'Bad emotions tapped',
       'Bad emotions let go',
+      'Best combo',
     ])
     const [goodTapped, goodMissed, badTapped, badLetGo] = values
     expect(goodTapped).toBeGreaterThan(0)
     expect(badTapped).toBeGreaterThan(0)
     expect(goodMissed).toBeGreaterThan(0)
     expect(badLetGo).toBeGreaterThan(0)
-    expect(session.score.value).toBe(goodTapped + badLetGo)
+    expect(timesScored()).toBe(goodTapped + badLetGo)
   })
 
   it('starts the record from zero on the next round', async () => {

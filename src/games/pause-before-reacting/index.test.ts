@@ -228,7 +228,7 @@ describe('Pause Before Reacting', () => {
   })
 
   it('ends with the 10th mistake on Easy, the summary matching what happened', async () => {
-    const { click, frames, tapAt, session, container, summaryValues } = await setup(4)
+    const { click, frames, tapAt, session, container, summaryValues, timesScored } = await setup(4)
     click('.game-hud__start')
     const random = seededRandom(40)
     const decided = new Set<string>()
@@ -253,13 +253,14 @@ describe('Pause Before Reacting', () => {
       'Good situations missed',
       'Bad situations tapped',
       'Bad situations let pass',
+      'Best combo',
     ])
     const [goodTapped, goodMissed, badTapped, badLetPass] = summaryValues()
     expect(goodMissed + badTapped).toBe(10)
     expect(goodTapped).toBeGreaterThan(0)
     expect(badLetPass).toBeGreaterThan(0)
     // Only good ones tapped score; bad ones let pass do not.
-    expect(session.score.value).toBe(goodTapped)
+    expect(timesScored()).toBe(goodTapped)
   })
 
   it('ends with the first mistake on Extreme, keeping everything on screen', async () => {

@@ -380,7 +380,7 @@ describe('Break It Down', () => {
   })
 
   it('ends with the 10th mistake on Easy, the summary matching what was chosen', async () => {
-    const { click, frames, tapAt, session, container, summaryValues } = await setup(4)
+    const { click, frames, tapAt, session, container, summaryValues, timesScored } = await setup(4)
     click('.game-hud__start')
     const random = seededRandom(40)
     let lastOptions = ''
@@ -407,6 +407,7 @@ describe('Break It Down', () => {
       'Good actions tapped',
       'Distractions tapped',
       'Too slow',
+      'Best combo',
     ])
     const [reached, , good, distracted, tooSlow] = summaryValues()
     expect(reached).toBeGreaterThan(0)
@@ -414,7 +415,7 @@ describe('Break It Down', () => {
     expect(tooSlow).toBeGreaterThan(0)
     // The 10th mistake ended the round.
     expect(distracted + tooSlow).toBe(10)
-    expect(session.score.value).toBe(good)
+    expect(timesScored()).toBe(good)
   })
 
   it('ends with the first mistake on Extreme, keeping everything on screen', async () => {

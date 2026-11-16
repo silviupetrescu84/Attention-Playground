@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { seededRandom } from '../../test/random'
 import { GAME_BAR_HEIGHT } from '../shared/game-hud'
 import { createGameLifecycle } from '../shared/game-lifecycle'
+import type { Pace } from '../shared/pace'
 import { createScore } from '../shared/score'
-import { timeLeftAt } from '../shared/timed-turns'
+import { FADE_MS, timeLeftAt } from '../shared/timed-turns'
 import data from './data/shift-perspective.json'
 import {
   CENTRE,
@@ -15,7 +16,6 @@ import {
   choicesAfter,
   choicesOpacityAt,
   createShiftPerspective,
-  FADE_MS,
   MOST_CHOICES,
   MOST_CHOICES_THAT_FIT,
   POINTS,
@@ -633,5 +633,26 @@ describe('a new round', () => {
 
     expect([game.turn, game.previous, game.timeMs]).toEqual([undefined, undefined, 0])
     expect(game.stats).toEqual({ good: 0, bad: 0, tooSlow: 0 })
+  })
+})
+
+describe('pace', () => {
+  it('gives 15% longer to read and to choose at Slow, and 15% less at Fast', () => {
+    const turns = (['normal', 'slow', 'fast'] as const).map((pace: Pace) => {
+      const { game } = setup()
+      game.start(pace)
+      return game.turn!
+    })
+
+    expect(turns.map((turn) => turn.choicesAtMs)).toEqual([
+      3_000,
+      expect.closeTo(3_450, 9),
+      expect.closeTo(2_550, 9),
+    ])
+    expect(turns.map((turn) => turn.timeLimitMs)).toEqual([
+      10_000,
+      expect.closeTo(11_500, 9),
+      expect.closeTo(8_500, 9),
+    ])
   })
 })

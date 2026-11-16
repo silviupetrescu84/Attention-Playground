@@ -1,0 +1,12 @@
+/* Colours Make Good Connections draws on the canvas with (read by draw.ts). */
+:root {
+  /* The dots: white, with a soft shadow (the buttons' own) so they show on the light background… */
+  --connect-dot: #fff;
+  /* …green once connected, like the lines between them and the outline on the last one. */
+  --connect-good: var(--color-good);
+  /* The walls, and the ring that shows the time left: ink. */
+  --connect-wall: var(--color-ink);
+  --connect-ring: var(--color-ink);
+  /* A line that went through a wall. */
+  --connect-wrong: var(--color-bad);
+}
