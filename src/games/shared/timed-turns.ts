@@ -3,7 +3,7 @@ import { clamp } from './numbers'
 /**
  * Turns with a time to choose, shared by the minigames that show something
  * to choose from until the player does or the time is up (Shift
- * Perspective, Break It Down): how visible things are as they fade in and
+ * Perspective, Make It Happen): how visible things are as they fade in and
  * out, how much of the time is left, and running out of time on time.
  */
 

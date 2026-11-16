@@ -9,7 +9,7 @@ import type { TextShape } from './text'
  * them, with what was measured of it.
  */
 
-/** Loads (once) the oval (from Emotions Rise; the actions in Break It Down). */
+/** Loads (once) the oval (from Emotions Rise; the actions in Make It Happen). */
 export const loadOvalImage = createImageLoader(ovalUrl, 'oval.png')
 
 /** The oval image, measured at this size… */
@@ -38,7 +38,7 @@ export function ovalOfWidth(width: number): BubbleSize {
 
 /**
  * The oval 20% bigger than in Emotions Rise (140 × 77), for longer texts:
- * the actions in Break It Down, the situations in Pause Before Reacting.
+ * the actions in Make It Happen, the situations in Pause Before Reacting.
  */
 export const LARGE_OVAL = ovalOfWidth(168)
 
@@ -50,7 +50,7 @@ export function ovalTextShape({ radiusX, radiusY }: BubbleSize): TextShape {
 /** How texts are written in the large oval. */
 export const LARGE_OVAL_TEXT: TextShape = ovalTextShape(LARGE_OVAL)
 
-/** Loads (once) the green bubble (the words in Focus Attention; the goals in Break It Down). */
+/** Loads (once) the green bubble (the words in Focus Attention; the goals in Make It Happen). */
 export const loadGreenBubbleImage = createImageLoader(greenBubbleUrl, 'green-bubble.png')
 
 /** The green bubble itself, without its glow, is at least this share of its image (measured). */

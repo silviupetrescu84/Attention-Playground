@@ -7,25 +7,7 @@ import type { Pace } from '../shared/pace'
 import { gapBetweenOvals } from '../shared/placing'
 import { createScore } from '../shared/score'
 import { FADE_MS } from '../shared/timed-turns'
-import {
-  createBreakItDown,
-  goalOpacityAt,
-  goalSizeAt,
-  isOnOption,
-  MOST_OPTIONS,
-  OPTIONS,
-  optionsOpacityAt,
-  POINTS,
-  READING_MS,
-  RESIZE_MS,
-  TIME_LIMIT,
-  type BreakItDownOptions,
-  type GoalOutcome,
-  type Mistake,
-  type ShownGoal,
-  type Turn,
-} from './break-it-down'
-import data from './data/break-it-down.json'
+import data from './data/make-it-happen.json'
 import { distractionsFrom, goalsFrom, type Goal } from './goals'
 import {
   CENTRE,
@@ -37,17 +19,35 @@ import {
   OPTION_HIT_WIDTH,
   ringOuterRadiusFor,
 } from './layout'
+import {
+  createMakeItHappen,
+  goalOpacityAt,
+  goalSizeAt,
+  isOnOption,
+  MOST_OPTIONS,
+  OPTIONS,
+  optionsOpacityAt,
+  POINTS,
+  READING_MS,
+  RESIZE_MS,
+  TIME_LIMIT,
+  type GoalOutcome,
+  type MakeItHappenOptions,
+  type Mistake,
+  type ShownGoal,
+  type Turn,
+} from './make-it-happen'
 
 const goals = goalsFrom(data)
 const distractions = distractionsFrom(data)
 
 function setup(
   seed = 1,
-  options: Partial<Pick<BreakItDownOptions, 'onMistake' | 'onGoalOver' | 'goals'>> = {},
+  options: Partial<Pick<MakeItHappenOptions, 'onMistake' | 'onGoalOver' | 'goals'>> = {},
 ) {
   const lifecycle = createGameLifecycle({ signal: new AbortController().signal })
   const score = createScore({ lifecycle })
-  const game = createBreakItDown({
+  const game = createMakeItHappen({
     goals,
     distractions,
     score,
@@ -142,7 +142,7 @@ describe('settings', () => {
     )
     const lifecycle = createGameLifecycle({ signal: new AbortController().signal })
     expect(() =>
-      createBreakItDown({
+      createMakeItHappen({
         goals,
         distractions: ['a', 'b', 'c', 'd', 'd'],
         score: createScore({ lifecycle }),
@@ -385,7 +385,7 @@ describe('showing a goal', () => {
 })
 
 describe('choosing the good action', () => {
-  it('gives +1, makes the goal a step smaller, and fades in new actions 0.1 s later', () => {
+  it('gives +1, makes the goal a step bigger, and fades in new actions 0.1 s later', () => {
     const { game, score, mistakes } = started()
     const goal = game.goal!
 
@@ -398,11 +398,11 @@ describe('choosing the good action', () => {
     expect(game.previousTurn).toBe(turn)
     expect(game.turn).not.toBe(turn)
     expect(game.turn).toMatchObject({ goal, shownAtMs: 3_200, readyAtMs: 3_300 })
-    expect(goal).toMatchObject({ level: -1, fromSize: 150, resizedAtMs: 3_200 })
-    expect(goalSizeAt(goal, 3_500)).toBe(goalSizeFor(-1))
+    expect(goal).toMatchObject({ level: 1, fromSize: 150, resizedAtMs: 3_200 })
+    expect(goalSizeAt(goal, 3_500)).toBe(goalSizeFor(1))
   })
 
-  it('reaches the goal after 3 steps smaller, and brings the next one after it fades out', () => {
+  it('reaches the goal after 3 steps bigger, and brings the next one after it fades out', () => {
     const { game, goalsOver, score } = started()
     const goal = game.goal!
 
@@ -411,13 +411,13 @@ describe('choosing the good action', () => {
     const last = choose(game, 'good')
 
     const overAt = last.endedAtMs! + FADE_MS
-    expect(goal).toMatchObject({ level: -3, outcome: 'reached', endedAtMs: overAt })
+    expect(goal).toMatchObject({ level: 3, outcome: 'reached', endedAtMs: overAt })
     expect(goalsOver).toEqual([{ outcome: 'reached', goal }])
     expect(game.stats.goalsReached).toBe(1)
     expect(score.value).toBe(3)
     expect(game.previousGoal).toBe(goal)
-    // Shrinking as it fades out, then the next goal, read alone for 3 s.
-    expect(goalSizeAt(goal, overAt + RESIZE_MS)).toBe(goalSizeFor(-3))
+    // Growing as it fades out, then the next goal, read alone for 3 s.
+    expect(goalSizeAt(goal, overAt + RESIZE_MS)).toBe(goalSizeFor(3))
     expect(game.goal).not.toBe(goal)
     expect(game.goal!.shownAtMs).toBe(overAt + RESIZE_MS)
     expect(game.turn!.shownAtMs).toBe(overAt + RESIZE_MS + READING_MS)
@@ -425,7 +425,7 @@ describe('choosing the good action', () => {
 })
 
 describe('choosing a distraction', () => {
-  it('is a mistake, scores nothing, makes the goal a step bigger and replaces all actions', () => {
+  it('is a mistake, scores nothing, makes the goal a step smaller and replaces all actions', () => {
     const { game, score, mistakes } = started()
     const goal = game.goal!
 
@@ -435,12 +435,12 @@ describe('choosing a distraction', () => {
     expect(game.stats.distractions).toBe(1)
     expect(mistakes).toEqual([{ mistake: 'distraction', turn }])
     expect(turn.chosen).toBe(badOf(turn))
-    expect(goal.level).toBe(1)
+    expect(goal.level).toBe(-1)
     expect(game.turn).toMatchObject({ goal, shownAtMs: 3_200 })
     expect(game.turn!.options.some((option) => turn.options.includes(option))).toBe(false)
   })
 
-  it('fails the goal after 3 steps bigger, with no extra mistake', () => {
+  it('fails the goal after 3 steps smaller, with no extra mistake', () => {
     const { game, goalsOver, mistakes } = started()
     const goal = game.goal!
 
@@ -449,7 +449,7 @@ describe('choosing a distraction', () => {
     const last = choose(game, 'bad')
 
     expect(goal).toMatchObject({
-      level: 3,
+      level: -3,
       outcome: 'failed',
       endedAtMs: last.endedAtMs! + FADE_MS,
     })
@@ -464,19 +464,19 @@ describe('choosing a distraction', () => {
     const goal = game.goal!
 
     for (const kind of ['good', 'bad', 'good', 'good'] as const) choose(game, kind)
-    expect(goal.level).toBe(-2)
+    expect(goal.level).toBe(2)
     expect(goalsOver).toEqual([])
 
     choose(game, 'good')
     expect(goalsOver).toEqual([{ outcome: 'reached', goal }])
   })
 
-  it('only fails a goal once it is 3 steps bigger than it started', () => {
+  it('only fails a goal once it is 3 steps smaller than it started', () => {
     const { game, goalsOver } = started()
     const goal = game.goal!
 
     for (const kind of ['good', 'bad', 'bad', 'bad'] as const) choose(game, kind)
-    expect(goal.level).toBe(2)
+    expect(goal.level).toBe(-2)
     expect(goalsOver).toEqual([])
 
     choose(game, 'bad')
@@ -485,7 +485,7 @@ describe('choosing a distraction', () => {
 })
 
 describe('choosing nothing in time', () => {
-  it('is a mistake at the deadline, and makes the goal a step bigger', () => {
+  it('is a mistake at the deadline, and makes the goal a step smaller', () => {
     const { game, mistakes } = started()
     const turn = game.turn!
 
@@ -496,7 +496,7 @@ describe('choosing nothing in time', () => {
     expect(mistakes).toEqual([{ mistake: 'tooSlow', turn }])
     expect(turn).toMatchObject({ endedAtMs: 13_100, chosen: undefined })
     expect(game.stats.tooSlow).toBe(1)
-    expect(game.goal!.level).toBe(1)
+    expect(game.goal!.level).toBe(-1)
     expect(game.turn!.shownAtMs).toBe(13_200)
   })
 
@@ -649,7 +649,7 @@ describe('the round ending', () => {
 describe('randomness', () => {
   it('uses Math.random by default', () => {
     const lifecycle = createGameLifecycle({ signal: new AbortController().signal })
-    const game = createBreakItDown({ goals, distractions, score: createScore({ lifecycle }) })
+    const game = createMakeItHappen({ goals, distractions, score: createScore({ lifecycle }) })
 
     game.start()
 

@@ -7,12 +7,12 @@ import type { Random } from '../shared/random'
 import { TIME_RING_WIDTH } from '../shared/time-ring'
 
 /**
- * Where things are in Break It Down, and how big.
+ * Where things are in Make It Happen, and how big.
  *
  * The goal is in a green bubble in the middle of the canvas, with a ring
  * around it that shows the time left. Each good action makes the bubble a
- * step (GOAL_STEP) smaller, and each bad one a step bigger: GOAL_STEPS steps
- * smaller and the goal is reached, as many bigger and it is failed.
+ * step (GOAL_STEP) bigger, and each bad one a step smaller: GOAL_STEPS steps
+ * bigger and the goal is reached, as many smaller and it is failed.
  *
  * The actions are in ovals around it, at random places: each at least
  * OPTION_GAP from the others, border to border, and GOAL_GAP from the goal's
@@ -28,7 +28,7 @@ export const CENTRE: GamePoint = PLAY_CENTRE
 export const GOAL_SIZE = 150
 /** Each step makes the bubble this share of GOAL_SIZE smaller or bigger. */
 export const GOAL_STEP = 0.15
-/** Steps smaller to reach the goal, and steps bigger to fail it. */
+/** Steps bigger to reach the goal, and steps smaller to fail it. */
 export const GOAL_STEPS = 3
 /** The most actions that fit around the goal, at any size, with every gap kept. */
 export const MOST_ACTIONS_THAT_FIT = 6

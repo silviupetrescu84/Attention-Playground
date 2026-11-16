@@ -1,8 +1,8 @@
-/* Colours Break It Down draws on the canvas with (read by draw.ts). */
+/* Colours Make It Happen draws on the canvas with (read by draw.ts). */
 :root {
   /*
    * The ring around the goal that shows the time left: a deep teal, like the
    * green bubble (#7fdddb on average) but dark enough to see on the background.
    */
-  --break-ring: #1f9e9a;
+  --make-it-happen-ring: #1f9e9a;
 }

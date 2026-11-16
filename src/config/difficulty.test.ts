@@ -105,21 +105,21 @@ describe('the difficulty', () => {
       0,
       'focusAttention.spawnDelayMsByTimeMs.start must be a finite number > 0, got 0',
     ],
-    ['breakItDown.readingMs', -1, 'breakItDown.readingMs must be a finite number ≥ 0, got -1'],
+    ['makeItHappen.readingMs', -1, 'makeItHappen.readingMs must be a finite number ≥ 0, got -1'],
     [
-      'breakItDown.actionsByGoals.limit',
+      'makeItHappen.actionsByGoals.limit',
       7,
-      'breakItDown.actionsByGoals.limit must be a whole number from 2 to 6, got 7',
+      'makeItHappen.actionsByGoals.limit must be a whole number from 2 to 6, got 7',
     ],
     [
-      'breakItDown.actionsByGoals.change',
+      'makeItHappen.actionsByGoals.change',
       0.5,
-      'breakItDown.actionsByGoals.change must be a whole number, got 0.5',
+      'makeItHappen.actionsByGoals.change must be a whole number, got 0.5',
     ],
     [
-      'breakItDown.timeToChooseMsByGoals.every',
+      'makeItHappen.timeToChooseMsByGoals.every',
       0,
-      'breakItDown.timeToChooseMsByGoals.every must be a whole number ≥ 1, got 0',
+      'makeItHappen.timeToChooseMsByGoals.every must be a whole number ≥ 1, got 0',
     ],
     [
       'pauseBeforeReacting.mostOnScreen',

@@ -1,19 +1,19 @@
 import alignTheActionsIcon from '../assets/game-icons/align-the-actions.png'
-import breakItDownIcon from '../assets/game-icons/break-it-down.png'
 import emotionsRiseIcon from '../assets/game-icons/emotions-rise.png'
 import focusAttentionIcon from '../assets/game-icons/focus-attention.png'
 import improveInnerVoiceIcon from '../assets/game-icons/improve-inner-voice.png'
 import makeGoodConnectionsIcon from '../assets/game-icons/make-good-connections.png'
+import makeItHappenIcon from '../assets/game-icons/make-it-happen.png'
 import pauseBeforeReactingIcon from '../assets/game-icons/pause-before-reacting.png'
 import rememberGratitudeIcon from '../assets/game-icons/remember-gratitude.png'
 import shiftPerspectiveIcon from '../assets/game-icons/shift-perspective.png'
 import stayInTheZoneIcon from '../assets/game-icons/stay-in-the-zone.png'
 import { alignTheActionsGame, preloadAlignTheActions } from './align-the-actions'
-import { breakItDownGame, preloadBreakItDown } from './break-it-down'
 import { emotionsRiseGame, preloadEmotionsRise } from './emotions-rise'
 import { focusAttentionGame, preloadFocusAttention } from './focus-attention'
 import { improveInnerVoiceGame, preloadImproveInnerVoice } from './improve-inner-voice'
 import { makeGoodConnectionsGame } from './make-good-connections'
+import { makeItHappenGame, preloadMakeItHappen } from './make-it-happen'
 import { pauseBeforeReactingGame, preloadPauseBeforeReacting } from './pause-before-reacting'
 import { preloadRememberGratitude, rememberGratitudeGame } from './remember-gratitude'
 import type { GameDefinition } from './shared/game-shell'
@@ -70,11 +70,11 @@ export const games: readonly CatalogGame[] = [
     preload: () => preloadFocusAttention(),
   },
   {
-    id: 'break-it-down',
-    name: 'Break It Down',
-    icon: breakItDownIcon,
-    create: () => breakItDownGame(),
-    preload: () => preloadBreakItDown(),
+    id: 'make-it-happen',
+    name: 'Make It Happen',
+    icon: makeItHappenIcon,
+    create: () => makeItHappenGame(),
+    preload: () => preloadMakeItHappen(),
   },
   {
     id: 'pause-before-reacting',

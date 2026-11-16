@@ -20,8 +20,8 @@ games connected to Practice of Happiness.
   see it before time runs out.
 - **Focus Attention**: values and anti-values drift towards a projector; focus
   on the values and change attention from the anti-values before they reach it.
-- **Break It Down**: a goal sits in a bubble among actions; tap the small
-  action that leads to it to shrink it, while distractions make it grow.
+- **Make It Happen**: a goal sits in a bubble among actions; tap the small
+  action that leads to it to grow it, while distractions make it shrink.
 - **Pause Before Reacting**: situations pop up around the screen; react to the
   helpful ones and let the unhelpful impulses pass.
 - **Improve Inner Voice**: words fall from the top; move the pad to catch the

@@ -3,9 +3,6 @@ import { expectTextsInside } from '../test/text-fit'
 import alignData from './align-the-actions/data/align-the-actions.json'
 import { ACTION_TEXT_FIT, GOAL_TEXT_FIT } from './align-the-actions/draw'
 import { goalsFrom as alignGoalsFrom } from './align-the-actions/goals'
-import breakItDownData from './break-it-down/data/break-it-down.json'
-import { GOAL_TEXT } from './break-it-down/draw'
-import { distractionsFrom, goalsFrom } from './break-it-down/goals'
 import { games } from './catalog'
 import emotions from './emotions-rise/data/emotions.json'
 import { EMOTION_TEXT_FIT } from './emotions-rise/draw'
@@ -15,6 +12,9 @@ import { BUTTONS } from './focus-attention/focus-attention'
 import innerVoiceData from './improve-inner-voice/data/improve-inner-voice.json'
 import { PAD_LABEL, PAD_TEXT_FIT, WORD_TEXT } from './improve-inner-voice/draw'
 import { wordsFrom } from './improve-inner-voice/words'
+import makeItHappenData from './make-it-happen/data/make-it-happen.json'
+import { GOAL_TEXT } from './make-it-happen/draw'
+import { distractionsFrom, goalsFrom } from './make-it-happen/goals'
 import pauseData from './pause-before-reacting/data/pause-before-reacting.json'
 import { situationsFrom } from './pause-before-reacting/situations'
 import gratitudeData from './remember-gratitude/data/remember-gratitude.json'
@@ -72,7 +72,7 @@ describe('the canvas font', () => {
   })
 })
 
-const breakItDown = goalsFrom(breakItDownData)
+const makeItHappen = goalsFrom(makeItHappenData)
 const pause = situationsFrom(pauseData)
 const thoughts = thoughtsFrom(data)
 const alignGoals = alignGoalsFrom(alignData)
@@ -108,10 +108,10 @@ describe('texts in the real font', () => {
   // Goals, actions and situations, in their bubbles and ovals: on 2 lines, at
   // a readable size, every corner of every line inside.
   it.each<[string, readonly string[], TextShape]>([
-    ['Break It Down goals', breakItDown.map((goal) => goal.title), GOAL_TEXT],
+    ['Make It Happen goals', makeItHappen.map((goal) => goal.title), GOAL_TEXT],
     [
-      'Break It Down actions',
-      [...breakItDown.flatMap((goal) => goal.actions), ...distractionsFrom(breakItDownData)],
+      'Make It Happen actions',
+      [...makeItHappen.flatMap((goal) => goal.actions), ...distractionsFrom(makeItHappenData)],
       LARGE_OVAL_TEXT,
     ],
     ['situations', [...pause.good, ...pause.bad], LARGE_OVAL_TEXT],

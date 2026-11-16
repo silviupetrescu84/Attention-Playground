@@ -68,7 +68,7 @@ export interface DifficultyConfig {
     /** The time from one bubble to the next, by the round's time. */
     readonly spawnDelayMsByTimeMs: StepTable
   }
-  readonly breakItDown: {
+  readonly makeItHappen: {
     /** How much slower each pace is than the settings below, in percent. */
     readonly paces: PacePercents
     /** How long a goal is shown alone before its actions come. */

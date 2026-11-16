@@ -5,7 +5,7 @@ import { randomBetween, shuffled, type Random } from './random'
 
 /**
  * Putting ovals at random places on the canvas, apart from each other,
- * shared by the minigames that scatter ovals (Break It Down, Pause Before
+ * shared by the minigames that scatter ovals (Make It Happen, Pause Before
  * Reacting).
  */
 
@@ -102,7 +102,7 @@ function tryLayout(
 
 /**
  * Random places for `count` ovals (or anything), shared by the minigames
- * that scatter several at once (Break It Down, Remember Gratitude): the first
+ * that scatter several at once (Make It Happen, Remember Gratitude): the first
  * layout found keeping the strictest rule, or else the next rule… or, if none
  * is found, `count` of the fallback places, at random. Throws if there are
  * fewer fallback places than `count`.

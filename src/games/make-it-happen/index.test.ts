@@ -9,12 +9,12 @@ import { loadedFonts, mountForTest, mountWaitingForFont } from '../../test/mount
 import { seededRandom } from '../../test/random'
 import { LARGE_OVAL_TEXT } from '../shared/artwork'
 import { chooseTextStyle, fontAt } from '../shared/text'
-import type { ShownGoal, Turn } from './break-it-down'
-import data from './data/break-it-down.json'
+import data from './data/make-it-happen.json'
 import { GOAL_TEXT } from './draw'
 import { distractionsFrom, goalsFrom } from './goals'
-import { breakItDownGame, goalMessage, INSTRUCTIONS, mistakeMessage } from './index'
+import { goalMessage, INSTRUCTIONS, makeItHappenGame, mistakeMessage } from './index'
 import { CENTRE, GOAL_SIZE, OPTION_WIDTH } from './layout'
+import type { ShownGoal, Turn } from './make-it-happen'
 
 const goals = goalsFrom(data)
 const actions = new Set(goals.flatMap((goal) => goal.actions))
@@ -35,7 +35,7 @@ afterEach(() => {
 const context = () => contexts.at(-1)!
 
 function setup(seed = 1) {
-  return mountForTest(breakItDownGame({ random: seededRandom(seed), fonts: loadedFonts }))
+  return mountForTest(makeItHappenGame({ random: seededRandom(seed), fonts: loadedFonts }))
 }
 
 interface Drawn {
@@ -79,7 +79,7 @@ function lastDrawn() {
 describe('loading', () => {
   it('loads the game font and both images before Start can be pressed', async () => {
     const { fonts, start, finishLoading } = mountWaitingForFont((fonts) =>
-      breakItDownGame({ fonts }),
+      makeItHappenGame({ fonts }),
     )
 
     expect(fonts.load).toHaveBeenCalledExactlyOnceWith(
@@ -96,7 +96,7 @@ describe('loading', () => {
     stubImages('error')
     // Fresh modules, so the images loaded by other tests are not cached.
     vi.resetModules()
-    const { breakItDownGame: freshGame } = await import('./index')
+    const { makeItHappenGame: freshGame } = await import('./index')
     const { click, frames, session } = await mountForTest(
       freshGame({ random: seededRandom(1), fonts: loadedFonts }),
     )
@@ -132,7 +132,7 @@ describe('loading', () => {
     }
     vi.stubGlobal('Image', HalfImage)
     vi.resetModules()
-    const { breakItDownGame: freshGame } = await import('./index')
+    const { makeItHappenGame: freshGame } = await import('./index')
     const { click, frames } = await mountForTest(
       freshGame({ random: seededRandom(1), fonts: loadedFonts }),
     )
@@ -152,10 +152,10 @@ describe('preloading', () => {
   it('loads the font and both images when the app starts', async () => {
     vi.resetModules()
     const images = stubImages()
-    const { preloadBreakItDown } = await import('./index')
+    const { preloadMakeItHappen } = await import('./index')
     const fonts = { load: vi.fn(async () => [{ status: 'loaded' }]) }
 
-    await expect(preloadBreakItDown(fonts)).resolves.toBeUndefined()
+    await expect(preloadMakeItHappen(fonts)).resolves.toBeUndefined()
 
     expect(fonts.load).toHaveBeenCalledOnce()
     expect(images.map((image) => image.src)).toEqual([greenBubbleUrl, ovalUrl])
@@ -164,13 +164,15 @@ describe('preloading', () => {
   it('fails if any of it does not load', async () => {
     vi.resetModules()
     stubImages('error')
-    const { preloadBreakItDown } = await import('./index')
+    const { preloadMakeItHappen } = await import('./index')
 
-    await expect(preloadBreakItDown(loadedFonts)).rejects.toThrow('Could not load green-bubble.png')
+    await expect(preloadMakeItHappen(loadedFonts)).rejects.toThrow(
+      'Could not load green-bubble.png',
+    )
   })
 })
 
-describe('Break It Down', () => {
+describe('Make It Happen', () => {
   it('explains how to play with the Start button, before every round', async () => {
     const { container, click } = await setup()
     const card = container.querySelector<HTMLElement>('.game-hud__instructions')!
@@ -262,7 +264,7 @@ describe('Break It Down', () => {
     expect(sweep()).toBeCloseTo(0.5, 9)
   })
 
-  it('gives a point for the good action, shrinks the goal and brings new actions', async () => {
+  it('gives a point for the good action, grows the goal and brings new actions', async () => {
     const { click, frames, tapAt, text, session } = await setup()
     click('.game-hud__start')
     frames.frame(3_100)
@@ -276,7 +278,7 @@ describe('Break It Down', () => {
     expect(session.status.text).toBe('')
     const next = lastDrawn()
     expect(next.goals[0].text).toBe(first.goals[0].text)
-    expect(next.goals[0].size).toBeCloseTo(GOAL_SIZE * 0.85, 9)
+    expect(next.goals[0].size).toBeCloseTo(GOAL_SIZE * 1.15, 9)
     expect(next.options.map((option) => option.text)).not.toContain(first.good!.text)
   })
 
@@ -297,7 +299,7 @@ describe('Break It Down', () => {
     expect(session.status.element.dataset.tone).toBe('good')
   })
 
-  it('counts a distraction as a mistake, says which in red, and grows the goal', async () => {
+  it('counts a distraction as a mistake, says which in red, and shrinks the goal', async () => {
     const { click, frames, tapAt, text, session } = await setup()
     click('.game-hud__start')
     frames.frame(3_100)
@@ -311,7 +313,7 @@ describe('Break It Down', () => {
     expect(session.status.text).toBe(`Tapped a distraction: ${bad!.text}`)
     expect(session.status.element.dataset.tone).toBe('bad')
     frames.frames(10, 50)
-    expect(lastDrawn().goals[0].size).toBeCloseTo(GOAL_SIZE * 1.15, 9)
+    expect(lastDrawn().goals[0].size).toBeCloseTo(GOAL_SIZE * 0.85, 9)
   })
 
   it('fails a goal after 3 distractions, saying so in red, with no extra mistake', async () => {
@@ -354,7 +356,7 @@ describe('Break It Down', () => {
       shownAtMs: 0,
       options: 2,
       timeLimitMs: 10_000,
-      level: 3,
+      level: -3,
       fromSize: 150,
       resizedAtMs: 0,
       endedAtMs: 4_000,

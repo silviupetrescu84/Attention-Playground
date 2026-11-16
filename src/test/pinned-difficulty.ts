@@ -70,7 +70,7 @@ const PINNED_DIFFICULTY: DifficultyConfig = {
       ],
     },
   },
-  breakItDown: {
+  makeItHappen: {
     paces: { slow: 15, normal: 0, fast: -15 },
     readingMs: 3_000,
     actionsByGoals: { start: 2, change: 1, every: 2, limit: 6 },

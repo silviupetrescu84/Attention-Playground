@@ -5,18 +5,17 @@ import { expectTextsInside } from '../../test/text-fit'
 import { LARGE_OVAL_TEXT } from '../shared/artwork'
 import { BUBBLE_BORDER_WIDTH } from '../shared/canvas-style'
 import { fontAt, type CanvasFont, type TextBlock, type TextStyle } from '../shared/text'
-import { goalSizeAt, type Option, type ShownGoal, type Turn } from './break-it-down'
-import data from './data/break-it-down.json'
+import data from './data/make-it-happen.json'
 import {
-  BREAK_COLORS,
   createTextLayout,
   DEFAULT_STYLES,
   drawGoal,
   drawScene,
   drawTurn,
   GOAL_TEXT,
+  MAKE_IT_HAPPEN_COLORS,
   TEXT_MARGIN,
-  type BreakColors,
+  type MakeItHappenColors,
   type SceneLook,
 } from './draw'
 import { distractionsFrom, goalsFrom } from './goals'
@@ -30,12 +29,13 @@ import {
   OPTION_HIT_WIDTH,
   OPTION_WIDTH,
 } from './layout'
+import { goalSizeAt, type Option, type ShownGoal, type Turn } from './make-it-happen'
 
 // The fake font is 0.6 × size wide per character, spaces included.
 
 const font: CanvasFont = { family: '"Test Sans"', weight: '600' }
 /** Stand-ins for the colours read from the CSS. */
-const colors: BreakColors = {
+const colors: MakeItHappenColors = {
   text: 'ink',
   cardFill: 'card fill',
   cardBorder: 'card border',
@@ -92,21 +92,21 @@ function turn(shown = goal(), changes: Partial<Turn> = {}): Turn {
 
 describe('colours', () => {
   it('come from CSS variables the app declares', () => {
-    for (const variable of Object.values(BREAK_COLORS)) {
+    for (const variable of Object.values(MAKE_IT_HAPPEN_COLORS)) {
       expect(cssVariables.get(variable), variable).toBeTruthy()
     }
   })
 
   it('use the shared card colours and feedback hues, and a deep teal ring', () => {
-    expect(BREAK_COLORS).toEqual({
+    expect(MAKE_IT_HAPPEN_COLORS).toEqual({
       text: '--color-ink',
       cardFill: '--canvas-card-fill',
       cardBorder: '--canvas-card-border',
       rightHue: '--canvas-right-hue',
       wrongHue: '--canvas-wrong-hue',
-      ring: '--break-ring',
+      ring: '--make-it-happen-ring',
     })
-    expect(cssVariables.get('--break-ring')).toBe('#1f9e9a')
+    expect(cssVariables.get('--make-it-happen-ring')).toBe('#1f9e9a')
   })
 })
 
@@ -239,7 +239,7 @@ describe('drawing the goal', () => {
     for (const [shown, forTurn] of [
       [goal(), undefined],
       [goal(), turn(goal())],
-      [goal({ endedAtMs: 5_000, level: 3, outcome: 'failed' }), undefined],
+      [goal({ endedAtMs: 5_000, level: -3, outcome: 'failed' }), undefined],
     ] as const) {
       const context = createFakeContext()
       const over = shown.endedAtMs !== undefined
@@ -248,11 +248,11 @@ describe('drawing the goal', () => {
     }
   })
 
-  it('grows as it fades out when failed', () => {
+  it('shrinks as it fades out when failed', () => {
     const context = createFakeContext()
     const shown = goal({
-      level: 3,
-      fromSize: goalSizeFor(2),
+      level: -3,
+      fromSize: goalSizeFor(-2),
       resizedAtMs: 5_000,
       endedAtMs: 5_000,
       outcome: 'failed',
@@ -263,7 +263,7 @@ describe('drawing the goal', () => {
     const [call] = context.callsTo('drawImage')
     expect(call.globalAlpha).toBe(0.5)
     expect(call.args[3]).toBe(goalSizeAt(shown, 5_150))
-    expect(call.args[3]).toBeGreaterThan(goalSizeFor(2))
+    expect(call.args[3]).toBeLessThan(goalSizeFor(-2))
   })
 
   it('draws nothing while it is hidden', () => {
@@ -380,7 +380,7 @@ describe('drawing a set of actions', () => {
 describe('drawing the scene', () => {
   it('clears the canvas, then draws the goals, then the actions over them', () => {
     const context = createFakeContext()
-    const before = goal({ endedAtMs: 4_000, level: -3, outcome: 'reached' })
+    const before = goal({ endedAtMs: 4_000, level: 3, outcome: 'reached' })
     const now = goal({ shownAtMs: 4_000 })
     const ended = turn(before, { shownAtMs: 3_000, readyAtMs: 3_100, endedAtMs: 3_950 })
     const next = turn(now, { shownAtMs: 4_020, readyAtMs: 4_120 })

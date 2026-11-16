@@ -5,16 +5,22 @@ import type { StatusTone } from '../shared/game-status'
 import type { FontLoader } from '../shared/load-font'
 import type { Random } from '../shared/random'
 import { CANVAS_FONT, chooseTextStyle, loadCanvasFont } from '../shared/text'
+import data from './data/make-it-happen.json'
 import {
-  createBreakItDown,
+  createTextLayout,
+  DEFAULT_STYLES,
+  drawScene,
+  GOAL_TEXT,
+  MAKE_IT_HAPPEN_COLORS,
+} from './draw'
+import { distractionsFrom, goalsFrom } from './goals'
+import {
+  createMakeItHappen,
   type GoalOutcome,
   type Mistake,
   type ShownGoal,
   type Turn,
-} from './break-it-down'
-import data from './data/break-it-down.json'
-import { BREAK_COLORS, createTextLayout, DEFAULT_STYLES, drawScene, GOAL_TEXT } from './draw'
-import { distractionsFrom, goalsFrom } from './goals'
+} from './make-it-happen'
 
 const goals = goalsFrom(data)
 const distractions = distractionsFrom(data)
@@ -44,14 +50,14 @@ export function goalMessage(outcome: GoalOutcome, goal: ShownGoal): string {
   return goalMessages[outcome].text(goal)
 }
 
-export interface BreakItDownGameOptions {
+export interface MakeItHappenGameOptions {
   random?: Random
   /** Defaults to `document.fonts`. */
   fonts?: FontLoader
 }
 
 /**
- * Loads what Break It Down needs: the goal's bubble, the actions' oval and
+ * Loads what Make It Happen needs: the goal's bubble, the actions' oval and
  * the font, each settling on its own. Loading twice does not download twice.
  */
 function loadAll(fonts?: FontLoader) {
@@ -68,26 +74,26 @@ function throwFirstFailure(results: readonly PromiseSettledResult<unknown>[]): v
 }
 
 /**
- * Loads what Break It Down needs, when the app starts, so it is usually
+ * Loads what Make It Happen needs, when the app starts, so it is usually
  * ready before the game is opened (the game loads it again in case it is
  * not). Fails if any of it does.
  */
-export async function preloadBreakItDown(fonts?: FontLoader): Promise<void> {
+export async function preloadMakeItHappen(fonts?: FontLoader): Promise<void> {
   throwFirstFailure(await loadAll(fonts))
 }
 
 /** How to play, shown with the Start button. */
 export const INSTRUCTIONS: readonly string[] = [
-   'Big goals are reached through small actions and they get closer and closer',
-    'Distractions make the goals seem to fade away',
+  'Big goals are reached through small actions and they get closer and closer',
+  'Distractions make the goals seem to fade away',
 ]
 
-export function breakItDownGame({
+export function makeItHappenGame({
   random = Math.random,
   fonts,
-}: BreakItDownGameOptions = {}): GameDefinition {
+}: MakeItHappenGameOptions = {}): GameDefinition {
   return ({ canvas, score, mistakes, status, pace }) => {
-    const game = createBreakItDown({
+    const game = createMakeItHappen({
       goals,
       distractions,
       score,
@@ -100,7 +106,7 @@ export function breakItDownGame({
         status.show(goalMessage(outcome, goal), goalMessages[outcome].tone)
       },
     })
-    const colors = readCssVariables(canvas.element, BREAK_COLORS)
+    const colors = readCssVariables(canvas.element, MAKE_IT_HAPPEN_COLORS)
     const font = readCssVariables(canvas.element, CANVAS_FONT)
     const images: { goalImage?: HTMLImageElement; optionImage?: HTMLImageElement } = {}
     let text = createTextLayout(canvas.context, font, DEFAULT_STYLES)

@@ -21,7 +21,7 @@ import {
 } from './layout'
 
 /**
- * The rules of Break It Down.
+ * The rules of Make It Happen.
  *
  * A goal appears in a bubble in the middle of the canvas. It fades in over
  * 0.1 s and is shown alone at first, so the player can read it.
@@ -30,15 +30,15 @@ import {
  * once they have faded in does the time to choose start (a ring around the
  * goal shows what is left; it stays full until then).
  *
- * - Tapping the good action: +1, and the goal gets a step smaller.
+ * - Tapping the good action: +1, and the goal gets a step bigger.
  * - Tapping a distraction, or choosing nothing in time: a mistake (see
- *   onMistake), and the goal gets a step bigger.
+ *   onMistake), and the goal gets a step smaller.
  *
  * Either way the actions fade out over 0.1 s, then the next ones fade in
  * over 0.1 s, and the goal's bubble changes size over RESIZE_MS. The steps
  * add up: a good action after a bad one only brings the goal back to its
- * size before. Once the goal is GOAL_STEPS steps smaller than it started it
- * is reached; GOAL_STEPS bigger and it is failed (no extra mistake: each
+ * size before. Once the goal is GOAL_STEPS steps bigger than it started it
+ * is reached; GOAL_STEPS smaller and it is failed (no extra mistake: each
  * step was one already). Either way it fades out over RESIZE_MS as it gets to
  * that size, and the next goal fades in.
  *
@@ -57,21 +57,21 @@ import {
  */
 
 /** How much slower each pace is than the settings here (see config/difficulty.json and the shared pace). */
-export const PACE_PERCENTS: PacePercents = DIFFICULTY.breakItDown.paces
-checkPaces(PACE_PERCENTS, 'breakItDown.paces')
+export const PACE_PERCENTS: PacePercents = DIFFICULTY.makeItHappen.paces
+checkPaces(PACE_PERCENTS, 'makeItHappen.paces')
 
-const { actionsByGoals, timeToChooseMsByGoals, readingMs } = DIFFICULTY.breakItDown
+const { actionsByGoals, timeToChooseMsByGoals, readingMs } = DIFFICULTY.makeItHappen
 
 /** How many actions each goal comes with, by how many goals came before it. */
 export const OPTIONS: Steps = actionsByGoals
-checkSteps(OPTIONS, 'breakItDown.actionsByGoals', (value, name) => {
+checkSteps(OPTIONS, 'makeItHappen.actionsByGoals', (value, name) => {
   checkWholeNumber(value, name, 2, MOST_ACTIONS_THAT_FIT)
 })
-checkWholeNumber(OPTIONS.change, 'breakItDown.actionsByGoals.change')
+checkWholeNumber(OPTIONS.change, 'makeItHappen.actionsByGoals.change')
 
 /** The time to choose, for each goal, by how many goals came before it. */
 export const TIME_LIMIT: Steps = timeToChooseMsByGoals
-checkSteps(TIME_LIMIT, 'breakItDown.timeToChooseMsByGoals', checkPositive)
+checkSteps(TIME_LIMIT, 'makeItHappen.timeToChooseMsByGoals', checkPositive)
 
 /** The most actions ever shown at once: one good and the rest distractions. */
 export const MOST_OPTIONS = Math.max(OPTIONS.start, OPTIONS.limit)
@@ -82,12 +82,12 @@ export const POINTS = {
 
 /** How long a goal is shown alone, from when it starts to fade in, before its first actions. */
 export const READING_MS = readingMs
-checkNotNegative(READING_MS, 'breakItDown.readingMs')
+checkNotNegative(READING_MS, 'makeItHappen.readingMs')
 
 /** How long the goal takes to change size (and, once over, to fade out). */
 export const RESIZE_MS = 300
 
-/** A goal reached (GOAL_STEPS smaller) or failed (GOAL_STEPS bigger). */
+/** A goal reached (GOAL_STEPS bigger) or failed (GOAL_STEPS smaller). */
 export type GoalOutcome = 'reached' | 'failed'
 
 /** A goal from when it starts to fade in until it has faded out. */
@@ -154,7 +154,7 @@ export function isOnOption(point: GamePoint, option: GamePoint): boolean {
 export type Mistake = 'distraction' | 'tooSlow'
 
 /** What happened in a round. */
-export interface BreakItDownStats {
+export interface MakeItHappenStats {
   readonly goalsReached: number
   readonly goalsFailed: number
   readonly good: number
@@ -162,7 +162,7 @@ export interface BreakItDownStats {
   readonly tooSlow: number
 }
 
-const NO_STATS: BreakItDownStats = {
+const NO_STATS: MakeItHappenStats = {
   goalsReached: 0,
   goalsFailed: 0,
   good: 0,
@@ -170,7 +170,7 @@ const NO_STATS: BreakItDownStats = {
   tooSlow: 0,
 }
 
-export interface BreakItDownOptions {
+export interface MakeItHappenOptions {
   goals: readonly Goal[]
   distractions: readonly string[]
   score: Score
@@ -181,7 +181,7 @@ export interface BreakItDownOptions {
   onGoalOver?: (outcome: GoalOutcome, goal: ShownGoal) => void
 }
 
-export interface BreakItDown {
+export interface MakeItHappen {
   /** The goal being shown, or about to be (while the one before fades out). */
   readonly goal: ShownGoal | undefined
   /** The goal before, while it fades out. */
@@ -193,7 +193,7 @@ export interface BreakItDown {
   /** The round's time at the last update. */
   readonly timeMs: number
   /** Counts for the current round (all 0 before it starts). */
-  readonly stats: BreakItDownStats
+  readonly stats: MakeItHappenStats
   /** Removes everything. */
   clear(): void
   /** Starts a round at `pace` (Normal if none): the first goal starts to fade in straight away. */
@@ -217,14 +217,14 @@ interface Dealing {
   lastAction: string | undefined
 }
 
-export function createBreakItDown({
+export function createMakeItHappen({
   goals,
   distractions,
   score,
   random = Math.random,
   onMistake,
   onGoalOver,
-}: BreakItDownOptions): BreakItDown {
+}: MakeItHappenOptions): MakeItHappen {
   if (goals.length < 2) {
     throw new RangeError(`Need at least 2 goals, got ${goals.length}`)
   }
@@ -354,12 +354,12 @@ export function createBreakItDown({
     const changeAtMs = atMs + FADE_MS
     shown.fromSize = goalSizeAt(shown, changeAtMs)
     shown.resizedAtMs = changeAtMs
-    shown.level += chosen?.good ? -1 : 1
+    shown.level += chosen?.good ? 1 : -1
 
     if (Math.abs(shown.level) < GOAL_STEPS) {
       showTurn(shown, changeAtMs)
     } else {
-      endGoal(shown, shown.level < 0 ? 'reached' : 'failed', changeAtMs)
+      endGoal(shown, shown.level > 0 ? 'reached' : 'failed', changeAtMs)
     }
   }
 

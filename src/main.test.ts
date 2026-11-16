@@ -136,7 +136,7 @@ describe('app start', () => {
     ['/games/align-the-actions', 'Align the Actions'],
     ['/games/shift-perspective', 'Shift Perspective'],
     ['/games/focus-attention', 'Focus Attention'],
-    ['/games/break-it-down', 'Break It Down'],
+    ['/games/make-it-happen', 'Make It Happen'],
     ['/games/pause-before-reacting', 'Pause Before Reacting'],
     ['/games/improve-inner-voice', 'Improve Inner Voice'],
     ['/games/stay-in-the-zone', 'Stay in the Zone'],
@@ -304,7 +304,7 @@ describe('games', () => {
     '/games/align-the-actions',
     '/games/shift-perspective',
     '/games/focus-attention',
-    '/games/break-it-down',
+    '/games/make-it-happen',
     '/games/pause-before-reacting',
     '/games/improve-inner-voice',
     '/games/stay-in-the-zone',
@@ -434,7 +434,7 @@ describe('high scores', () => {
 })
 
 describe('games that start with nothing on screen', () => {
-  it.each(['/games/break-it-down', '/games/pause-before-reacting'])(
+  it.each(['/games/make-it-happen', '/games/pause-before-reacting'])(
     '%s starts a round with the canvas cleared, for what comes first to fade in',
     async (pathname) => {
       const { app } = await startApp(pathname)

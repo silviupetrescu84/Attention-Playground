@@ -15,18 +15,18 @@ import {
 } from '../shared/text'
 import { drawTimeRing } from '../shared/time-ring'
 import { timeLeftAt } from '../shared/timed-turns'
+import { CENTRE, GOAL_SIZE, goalRadiusFor, RING_OFFSET } from './layout'
 import {
   goalOpacityAt,
   goalSizeAt,
   optionsOpacityAt,
   type ShownGoal,
   type Turn,
-} from './break-it-down'
-import { CENTRE, GOAL_SIZE, goalRadiusFor, RING_OFFSET } from './layout'
-import './break-it-down.css'
+} from './make-it-happen'
+import './make-it-happen.css'
 
 /**
- * Drawing for Break It Down: the goal in a green bubble (the one from Focus
+ * Drawing for Make It Happen: the goal in a green bubble (the one from Focus
  * Attention) in the middle, growing and shrinking, its text with it; a ring
  * around it that runs out with the time to choose; and the actions in ovals
  * (the one from Emotions Rise) around it. The action chosen takes a green
@@ -36,13 +36,13 @@ import './break-it-down.css'
  * one set of actions to the next (see the shared `chooseTextStyle`).
  */
 
-/** The colours the game is drawn with, from CSS (game.css and break-it-down.css). */
-export const BREAK_COLORS = {
+/** The colours the game is drawn with, from CSS (game.css and make-it-happen.css). */
+export const MAKE_IT_HAPPEN_COLORS = {
   ...BUBBLE_COLORS,
-  ring: '--break-ring',
+  ring: '--make-it-happen-ring',
 } as const satisfies CssVariables
 
-export type BreakColors = CssValues<keyof typeof BREAK_COLORS>
+export type MakeItHappenColors = CssValues<keyof typeof MAKE_IT_HAPPEN_COLORS>
 
 /** Space kept between a text and its bubble's edge. */
 export const TEXT_MARGIN = 8
@@ -97,7 +97,7 @@ export function createTextLayout(
 export interface SceneLook {
   readonly text: TextLayout
   readonly font: CanvasFont
-  readonly colors: BreakColors
+  readonly colors: MakeItHappenColors
   /** The artwork; plain shapes are drawn for any that did not load. */
   readonly goalImage?: CanvasImageSource
   readonly optionImage?: CanvasImageSource
@@ -165,7 +165,7 @@ export function drawTurn(
 }
 
 /** What the drawing shows: the game's current state. */
-export interface BreakItDownScene {
+export interface MakeItHappenScene {
   readonly goal: ShownGoal | undefined
   readonly previousGoal: ShownGoal | undefined
   readonly turn: Turn | undefined
@@ -175,7 +175,7 @@ export interface BreakItDownScene {
 
 export function drawScene(
   context: CanvasRenderingContext2D,
-  { goal, previousGoal, turn, previousTurn, timeMs }: BreakItDownScene,
+  { goal, previousGoal, turn, previousTurn, timeMs }: MakeItHappenScene,
   look: SceneLook,
 ): void {
   clearGameCanvas(context)

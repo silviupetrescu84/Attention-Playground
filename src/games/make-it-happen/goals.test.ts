@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import data from './data/break-it-down.json'
+import data from './data/make-it-happen.json'
 import { distractionsFrom, goalsFrom } from './goals'
 
 describe('the data', () => {

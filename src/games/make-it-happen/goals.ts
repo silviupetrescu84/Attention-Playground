@@ -1,10 +1,10 @@
 /**
- * The goals of Break It Down, each with small actions that lead to it, and
+ * The goals of Make It Happen, each with small actions that lead to it, and
  * the distractions that lead nowhere.
  */
 
-/** The shape of `data/break-it-down.json`. */
-export interface BreakItDownData {
+/** The shape of `data/make-it-happen.json`. */
+export interface MakeItHappenData {
   readonly goals: readonly {
     readonly title: string
     readonly actions: readonly { readonly text: string }[]
@@ -18,13 +18,13 @@ export interface Goal {
   readonly actions: readonly string[]
 }
 
-export function goalsFrom({ goals }: BreakItDownData): Goal[] {
+export function goalsFrom({ goals }: MakeItHappenData): Goal[] {
   return goals.map(({ title, actions }) => ({
     title,
     actions: actions.map(({ text }) => text),
   }))
 }
 
-export function distractionsFrom({ distractions }: BreakItDownData): string[] {
+export function distractionsFrom({ distractions }: MakeItHappenData): string[] {
   return distractions.map(({ text }) => text)
 }
